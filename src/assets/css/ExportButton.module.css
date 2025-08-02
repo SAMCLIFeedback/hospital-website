@@ -1,0 +1,114 @@
+/* Base Button Styles */
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
+  outline: none;
+}
+
+.actionButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.actionButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Variants */
+.confirmButton {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border-color: #6366f1;
+}
+
+.confirmButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border-color: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: white;
+  border-color: #059669;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+  border-color: #047857;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(5, 150, 105, 0.4);
+}
+
+.secondaryButton {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-color: #9ca3af;
+  color: #1f2937;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(107, 114, 128, 0.2);
+}
+
+.outlineButton {
+  background: transparent;
+  color: #6366f1;
+  border-color: #6366f1;
+}
+
+.outlineButton:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: #4f46e5;
+  color: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+}
+
+/* Sizes */
+.smallButton {
+  padding: 8px 14px;
+  font-size: 12px;
+  gap: 6px;
+  min-height: 32px;
+}
+
+.mediumButton {
+  padding: 12px 20px;
+  font-size: 14px;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.largeButton {
+  padding: 16px 28px;
+  font-size: 16px;
+  gap: 10px;
+  min-height: 48px;
+}
+
+/* Print Styles */
+@media print {
+  .actionButton {
+    display: none;
+  }
+}

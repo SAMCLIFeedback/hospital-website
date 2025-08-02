@@ -1,0 +1,390 @@
+/* PrintableContent.module.css - Optimized for multi-entry pages */
+
+.reportContainer {
+    background-color: #ffffff;
+    padding: 15mm 10mm; /* Reduced margins for more content space */
+    font-family: Arial, Helvetica, sans-serif;
+    color: #333;
+    line-height: 1.4; /* Slightly tighter line height */
+    width: 210mm; /* A4 width */
+    min-height: 297mm; /* A4 height */
+    box-sizing: border-box;
+}
+
+.fontSizeSmall { font-size: 9pt; line-height: 1.3; }
+.fontSizeMedium { font-size: 10pt; line-height: 1.4; }
+.fontSizeLarge { font-size: 11pt; line-height: 1.5; }
+
+/* --- Header Section --- */
+.reportHeader {
+    text-align: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px; /* Reduced padding */
+    margin-bottom: 15px; /* Reduced margin */
+    position: relative;
+    page-break-after: avoid;
+}
+
+.reportHeader h1 {
+    margin: 0;
+    font-size: 1.8em; /* Smaller header */
+    color: #000;
+    font-weight: bold;
+}
+
+.logo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px; /* Smaller logo */
+    height: auto;
+}
+
+.headerMeta {
+    margin-top: 8px;
+    font-size: 0.85em;
+    color: #555;
+}
+
+.headerMeta p {
+    margin: 1px 0;
+}
+
+/* --- Statistics Section --- */
+.statsSection {
+    margin-bottom: 15px; /* Reduced margin */
+    padding: 10px; /* Reduced padding */
+    border: 1px solid #e0e0e0;
+    background-color: #f9f9f9;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+.sectionTitle {
+    font-size: 1.3em; /* Smaller title */
+    margin: 0 0 10px 0;
+    font-weight: bold;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Smaller grid items */
+    gap: 15px;
+    font-size: 0.9em;
+}
+
+.statItem strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.95em;
+}
+
+.statItem ul {
+    list-style-type: none;
+    padding-left: 8px;
+    margin: 0;
+    font-size: 0.9em;
+}
+
+.statItem li {
+    margin: 1px 0;
+}
+
+/* --- Grouping --- */
+.groupSection {
+    margin-top: 15px; /* Reduced margin */
+    page-break-inside: avoid; /* Keep group header with at least first item */
+}
+
+.groupTitle {
+    background-color: #e9ecef;
+    padding: 6px 10px; /* Reduced padding */
+    border-radius: 3px;
+    font-size: 1.2em; /* Smaller font */
+    margin-top: 12px;
+    margin-bottom: 8px;
+    border-left: 4px solid #1a73e8;
+    page-break-after: avoid; /* Keep title with content */
+    page-break-inside: avoid; /* Don't split title */
+    font-weight: bold;
+}
+
+/* --- Feedback Item Styling (Optimized for multiple per page) --- */
+.feedbackItem {
+    border: 1px solid #ddd;
+    padding: 12px; /* Reduced padding significantly */
+    margin-bottom: 12px; /* Reduced margin */
+    page-break-inside: avoid; /* Keep entire item together - will move to next page if doesn't fit */
+    page-break-after: auto; /* Allow natural page breaks after items */
+    border-radius: 3px;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    min-height: 80px; /* Minimum height to ensure consistent spacing */
+    position: relative;
+}
+
+.itemTitle {
+    font-size: 1.1em; /* Much smaller title */
+    color: #1a73e8;
+    margin: 0 0 8px 0; /* Reduced margins */
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+    font-weight: bold;
+}
+
+.section {
+    margin-bottom: 8px; /* Reduced spacing between sections */
+}
+
+.subSectionTitle {
+    font-size: 0.95em; /* Smaller subsection titles */
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 4px;
+    margin-top: 6px;
+    border-left: 3px solid #1a73e8;
+    padding-left: 6px;
+}
+
+.prose {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background-color: #f8f9fa;
+    padding: 6px; /* Reduced padding */
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    font-family: Arial, sans-serif; /* Use same font for consistency */
+    font-size: 0.9em;
+    line-height: 1.3;
+    max-height: 80px; /* Limit height for very long content */
+    overflow: hidden;
+}
+
+/* --- Compact Tables --- */
+.detailsTable, .historyTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+    font-size: 0.85em; /* Smaller table font */
+}
+
+.detailsTable th, .detailsTable td, .historyTable th, .historyTable td {
+    padding: 4px 6px; /* Much smaller padding */
+    border: 1px solid #ddd;
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.2;
+}
+
+.detailsTable th {
+    width: 25%; /* Reduced width for labels */
+    background-color: #f2f2f2;
+    font-weight: bold;
+    font-size: 0.8em;
+}
+
+.detailsTable td {
+    font-size: 0.85em;
+}
+
+.historyTable th {
+    background-color: #e9ecef;
+    font-weight: bold;
+    font-size: 0.8em;
+    padding: 3px 5px;
+}
+
+.historyTable td {
+    font-size: 0.8em;
+    padding: 3px 5px;
+}
+
+.historyTable tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+/* --- Compact Grid Layout for Key Details --- */
+.compactDetails {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    background-color: #f8f9fa;
+    padding: 8px;
+    border-radius: 3px;
+    margin-bottom: 8px;
+    font-size: 0.85em;
+}
+
+.compactDetails .detailItem {
+    display: flex;
+    flex-direction: column;
+}
+
+.compactDetails .detailLabel {
+    font-weight: bold;
+    font-size: 0.8em;
+    color: #666;
+    margin-bottom: 1px;
+}
+
+.compactDetails .detailValue {
+    font-size: 0.9em;
+    color: #333;
+}
+
+/* --- Status and Priority Badges --- */
+.statusBadge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.75em;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 0 3px;
+}
+
+.statusBadge.urgent { background-color: #dc3545; color: white; }
+.statusBadge.pending { background-color: #ffc107; color: #000; }
+.statusBadge.approved { background-color: #28a745; color: white; }
+.statusBadge.escalated { background-color: #fd7e14; color: white; }
+
+.sentimentBadge {
+    display: inline-block;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-size: 0.7em;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.sentimentBadge.positive { background-color: #d4edda; color: #155724; }
+.sentimentBadge.negative { background-color: #f8d7da; color: #721c24; }
+.sentimentBadge.neutral { background-color: #e2e3e5; color: #383d41; }
+
+/* --- Two-Column Layout for Efficient Space Usage --- */
+.twoColumnSection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.columnItem {
+    padding: 6px;
+    background-color: #f8f9fa;
+    border-radius: 3px;
+    border: 1px solid #e9ecef;
+}
+
+.columnItem .columnTitle {
+    font-weight: bold;
+    font-size: 0.85em;
+    color: #495057;
+    margin-bottom: 3px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 2px;
+}
+
+.columnItem .columnContent {
+    font-size: 0.8em;
+    line-height: 1.3;
+    color: #333;
+}
+
+/* --- Footer --- */
+.reportFooter {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #ccc;
+    color: #777;
+    font-size: 0.75em;
+    page-break-before: avoid;
+}
+
+/* --- Page Break Controls --- */
+.pageBreakBefore { page-break-before: always; }
+.pageBreakAfter { page-break-after: always; }
+.avoidPageBreak { page-break-inside: avoid; }
+
+/* --- Orphan and Widow Control --- */
+.feedbackItem {
+    orphans: 2; /* Minimum 2 lines at bottom of page */
+    widows: 2; /* Minimum 2 lines at top of page */
+}
+
+.section {
+    orphans: 2;
+    widows: 2;
+    page-break-inside: avoid; /* Keep sections together when possible */
+}
+
+/* --- Large Content Handling --- */
+.largeContent {
+    page-break-inside: auto; /* Allow breaking for very large content */
+    max-height: none; /* Remove height restrictions for large items */
+}
+
+.prose.large {
+    max-height: none;
+    page-break-inside: auto;
+}
+
+/* --- Print-specific optimizations --- */
+@media print {
+    .reportContainer {
+        padding: 10mm;
+        font-size: 9pt;
+    }
+    
+    .feedbackItem {
+        padding: 8px;
+        margin-bottom: 8px;
+        page-break-inside: avoid !important; /* Force no breaks inside items in print */
+        break-inside: avoid; /* Modern CSS property for better browser support */
+    }
+    
+    .itemTitle {
+        font-size: 1.0em;
+        page-break-after: avoid; /* Keep title with content */
+    }
+    
+    .prose {
+        max-height: 60px;
+        font-size: 0.85em;
+    }
+    
+    .section {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    .groupTitle {
+        page-break-after: avoid !important;
+        break-after: avoid;
+    }
+    
+    .compactDetails {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    .historyTable {
+        page-break-inside: auto; /* Allow table to break if too large */
+        break-inside: auto;
+    }
+    
+    .twoColumnSection {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+}
+
+/* --- Responsive adjustments for different font sizes --- */
+.fontSizeSmall .feedbackItem { padding: 8px; margin-bottom: 8px; }
+.fontSizeSmall .itemTitle { font-size: 1.0em; }
+.fontSizeSmall .prose { max-height: 60px; padding: 4px; }
+
+.fontSizeLarge .feedbackItem { padding: 14px; margin-bottom: 14px; }
+.fontSizeLarge .itemTitle { font-size: 1.2em; }
+.fontSizeLarge .prose { max-height: 100px; padding: 8px; }

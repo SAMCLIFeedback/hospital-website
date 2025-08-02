@@ -1,0 +1,407 @@
+/* LandingPage.module.css */
+.landingPage .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Hero Section */
+.landingPage .hero {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.landingPage .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: landingPageFloat 20s linear infinite;
+}
+
+@keyframes landingPageFloat {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-50px, -50px) rotate(360deg); }
+}
+
+.landingPage .heroContent {
+    position: relative;
+    z-index: 2;
+    animation: landingPageFadeInUp 1s ease-out;
+}
+
+@keyframes landingPageFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.landingPage .heroHeading {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    background: linear-gradient(45deg, #fff, #e2e8f0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.landingPage .heroText {
+    font-size: 1.25rem;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.landingPage .statsCounter {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50px;
+    padding: 10px 20px;
+    color: white;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    animation: landingPagePulse 2s infinite;
+}
+
+@keyframes landingPagePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.landingPage .statsCounter::before {
+    content: '📊';
+    margin-right: 8px;
+}
+.landingPage h1{
+  text-align: center;
+}
+/* Role Selection Grid */
+.landingPage .roleSection {
+    background: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(247,250,252,0.95));
+    backdrop-filter: blur(20px);
+    padding: 4rem 0;
+    margin: -2rem 0 0 0;
+    border-radius: 2rem 2rem 0 0;
+    position: relative;
+}
+
+.landingPage .roleGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.landingPage .roleCard {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.landingPage .roleCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+    transition: left 0.6s ease;
+}
+
+.landingPage .roleCard:hover::before {
+    left: 100%;
+}
+
+.landingPage .roleCard:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+    border-color: #667eea;
+}
+
+.landingPage .roleIcon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    display: block;
+    filter: grayscale(20%);
+    transition: all 0.3s ease;
+}
+
+.landingPage .roleCard:hover .roleIcon {
+    filter: grayscale(0%);
+    transform: scale(1.1);
+}
+
+.landingPage .roleTitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.landingPage .roleDescription {
+    color: #718096;
+    font-size: 0.95rem;
+}
+
+/* Testimonial Carousel */
+.landingPage .testimonialSection {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    padding: 4rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.landingPage .testimonialCarousel {
+    text-align: center;
+    position: relative;
+    height: 200px;
+}
+
+.landingPage .testimonial {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    max-width: 800px;
+    width: 100%;
+}
+
+.landingPage .testimonial.active {
+    opacity: 1;
+}
+
+.landingPage .testimonialQuote {
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #4a5568;
+    margin-bottom: 1rem;
+    line-height: 1.8;
+}
+
+.landingPage .testimonialAuthor {
+    color: #2f9e4b;
+    font-weight: 600;
+    font-style: normal;
+}
+
+/* Footer */
+.landingPage .footer {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+    position: relative;
+}
+
+.landingPage .footerContent {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.landingPage .footerHeading {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #e2e8f0;
+}
+
+.landingPage .footerLinks {
+    list-style: none;
+}
+
+.landingPage .footerLinks li {
+    margin-bottom: 0.5rem;
+}
+
+.landingPage .footerLink {
+    color: #a0aec0;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.landingPage .footerLink:hover {
+    color: #667eea;
+}
+
+.landingPage .trustBadges {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.landingPage .trustBadge {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.landingPage .trustBadge::before {
+    content: '🔒';
+    margin-right: 0.5rem;
+}
+
+.landingPage .trustBadge.dpa::before {
+    content: '🛡️';
+}
+
+.landingPage .trustBadge.data::before {
+    content: '✅';
+}
+
+.landingPage .footerBottom {
+    border-top: 1px solid #4a5568;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.landingPage .logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2f9e4b;
+}
+
+.landingPage .logo img {
+    width: 100px;
+    margin-right: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .landingPage .roleGrid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .landingPage .roleCard {
+        padding: 2rem;
+    }
+    
+    .landingPage .hero {
+        min-height: 50vh;
+        padding: 2rem 0;
+    }
+    
+    .landingPage .footerBottom {
+        flex-direction: column;
+        text-align: center;
+    }
+    .landingPage .statsCounter {
+        margin-bottom: 2rem;
+    }
+}
+
+/* Accessibility */
+.landingPage .roleCard:focus {
+    outline: 3px solid #667eea;
+    outline-offset: 2px;
+}
+
+.landingPage .visuallyHidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.landingPage .sectionHeading {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.landingPage .sectionHeading::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background-color: #667eea;
+    margin: 10px auto 0;
+    border-radius: 2px;
+}
+
+.landingPage .feedbackGrid,
+.landingPage .dashboardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 1rem; /* Adjust as needed */
+    margin-bottom: 4rem; /* Space between sections */
+}
+
+/* Specific styling for feedback cards if desired */
+.landingPage .feedbackGrid .roleCard {
+    background: #e6f7ff; /* Lighter blue background */
+    border-color: #99ccff;
+}
+
+.landingPage .feedbackGrid .roleCard:hover {
+    box-shadow: 0 20px 40px rgba(153, 204, 255, 0.25);
+    border-color: #66b3ff;
+}
+
+/* Specific styling for dashboard cards if desired */
+.landingPage .dashboardGrid .roleCard {
+    background: #f0f0f0; /* Slightly darker background for distinction */
+    border-color: #d0d0d0;
+}
+
+.landingPage .dashboardGrid .roleCard:hover {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border-color: #a0a0a0;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+    .landingPage .feedbackGrid,
+    .landingPage .dashboardGrid {
+        grid-template-columns: 1fr;
+    }
+}

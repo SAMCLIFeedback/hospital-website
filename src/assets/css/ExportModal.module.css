@@ -1,0 +1,311 @@
+/* ExportPDFModal.module.css */
+
+/* --- OVERLAY & CONTENT --- */
+.modalOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 10px; /* Reduced padding for mobile */
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modalContent {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 1400px;
+    height: 90vh; /* Adjusted height */
+    max-height: 100vh; /* Ensure it fits within viewport */
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease-out;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- HEADER --- */
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px; /* Reduced padding for mobile */
+    border-bottom: 1px solid #e5e7eb;
+    background: #f8f9fa;
+    color: #333;
+    flex-shrink: 0;
+}
+.modalTitle { font-size: 16px; font-weight: 700; margin: 0; gap: 8px; display: flex; align-items: center; } /* Smaller font */
+.modalTitle i { color: #6366f1; }
+.closeButton { background: none; border: none; font-size: 18px; cursor: pointer; color: #666; transition: color 0.2s; } /* Smaller icon */
+.closeButton:hover { color: #000; }
+
+/* --- BODY & PANELS --- */
+.modalBody {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.leftPanel, .middlePanel, .rightPanel {
+    display: flex;
+    flex-direction: column;
+    padding: 15px; /* Reduced padding for mobile */
+    gap: 15px; /* Reduced gap */
+    height: 100%;
+    overflow-y: auto; /* This makes the panels scrollable if content exceeds height */
+}
+
+.leftPanel { flex: 2; border-right: 1px solid #e5e7eb; background: #fff; }
+.middlePanel { flex: 2; border-right: 1px solid #e5e7eb; background: #fff; }
+.rightPanel { flex: 3; background: #fdfdff; }
+
+/* --- SECTION STYLES --- */
+.exportSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Reduced gap */
+}
+.exportSection h3 {
+    font-size: 14px; /* Smaller font */
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.exportSection h3 i { color: #6366f1; }
+
+/* --- STEP 1: FILTERS --- */
+.timeFilterBar { display: flex; gap: 5px; flex-wrap: wrap; }
+.timeFilterBar button { font-size: 11px; padding: 5px 8px; border: 1px solid #ccc; background: #fff; border-radius: 5px; cursor: pointer; transition: all 0.2s; } /* Smaller buttons */
+.timeFilterBar button:hover { background-color: #f0f0f0; border-color: #999; }
+.timeFilterBar button.active { background-color: #6366f1; color: white; border-color: #6366f1; }
+
+.filterGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } /* Reduced gap */
+.filterGroup { display: flex; flex-direction: column; gap: 5px; } /* Reduced gap */
+.filterGroup label { font-size: 11px; font-weight: 600; color: #374151; } /* Smaller font */
+.filterInput, .filterSelect, .datePicker {
+    width: 100%;
+    padding: 6px 10px; /* Reduced padding */
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 12px; /* Smaller font */
+    background: white;
+    transition: all 0.2s ease;
+}
+.filterInput:focus, .filterSelect:focus, .datePicker:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+
+/* --- STEP 2: SELECTION --- */
+.selectionActions { display: flex; gap: 6px; } /* Reduced gap */
+.selectionActions .actionButton { flex: 1; padding: 6px 10px; font-size: 12px; } /* Smaller buttons */
+.selectionList { flex-grow: 1; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; }
+.selectionItem { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: background 0.2s ease; } /* Reduced padding */
+.selectionItem:hover { background: #f9fafb; }
+.selectionItem input[type="checkbox"] { margin-right: 10px; width: 14px; height: 14px; accent-color: #6366f1; } /* Smaller checkbox */
+.selectionItemContent { flex: 1; }
+.selectionItemId { font-weight: bold; font-size: 12px; color: #1f2937; display: flex; justify-content: space-between; align-items: center; } /* Smaller font */
+.urgentTag { font-size: 9px; background-color: #fee2e2; color: #b91c1c; padding: 2px 5px; border-radius: 8px; font-weight: 600; } /* Smaller tag */
+.selectionItemMeta { font-size: 10px; color: #6b7280; margin-top: 3px; display: flex; justify-content: space-between; align-items: center; } /* Smaller font */
+.statusTag { font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: 600; text-transform: uppercase; } /* Smaller tag */
+/* ... (status colors can be added here) ... */
+
+/* --- STEP 3: CONFIGURATION --- */
+.configGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; } /* Reduced gap */
+.configHeader { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; } /* Smaller font */
+.checkboxLabel { display: flex; align-items: center; font-size: 12px; color: #374151; cursor: pointer; margin: 6px 0; } /* Smaller font */
+.checkboxLabel input[type="checkbox"] { margin-right: 6px; width: 14px; height: 14px; accent-color: #6366f1; } /* Smaller checkbox */
+.configOption { display: flex; flex-direction: column; gap: 3px; } /* Reduced gap */
+.configOption label { font-size: 11px; font-weight: 600; } /* Smaller font */
+
+.configSelect {
+    width: 100%;
+    padding: 6px 10px; /* Reduced padding */
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 12px; /* Smaller font */
+    background: white;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l4 4 4-4"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 0.9em; /* Smaller icon */
+}
+.configSelect:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+
+/* --- STEP 4: GENERATE --- */
+.exportSummary { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; } /* Reduced padding */
+.summaryStats { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
+.summaryStatNumber { font-size: 20px; font-weight: 700; color: #1f2937; } /* Smaller font */
+.summaryStatLabel { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; } /* Smaller font */
+
+/* --- SHARED & UTILITY --- */
+.actionButtons { display: flex; gap: 10px; margin-top: auto; } /* Reduced gap */
+.actionButton { flex: 1; padding: 10px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid transparent; } /* Smaller buttons */
+.confirmButton { background: #10b981; color: white; }
+.confirmButton:hover:not(:disabled) { background: #059669; }
+.confirmButton:disabled { background: #d1d5db; color: #9ca3af; cursor: not-allowed; }
+.cancelButton { background: white; color: #374151; border-color: #d1d5db; }
+.cancelButton:hover:not(:disabled) { background: #f9fafb; border-color: #9ca3af; }
+.loadingText, .emptyState { text-align: center; padding: 30px; color: #6b7280; } /* Reduced padding */
+
+.printableContent {
+    position: absolute;
+    left: -9999px; /* Move it far off-screen to the left */
+    top: auto;
+    width: 210mm;   /* Essential: Set a fixed print width (A4) */
+    z-index: -1;    /* Place it behind everything */
+    opacity: 1;     /* Keep it visible for html2canvas to render */
+    pointer-events: none; /* Prevent any interaction */
+}
+
+/* --- MOBILE RESPONSIVE STYLES --- */
+@media screen and (max-width: 768px) {
+    .modalOverlay {
+        padding: 5px; /* Further reduced padding */
+        align-items: flex-start; /* Start from top for better scroll */
+    }
+
+    .modalContent {
+        max-width: 100%;
+        height: 100vh; /* Full height for mobile */
+        border-radius: 0; /* Remove border radius for edge-to-edge */
+    }
+
+    .modalHeader {
+        padding: 10px 12px;
+    }
+
+    .modalTitle {
+        font-size: 14px; /* Even smaller font */
+    }
+
+    .closeButton {
+        font-size: 16px; /* Smaller close button */
+    }
+
+    .modalBody {
+        flex-direction: column; /* Stack panels vertically */
+        overflow-y: auto; /* Allow scrolling the entire body */
+    }
+
+    .leftPanel, .middlePanel, .rightPanel {
+        flex: none; /* Remove flex sizing */
+        width: 100%; /* Full width */
+        border-right: none; /* Remove borders between panels */
+        padding: 10px; /* Further reduced padding */
+        max-height: none; /* Remove height constraints */
+    }
+
+    .filterGrid {
+        grid-template-columns: 1fr; /* Single column for filters */
+    }
+
+    .configGrid {
+        grid-template-columns: 1fr; /* Single column for config */
+    }
+
+    .timeFilterBar {
+      flex-wrap: wrap; /* Ensure buttons wrap properly */
+    }
+
+    .timeFilterBar button {
+        font-size: 10px;
+        padding: 4px 6px; /* Smaller buttons */
+    }
+
+    .selectionActions {
+        flex-direction: column; /* Stack selection buttons */
+        gap: 8px;
+    }
+
+    .selectionActions .actionButton {
+        padding: 6px;
+        font-size: 12px;
+    }
+
+    .exportSection h3 {
+        font-size: 13px; /* Smaller section headers */
+    }
+
+    .filterGroup label {
+        font-size: 10px; /* Smaller labels */
+    }
+
+    .filterInput, .filterSelect, .datePicker {
+        font-size: 11px;
+        padding: 5px 8px; /* Smaller inputs */
+    }
+
+    .configHeader {
+        font-size: 12px; /* Smaller config headers */
+    }
+
+    .checkboxLabel {
+        font-size: 11px; /* Smaller checkbox labels */
+    }
+
+    .configOption label {
+        font-size: 10px; /* Smaller config labels */
+    }
+
+    .configSelect {
+        font-size: 11px;
+        padding: 5px 8px; /* Smaller selects */
+    }
+
+    .summaryStats {
+        grid-template-columns: 1fr; /* Stack stats vertically */
+        gap: 10px;
+    }
+
+    .summaryStatNumber {
+        font-size: 18px; /* Smaller stat numbers */
+    }
+
+    .summaryStatLabel {
+        font-size: 10px; /* Smaller stat labels */
+    }
+
+    .actionButtons {
+        flex-direction: column; /* Stack action buttons */
+        gap: 8px;
+    }
+
+    .actionButton {
+        padding: 8px 12px;
+        font-size: 12px; /* Smaller buttons */
+    }
+
+    .selectionItem {
+        padding: 6px; /* Smaller padding */
+    }
+
+    .selectionItemId {
+        font-size: 11px; /* Smaller font */
+    }
+
+    .selectionItemMeta {
+        font-size: 9px; /* Smaller font */
+    }
+
+    .urgentTag, .statusTag {
+        font-size: 8px; /* Smaller tags */
+        padding: 1px 4px;
+    }
+}

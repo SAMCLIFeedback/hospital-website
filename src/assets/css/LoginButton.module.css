@@ -1,0 +1,33 @@
+/* assets/css/LoginButton.module.css */
+
+.loginButton {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background-color: #22c55e; /* Vibrant green */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loginButton:hover:not(:disabled) {
+  background-color: #16a34a; /* Darker green for hover */
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
+
+.loginButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.loginButton:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}

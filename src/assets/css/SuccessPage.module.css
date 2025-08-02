@@ -1,0 +1,200 @@
+/* SuccessPage.module.css */
+
+.successContainer {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    box-sizing: border-box; /* Ensures padding is included in the element's total width/height */
+}
+
+.successContent {
+    text-align: center;
+    max-width: 600px;
+    padding: 3rem;
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 100%; /* Ensure it takes full width within max-width */
+    box-sizing: border-box; /* Important for padding */
+}
+
+.checkmark {
+    font-size: 4rem;
+    color: #48bb78;
+    margin-bottom: 1.5rem;
+    animation: checkmarkScale 0.6s ease-in-out;
+}
+
+@keyframes checkmarkScale {
+    0% { transform: scale(0); }
+    80% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.successTitle {
+    font-size: 2.5rem;
+    color: #2d3748;
+    margin-bottom: 1rem;
+}
+
+.successText {
+    font-size: 1.1rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.buttonGroup {
+    margin-top: 2rem;
+}
+
+.submitAnotherButton {
+    background: #48bb78;
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center; /* Center text within button */
+    gap: 0.5rem;
+    width: auto; /* Allow button to size to content */
+    max-width: 100%; /* Prevent overflow on very small screens */
+    box-sizing: border-box; /* Include padding in width */
+    text-align: center; /* Ensure text is centered */
+}
+
+.submitAnotherButton:hover {
+    background: #38a169;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+}
+
+.note {
+    margin-top: 2rem;
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.homeLink {
+    color: #48bb78;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.homeLink:hover {
+    text-decoration: underline;
+}
+
+/* --- Media Queries for responsive adjustments --- */
+
+/* Medium screens (e.g., tablets, up to 768px) */
+@media (max-width: 768px) {
+    .successContainer {
+        padding: 1.5rem; /* Slightly less padding around the container */
+    }
+
+    .successContent {
+        padding: 2rem; /* Reduce card padding */
+        border-radius: 1rem; /* Slightly smaller border-radius */
+    }
+
+    .checkmark {
+        font-size: 3.5rem; /* Smaller checkmark */
+        margin-bottom: 1.25rem;
+    }
+    
+    .successTitle {
+        font-size: 2rem; /* Adjust title font size */
+        margin-bottom: 0.75rem;
+    }
+
+    .successText {
+        font-size: 1rem; /* Adjust body text font size */
+        margin-bottom: 1.5rem;
+    }
+
+    .submitAnotherButton {
+        padding: 0.875rem 1.75rem; /* Smaller button padding */
+        font-size: 1rem; /* Smaller button font size */
+        border-radius: 0.625rem; /* Slightly smaller border-radius */
+    }
+
+    .note {
+        margin-top: 1.5rem; /* Reduced margin */
+        font-size: 0.85rem; /* Smaller note font size */
+    }
+}
+
+/* Small screens (e.g., mobile phones, up to 480px) */
+@media (max-width: 480px) {
+    .successContainer {
+        padding: 1rem; /* Even less padding for very small screens */
+    }
+
+    .successContent {
+        padding: 1.5rem; /* Further reduce card padding */
+        border-radius: 0.75rem; /* Even smaller border-radius */
+    }
+
+    .checkmark {
+        font-size: 3rem; /* Even smaller checkmark */
+        margin-bottom: 1rem;
+    }
+
+    .successTitle {
+        font-size: 1.75rem; /* Further adjust title font size */
+    }
+
+    .successText {
+        font-size: 0.9rem; /* Further adjust body text font size */
+        margin-bottom: 1.25rem;
+    }
+
+    .submitAnotherButton {
+        padding: 0.75rem 1.25rem; /* Smallest button padding */
+        font-size: 0.9rem; /* Smallest button font size */
+        border-radius: 0.5rem; /* Smallest border-radius */
+        /* Make button full width on very small screens for better tap target */
+        width: 100%;
+        display: block; /* Make it a block element to take full width */
+    }
+
+    .note {
+        margin-top: 1rem; /* Minimal margin */
+        font-size: 0.8rem; /* Smallest note font size */
+    }
+}
+
+/* Extra small screens (e.g., old iPhones, up to 320px) */
+@media (max-width: 320px) {
+    .successContent {
+        padding: 1rem; /* Very tight padding */
+    }
+
+    .checkmark {
+        font-size: 2.5rem;
+    }
+
+    .successTitle {
+        font-size: 1.5rem;
+    }
+
+    .successText {
+        font-size: 0.85rem;
+    }
+
+    .submitAnotherButton {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .note {
+        font-size: 0.75rem;
+    }
+}

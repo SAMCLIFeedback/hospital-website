@@ -1,0 +1,79 @@
+
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  /* Darker, more opaque tint + backdrop blur */
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cross {
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.vertical, .horizontal {
+  position: absolute;
+  background: #1db954;
+  border-radius: 0.25rem;
+}
+
+.vertical {
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 0.5rem;
+  transform: translateX(-50%);
+}
+
+.horizontal {
+  left: 0; right: 0;
+  top: 50%;
+  height: 0.5rem;
+  transform: translateY(-50%);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1);      opacity: 0.8; }
+  50%      { transform: scale(1.2);    opacity: 1;   }
+}
+
+/* Heartbeat line */
+.heartbeat {
+  width: 8rem;
+  height: 1.5rem;
+}
+
+.line {
+  fill: none;
+  stroke: #1db954;
+  stroke-width: 2;
+  stroke-linecap: round;
+  animation: dash 1.5s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+/* prepare the line for dashing */
+.line {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+}

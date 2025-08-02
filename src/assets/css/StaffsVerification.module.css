@@ -1,0 +1,537 @@
+/* StaffsVerification.module.css */
+
+.container {
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Added for better mobile background behavior */
+    padding: 1rem; /* Add some padding around the container */
+    box-sizing: border-box; /* Include padding in the element's total width and height */
+}
+
+.mainCard {
+    max-width: 29rem;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    width: 100%;
+    /* On smaller screens, reduce padding to prevent excessive whitespace */
+    padding: 1.5rem 1rem; /* Adjusted for smaller screens */
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.card {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: slideIn 0.5s ease-out forwards;
+    /* On smaller screens, reduce internal padding */
+    padding: 1.5rem; /* Adjusted for smaller screens */
+}
+
+.iconContainer {
+    width: 4rem;
+    height: 4rem;
+    background-color: #dbeafe;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 2rem;
+}
+
+.iconContainerGreen {
+    background-color: #dcfce7;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #111827;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    /* Slightly reduce font size on smaller screens */
+    font-size: 1.375rem;
+}
+
+.subtitle {
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    /* Ensure subtitle text is readable and fits well */
+    font-size: 0.8125rem; /* Slightly smaller font for mobile */
+}
+
+.subtitleHighlight {
+    font-weight: 500;
+    color: #111827;
+}
+
+.formGroup {
+    margin-bottom: 1rem;
+}
+
+.label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.labelCentered {
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.emailInputContainer {
+    display: flex;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.emailInputContainer.focusWithin {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.emailInput {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    /* Adjust padding for smaller screens if needed */
+    padding: 0.625rem 0.875rem;
+}
+
+.emailSuffix {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    background-color: #f9fafb;
+    color: #6b7280;
+    border-left: 1px solid #d1d5db;
+    /* Adjust font size for suffix on smaller screens */
+    font-size: 0.875rem;
+    padding: 0 0.75rem; /* Smaller padding */
+}
+
+.button {
+    width: 100%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    /* Adjust padding and font size for buttons on mobile */
+    padding: 0.625rem 0.875rem;
+    font-size: 0.9375rem;
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.secondaryButton {
+    width: 100%;
+    background: transparent;
+    color: #6b7280;
+    padding: 0.5rem 1rem;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    /* Adjust padding and font size for buttons on mobile */
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+}
+
+.secondaryButton:hover {
+    color: #374151;
+}
+
+.pinContainer {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    /* Allow pins to wrap on very small screens, though unlikely with 6 inputs */
+    flex-wrap: wrap;
+}
+
+.pinInput {
+    width: 3rem;
+    height: 3.5rem;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+    border: 2px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    outline: none;
+    /* Adjust size for mobile screens */
+    width: 2.5rem; /* Smaller width */
+    height: 3rem; /* Smaller height */
+    font-size: 1.125rem; /* Smaller font size */
+}
+
+.pinInput:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    transform: scale(1.05);
+}
+
+.error {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    animation: shake 0.5s ease-in-out; /* Applying the shake animation here */
+    text-align: center; /* Center error message */
+    justify-content: center; /* Center horizontally */
+    font-size: 0.8125rem; /* Slightly smaller error text */
+}
+
+.errorCentered {
+    justify-content: center;
+    margin-top: 0.75rem;
+}
+
+.privacyBox {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1.5rem;
+}
+
+.privacyBoxContent {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    /* Allow content to stack on very small screens if needed */
+    flex-direction: column; /* Stack on mobile */
+    text-align: center;
+}
+
+.privacyBoxIcon {
+    font-size: 1.25rem;
+    margin-top: 0.125rem;
+    /* Center icon when content is stacked */
+    margin: 0 auto;
+}
+
+.privacyTitle {
+    color: #166534;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.privacyText {
+    color: #15803d;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    font-size: 0.8125rem; /* Smaller text on mobile */
+}
+
+.privacyLink {
+    color: #15803d;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    font-size: 0.8125rem; /* Smaller text on mobile */
+}
+
+.helpSection {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.helpText {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.helpLink {
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 0.75rem;
+}
+
+.helpLink:hover {
+    color: #2563eb;
+}
+
+.disclaimer {
+    margin-top: 1.5rem;
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    text-align: center;
+    padding: 0.75rem; /* Reduced padding for mobile */
+}
+
+.disclaimerText {
+    color: #1e40af;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-size: 0.8125rem; /* Smaller text on mobile */
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 50;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modalContent {
+    background-color: white;
+    border-radius: 0.75rem;
+    max-width: 28rem;
+    width: 100%;
+    padding: 1.5rem;
+    animation: slideIn 0.3s ease-out;
+    padding: 1.25rem; /* Slightly reduced padding for mobile */
+}
+
+.modalTitle {
+    font-size: 1.125rem;
+    font-weight: bold;
+    color: #111827;
+    margin-bottom: 1rem;
+}
+
+.modalList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    margin-bottom: 1rem;
+}
+
+.modalListItem {
+    font-size: 0.875rem;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    padding-left: 0.5rem;
+    font-size: 0.8125rem; /* Smaller text on mobile */
+}
+
+.timerBox {
+    background-color: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.timerText {
+    color: #92400e;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: 0.8125rem; /* Smaller text on mobile */
+}
+
+.spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid white;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Keyframe animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Global shake animation definition */
+@keyframes shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- Media Queries for further fine-tuning --- */
+
+/* Small screens (e.g., mobile phones, up to 600px) */
+@media (max-width: 600px) {
+    .mainCard {
+        padding: 1.5rem 1rem; /* Adjust overall padding for very small screens */
+    }
+
+    .card {
+        padding: 1.25rem; /* Further reduce card padding */
+    }
+
+    .title {
+        font-size: 1.25rem; /* Slightly smaller title */
+    }
+
+    .subtitle,
+    .privacyText,
+    .privacyLink,
+    .disclaimerText,
+    .modalListItem,
+    .timerText {
+        font-size: 0.75rem; /* Adjust smaller text elements for readability */
+    }
+
+    .emailInput {
+        padding: 0.5rem 0.75rem; /* Smaller input padding */
+        font-size: 0.9375rem; /* Slightly smaller input font */
+    }
+
+    .emailSuffix {
+        padding: 0 0.5rem; /* Smaller suffix padding */
+        font-size: 0.75rem; /* Smaller suffix font */
+    }
+
+    .button,
+    .secondaryButton {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem; /* Smaller button text */
+    }
+
+    .pinContainer {
+        gap: 0.35rem; /* Reduce gap between pin inputs */
+    }
+
+    .pinInput {
+        width: 2.5rem; /* Adjusted for consistency, slightly larger than 2.2rem might be better */
+        height: 3rem;
+        font-size: 1.125rem;
+    }
+
+    .error, .errorCentered {
+        font-size: 0.75rem; /* Adjust error message font size */
+        /* To reduce shake intensity on smaller screens, we can apply a custom animation */
+        animation: shake-mobile 0.4s ease-in-out; /* Use a new, less intense animation */
+    }
+
+    .privacyBoxContent {
+        flex-direction: column; /* Ensure stacking on very small screens */
+        text-align: center;
+        gap: 0.5rem; /* Reduce gap */
+    }
+
+    .privacyBoxIcon {
+        margin: 0 auto 0.25rem; /* Center icon above text */
+    }
+}
+
+/* Even smaller screens (e.g., iPhone 5/SE) */
+@media (max-width: 320px) {
+    .pinInput {
+        width: 2.2rem; /* Make pin inputs even smaller */
+        height: 2.7rem;
+        font-size: 1rem;
+    }
+    .pinContainer {
+        gap: 0.25rem; /* Very small gap */
+    }
+    .title {
+        font-size: 1.1rem;
+    }
+    .subtitle {
+        font-size: 0.7rem;
+    }
+}
+
+/* Define the less intense shake animation for mobile */
+@keyframes shake-mobile {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-3px);
+    }
+    75% {
+        transform: translateX(3px);
+    }
+}
