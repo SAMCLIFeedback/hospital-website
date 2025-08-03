@@ -658,14 +658,6 @@ const ExternalFeedback = () => {
                     </div>
                     </div>
               </label>
-            </div>
-            <div className={styles.section} style={{ animationDelay: '0.9s' }}>
-              <div className={styles.sectionHeader}>
-                <h3 className={styles.sectionLabel}>
-                  <span className={styles.stepNumber}>9</span>
-                  Verify you're human
-                </h3>
-              </div>
               <ReCAPTCHA
                 sitekey="6LfMCpkrAAAAAEj2FgwNmdZdC8B9y1M-iFzwj2xT"
                 onChange={(token) => handleInputChange('reCaptchaToken', token)}
