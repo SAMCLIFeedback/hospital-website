@@ -281,8 +281,8 @@ const StaffFeedbackForm = () => {
             Your voice matters. Share concerns safely and anonymously.
           </p>
           <div className={styles.securityBadge}>
-            <span className={styles.securityIcon}>🛡️</span>
-            Protected by Hospital Policy | End-to-End Encrypted
+            <span className={styles.securityIcon}>🛡️
+            Protected by Hospital Policy | End-to-End Encrypted</span>
           </div>
         </div>
       </div>

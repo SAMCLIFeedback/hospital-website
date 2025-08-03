@@ -990,63 +990,591 @@ padding: 0.5rem;
   }
 }
 
-/* Responsive Design */
+/* Enhanced Mobile Responsive Design for Feedback Form Sections */
+
+/* Base responsive improvements */
 @media (max-width: 768px) {
   .container {
-    padding: 1rem;
+    padding: 1rem 0.75rem;
+    min-height: 100vh;
   }
   
   .form {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1rem;
+    border-radius: 16px;
+    margin: 0;
+  }
+  
+  /* Progress bar improvements */
+  .progressContainer {
+    top: 1rem;
+    margin-bottom: 1.5rem;
+    position: sticky;
+    z-index: 100;
+  }
+  
+  .progressBar {
+    height: 6px;
+  }
+  
+  .textContainer {
+    margin: 8px auto 0px auto;
+    padding: 4px 20px 8px 20px;
+  }
+  
+  .progressText {
+    font-size: 0.8rem;
+  }
+
+  /* Header improvements */
+  .header {
+    margin-bottom: 2rem;
+    padding: 0 0.5rem;
   }
   
   .title {
-    font-size: 2.5rem;
+    font-size: 2rem;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
   }
   
+  .subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .iconLarge {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .securityBadge {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+  }
+
+  /* Section improvements */
+  .section {
+    margin-bottom: 2rem;
+    padding: 0;
+  }
+  
+  .sectionHeader {
+    margin-bottom: 1rem;
+  }
+  
+  .sectionLabel {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 1.1rem;
+    line-height: 1.3;
+    margin-bottom: 0.75rem;
+  }
+  
+  .stepNumber {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  
+  .sectionDescription {
+    margin-left: 2.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #6b7280;
+  }
+
+  /* Radio grid improvements */
   .radioGrid {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding: 0;
+  }
+  
+  .radioCardContent {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+  
+  .radioCardIcon {
+    font-size: 1.5rem;
+  }
+  
+  .radioCardTitle {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .radioCardDesc {
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+  
+  .radioCardCheck {
+    font-size: 1.25rem;
+  }
+
+  /* Conditional field improvements */
+  .conditionalField {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .urgentCheckbox {
+    gap: 0.75rem;
+  }
+  
+  .urgentContent {
+    gap: 0.5rem;
+  }
+  
+  .urgentIcon {
+    font-size: 1.25rem;
+  }
+  
+  .urgentText {
+    font-size: 1rem;
+  }
+
+  /* Input improvements */
+  .inputGroup {
+    gap: 0.4rem;
+  }
+  
+  .inputLabel {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  
+  .textInput, .searchInput {
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+  
+  .searchInput {
+    padding-left: 2.5rem;
+  }
+  
+  .searchIcon {
+    left: 0.75rem;
+    font-size: 1rem;
+  }
+
+  /* Dropdown improvements */
+  .dropdown {
+    border-radius: 8px;
+    max-height: 250px;
+    font-size: 0.9rem;
+  }
+  
+  .categoryHeader {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
+    gap: 0.5rem;
+  }
+  
+  .dropdownOption {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+  
+  .optionIcon {
+    font-size: 1rem;
+  }
+  
+  .optionContent strong {
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .optionContent small {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  /* Severity options improvements */
+  .severityContainer {
+    margin-top: 1rem;
   }
   
   .severityOptions {
     grid-template-columns: 1fr;
-  }
-  
-  .anonymityOptions {
-    grid-template-columns: 1fr;
-  }
-  
-  .sectionDescription {
-    margin-left: 0;
-    margin-top: 0.5rem;
-  }
-  
-  .sectionLabel {
-    flex-direction: column;
-    align-items: flex-start;
     gap: 0.75rem;
   }
   
-  .stepNumber {
-    align-self: flex-start;
+  .severityCard {
+    padding: 1rem;
+    border-radius: 12px;
   }
-}
+  
+  .severityIcon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .severityLabel {
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .severityDesc {
+    font-size: 0.85rem;
+  }
 
-@media (max-width: 480px) {
-  .form {
-    padding: 1.5rem 1rem;
+  /* Textarea improvements */
+  .textareaContainer {
+    margin-top: 1rem;
   }
   
-  .progressContainer {
-    top: 1rem;
+  .textarea {
+    min-height: 150px;
+    padding: 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 8px;
   }
   
-  .iconLarge {
-    font-size: 3rem;
+  .textareaFooter {
+    margin-top: 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .charCount {
+    gap: 0.4rem;
+    font-size: 0.85rem;
+  }
+  
+  .warning {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+  }
+
+  /* Anonymity options improvements */
+  .anonymityOptions {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  
+  .anonymityCardContent {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+  
+  .anonymityIcon {
+    font-size: 1.5rem;
+  }
+  
+  .anonymityTitle {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .anonymityDesc {
+    font-size: 0.85rem;
+  }
+
+  /* Confirmation improvements */
+  .confirmationGroup {
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .confirmationItem {
+    padding: 1rem;
+    gap: 0.75rem;
+    border-radius: 8px;
+    align-items: flex-start;
+  }
+  
+  .checkboxCustom {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+  }
+  
+  .confirmationText {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  .confirmationLinks {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  /* Submit section improvements */
+  .submitSection {
+    margin-top: 2rem;
+    padding: 0 0.5rem;
   }
   
   .submitButton {
     width: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 12px;
     justify-content: center;
+    gap: 0.75rem;
+  }
+  
+  .submitIcon {
+    font-size: 1.1rem;
+  }
+  
+  .submitText {
+    font-size: 1rem;
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .form {
+    padding: 1rem 0.75rem;
+    border-radius: 12px;
+  }
+  
+  .progressContainer {
+    top: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .header {
+    margin-bottom: 1.5rem;
+    padding: 0 0.25rem;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .iconLarge {
+    font-size: 2rem;
+  }
+  
+  .securityBadge {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .sectionLabel {
+    font-size: 1rem;
+    gap: 0.5rem;
+  }
+  
+  .stepNumber {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.8rem;
+  }
+  
+  .sectionDescription {
+    margin-left: 2.25rem;
+    font-size: 0.85rem;
+  }
+  
+  .radioGrid {
+    gap: 0.5rem;
+  }
+  
+  .radioCardContent {
+    padding: 0.875rem;
+    gap: 0.5rem;
+  }
+  
+  .radioCardIcon {
+    font-size: 1.25rem;
+  }
+  
+  .radioCardTitle {
+    font-size: 0.9rem;
+  }
+  
+  .radioCardDesc {
+    font-size: 0.8rem;
+  }
+  
+  .conditionalField {
+    padding: 0.875rem;
+  }
+  
+  .textInput, .searchInput {
+    padding: 0.75rem 0.875rem;
+    font-size: 1rem;
+  }
+  
+  .searchInput {
+    padding-left: 2.25rem;
+  }
+  
+  .searchIcon {
+    left: 0.625rem;
+  }
+  
+  .dropdown {
+    max-height: 200px;
+    font-size: 0.85rem;
+  }
+  
+  .categoryHeader {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .dropdownOption {
+    padding: 0.625rem;
+  }
+  
+  .severityOptions {
+    gap: 0.5rem;
+  }
+  
+  .severityCard {
+    padding: 0.875rem;
+  }
+  
+  .severityIcon {
+    font-size: 1.75rem;
+  }
+  
+  .textarea {
+    min-height: 120px;
+    padding: 0.875rem;
+    font-size: 1rem;
+  }
+  
+  .anonymityOptions {
+    gap: 0.5rem;
+  }
+  
+  .anonymityCardContent {
+    padding: 0.875rem;
+  }
+  
+  .confirmationGroup {
+    gap: 0.75rem;
+  }
+  
+  .confirmationItem {
+    padding: 0.875rem;
+  }
+  
+  .submitButton {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+    gap: 0.5rem;
+  }
+}
+
+/* Landscape orientation for small devices */
+@media (max-width: 768px) and (orientation: landscape) {
+  .progressContainer {
+    position: relative;
+    top: auto;
+    margin-bottom: 1rem;
+  }
+  
+  .header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .iconLarge {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  .section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .textarea {
+    min-height: 100px;
+  }
+}
+
+/* Touch target improvements for mobile */
+@media (max-width: 768px) {
+  .radioCard,
+  .severityOption,
+  .anonymityCard,
+  .confirmationItem,
+  .urgentCheckbox,
+  .dropdownOption {
+    min-height: 44px; /* iOS/Android recommended touch target */
+  }
+  
+  .submitButton {
+    min-height: 48px;
+  }
+  
+  /* Improve spacing between interactive elements */
+  .radioGrid > *:not(:last-child) {
+    margin-bottom: 0.25rem;
+  }
+  
+  .severityOptions > *:not(:last-child) {
+    margin-bottom: 0.25rem;
+  }
+  
+  .anonymityOptions > *:not(:last-child) {
+    margin-bottom: 0.25rem;
+  }
+  
+  .confirmationGroup > *:not(:last-child) {
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* Focus improvements for mobile accessibility */
+@media (max-width: 768px) {
+  .textInput:focus,
+  .searchInput:focus,
+  .textarea:focus {
+    border-width: 2px;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  }
+  
+  .radioInput:focus + .radioCardContent,
+  .checkbox:focus + .checkboxCustom {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
   }
 }

@@ -278,7 +278,7 @@ const ExternalFeedback = () => {
         <h1 className={styles.title}>Help Us Serve You Better</h1>
         <p className={styles.subtitle}>Share your experience to help us improve our services.</p>
         <div className={styles.securityBadge}>
-          <span className={styles.securityIcon}>🛡️</span> Your voice matters. Share concerns safely and anonymously.
+          <span className={styles.securityIcon}>🛡️ Your voice matters. Share concerns safely and anonymously.</span>
         </div>
       </div>
 

@@ -16,6 +16,7 @@ import AdminLogin from './components/AdminLogin.jsx';
 const App = () => {
   return (
     // Add the basename prop here
+    //<Router basename="/">
     <Router basename="/hospital-website">
       <ScrollToTop />
       <Routes>
