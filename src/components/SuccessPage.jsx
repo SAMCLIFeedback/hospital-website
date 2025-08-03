@@ -25,7 +25,7 @@ const SuccessPage = () => {
           </button>
         </div>
         <p className={styles.note}>
-          Want to return home instead? <a href="/" className={styles.homeLink}>Click here</a>
+          Want to return home instead? <a href="https://samclifeedback.github.io/hospital-website/" className={styles.homeLink}>Click here</a>
         </p>
       </div>
     </div>

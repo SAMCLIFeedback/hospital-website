@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styles from '../assets/css/LandingPage.module.css';
 import Loader from './Loader.jsx';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const LandingPage = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -234,7 +235,7 @@ const LandingPage = () => {
 
           <div className={styles.footerBottom}>
             <div className={styles.logo}>
-              <img src="src/assets/logo.png" alt="logo" className={styles.logoImage} />
+              <img src={logo} alt="logo" className={styles.logoImage} />
               San Antonio Medical Center of Lipa, Inc.
             </div>
             <p className={styles.copyright}>&copy; 2024 General Hospital. All rights reserved.</p>

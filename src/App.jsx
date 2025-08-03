@@ -15,7 +15,8 @@ import AdminLogin from './components/AdminLogin.jsx';
 
 const App = () => {
   return (
-    <Router>
+    // Add the basename prop here
+    <Router basename="/hospital-website">
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -33,4 +34,4 @@ const App = () => {
     </Router>
   );
 };
-export default App
+export default App;
