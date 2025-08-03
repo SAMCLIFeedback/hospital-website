@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import Loader from './Loader.jsx';
 import DropdownPortal from './DropdownPortal.jsx';
-import StepTracker from './StepTracker.jsx'; // ✅ Import the new tracker
+import StepTracker from './StepTracker.jsx';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const departments = [
   { value: 'General Feedback', label: 'General Feedback' },
@@ -56,8 +57,10 @@ const ExternalFeedback = () => {
     email: '',
     phone: '',
     consentAgreed: false,
+    reCaptchaToken: null,
   });
 
+  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false); 
   const [hoveredStar, setHoveredStar] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
@@ -217,6 +220,13 @@ const ExternalFeedback = () => {
       return;
     }
 
+    if (!formData.reCaptchaToken) {
+        alert('Please verify that you are not a robot.');
+        setIsSubmitting(false);
+        setIsNavigating(false);
+        return;
+    }
+
     setIsSubmitting(true);
     setIsNavigating(true);
 
@@ -235,7 +245,8 @@ const ExternalFeedback = () => {
           isAnonymous: formData.isAnonymous,
           email: formData.isAnonymous ? null : formData.email,
           phone: formData.isAnonymous ? null : formData.phone,
-          consentAgreed: formData.consentAgreed
+          consentAgreed: formData.consentAgreed,
+          reCaptchaToken: formData.reCaptchaToken, 
         })
       });
 
@@ -268,7 +279,7 @@ const ExternalFeedback = () => {
     }
   };
 
-  const isSubmitDisabled = !formData.consentAgreed || isSubmitting;
+  const isSubmitDisabled = !formData.consentAgreed || !formData.reCaptchaToken || isSubmitting;
 
   return (
     <div className={styles.container}>
@@ -647,6 +658,18 @@ const ExternalFeedback = () => {
                     </div>
                     </div>
               </label>
+            </div>
+            <div className={styles.section} style={{ animationDelay: '0.9s' }}>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionLabel}>
+                  <span className={styles.stepNumber}>9</span>
+                  Verify you're human
+                </h3>
+              </div>
+              <ReCAPTCHA
+                sitekey="6LfMCpkrAAAAAEj2FgwNmdZdC8B9y1M-iFzwj2xT"
+                onChange={(token) => handleInputChange('reCaptchaToken', token)}
+              />
             </div>
           </section>
 

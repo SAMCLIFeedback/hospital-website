@@ -2,7 +2,29 @@ const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const { analyzeSentiment } = require('./analyzeSentiment');
+const axios = require('axios');
 const ExternalFeedback = require('../models/ExternalFeedback');
+
+const VERIFY_RECAPTCHA = async (token) => {
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY; // This needs to be set in your .env
+  const verificationUrl = 'https://www.google.com/recaptcha/api/siteverify';
+
+  try {
+    const response = await axios.post(
+      verificationUrl,
+      null, {
+        params: {
+          secret: secretKey,
+          response: token,
+        },
+      }
+    );
+    return response.data.success;
+  } catch (error) {
+    console.error('reCAPTCHA verification error:', error);
+    return false;
+  }
+};
 
 router.post('/feedback', async (req, res) => {
   try {
@@ -15,8 +37,14 @@ router.post('/feedback', async (req, res) => {
       isAnonymous,
       email,
       phone,
-      consentAgreed
+      consentAgreed,
+      reCaptchaToken, 
     } = req.body;
+
+    const isHuman = await VERIFY_RECAPTCHA(reCaptchaToken);
+    if (!isHuman) {
+      return res.status(400).json({ error: 'reCAPTCHA verification failed. Please try again.' });
+    }
 
     if (
       !role || !feedbackType || !department ||
