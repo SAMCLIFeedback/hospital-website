@@ -1,3 +1,6 @@
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET;
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -94,7 +97,8 @@ router.post('/verify-pin', (req, res) => {
 
   delete pins[email];
   savePins(pins);
-  res.json({ success: true });
+  const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '15m' });
+  res.json({ success: true, token });
 });
 
 module.exports = router;

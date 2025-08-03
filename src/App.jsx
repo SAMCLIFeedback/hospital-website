@@ -12,11 +12,12 @@ import DepartmentLogin from './components/DepartmentLogin.jsx';
 import QALogin from './components/QALogin.jsx';
 import AdminDashboard from './components/AdminDashboard.jsx';
 import AdminLogin from './components/AdminLogin.jsx';
+import ProtectedRoute from './components/ProtectRoute.jsx';
 
 const App = () => {
   return (
     // Add the basename prop here
-    //<Router basename="/">
+    //<Router basename="/hospital-website">
     <Router basename="/hospital-website">
       <ScrollToTop />
       <Routes>
@@ -24,7 +25,14 @@ const App = () => {
         <Route path="/patient-feedback" element={<ExternalFeedback />} />
         <Route path="/success" element={<SuccessPage />} />
         <Route path="/staff-verification" element={<StaffsVerification />} />
-        <Route path="/staff-feedback" element={<StaffFeedbackForm />} />
+        <Route
+          path="/staff-feedback"
+          element={
+            <ProtectedRoute>
+              <StaffFeedbackForm />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/QA-dashboard" element={<QADashboard />} />
         <Route path="/deptHead-Dashboard" element={<DeptHeadDashboard />} />
         <Route path="/departmentLogin" element={<DepartmentLogin/>} />

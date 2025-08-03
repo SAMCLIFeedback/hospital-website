@@ -158,7 +158,7 @@ const handlePinSubmit = async (e) => {
       return;
     }
 
-    // Navigate directly on success, loader will naturally disappear as component unmounts
+    sessionStorage.setItem('staff_token', data.token);
     navigate('/staff-feedback');
 
   } catch (err) {
