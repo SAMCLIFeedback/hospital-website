@@ -755,12 +755,6 @@ padding: 0.5rem;
   }
 }
 
-
-/* Enhanced Mobile Responsive Design for ExternalFeedback Component */
-
-/* Update existing responsive breakpoints with improved mobile design */
-
-/* Small tablets and large phones */
 @media (max-width: 768px) {
   .container {
     padding: 1rem 0.75rem;
@@ -951,10 +945,6 @@ padding: 0.5rem;
     min-height: 100px;
   }
 
-  /* Section 6: Anonymous/Contact Radio Grid */
-  /* Uses same radioGrid styles as Section 2 */
-
-  /* Section 7: Consent Checkbox */
   .confirmationItem {
     padding: 1rem;
     gap: 0.75rem;
@@ -1419,6 +1409,6 @@ padding: 0.5rem;
   .formSelect,
   .formTextarea,
   .searchInput {
-    font-size: 16px; /* iOS won't zoom if font-size is 16px or larger */
+    font-size: 16px;
   }
 }
