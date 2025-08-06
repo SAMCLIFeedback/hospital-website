@@ -582,9 +582,13 @@ const FeedbackModal = ({ feedback, onClose, prepareRawFeedbackForDisplay, action
       [feedback.id]: { isActionMode: false, actionText: '' },
     }));
     if (hasInput) {
-      toast.warn('Input text cleared');
+      toast.warn('Input text cleared', {
+        autoClose: 2000
+      });
     } else {
-      toast.info('Creation canceled');
+      toast.info('Creation canceled', {
+        autoClose: 2000
+      });
     }
     if (isNeedRevision) {
       onClose();
@@ -597,7 +601,9 @@ const FeedbackModal = ({ feedback, onClose, prepareRawFeedbackForDisplay, action
         ids: [feedback.id],
         finalActionDescription: actionText,
       });
-      toast.success(`Action for ${feedback.id} sent for approval.`);
+      toast.success(`Action for ${feedback.id} sent for approval.`, {
+        autoClose: 2000
+      });
       onClose();
     } catch (err) {
       console.error('Error sending for approval:', err);
@@ -763,7 +769,9 @@ const FeedbackModal = ({ feedback, onClose, prepareRawFeedbackForDisplay, action
                             ids: [feedback.id],
                             userName: user.name,
                           });
-                          toast.success(`Feedback ${feedback.id.toUpperCase()} marked as 'No Action Needed'.`);
+                          toast.success(`Feedback ${feedback.id.toUpperCase()} marked as 'No Action Needed'.`, {
+                            autoClose: 2000
+                          });
                           onClose();
                         } catch (err) {
                           console.error('Error marking no action needed:', err);
@@ -1153,7 +1161,9 @@ const DepartmentHeadsDashboard = () => {
     try {
       setLoading(true);
       await fetchFeedback();
-      toast.info('Feedback refreshed.');
+      toast.info('Feedback refreshed.', {
+        autoClose: 1000
+      });
     } catch (error) {
       console.error('Error refreshing feedback:', error.message);
       toast.error('Failed to refresh feedback data.');
@@ -1174,7 +1184,9 @@ const DepartmentHeadsDashboard = () => {
         ids: [id],
         userName: user.name,
       });
-      toast.success(`Feedback ${id.toUpperCase()} marked as 'No Action Needed'.`);
+      toast.success(`Feedback ${id.toUpperCase()} marked as 'No Action Needed'.`, {
+        autoClose: 2000
+      });
       await fetchFeedback();
     } catch (err) {
       console.error('Error marking no action needed:', err);
@@ -1199,7 +1211,9 @@ const DepartmentHeadsDashboard = () => {
         ids: selectedFeedbackIds,
         userName: user.name,
       });
-      toast.success(`${selectedFeedbackIds.length} feedback item(s) marked as 'No Action Needed'.`);
+      toast.success(`${selectedFeedbackIds.length} feedback item(s) marked as 'No Action Needed'.`, {
+        autoClose: 2000
+      });
       setSelectedFeedbackIds([]);
       await fetchFeedback();
     } catch (err) {
@@ -1414,6 +1428,7 @@ const DepartmentHeadsDashboard = () => {
   const totalFeedback = feedbackData.length;
   const assignedCount = feedbackData.filter(f => f.dept_status === 'needs_action').length;
   const approvedCount = feedbackData.filter(f => f.dept_status === 'approved').length;
+  const noActionNeeded = feedbackData.filter(f => f.dept_status === 'no_action_needed').length;
 
   if (isSessionLoading) {
     return (
@@ -1467,6 +1482,13 @@ const DepartmentHeadsDashboard = () => {
               icon="fas fa-check-circle"
               variant="success"
             />
+            <MetricCard 
+              title="No Action Needed" 
+              value={noActionNeeded} 
+              icon="fas fa-folder-open" 
+              variant="primary" 
+            />
+
           </div>
         </section>
         <AnalyticsSection feedbackData={feedbackData} />
@@ -1576,7 +1598,9 @@ const DepartmentHeadsDashboard = () => {
                         finalActionDescription: bulkActionDescription.trim()
                       });
 
-                      toast.success(`Proposed action for ${selectedFeedbackIds.length} feedback item(s).`);
+                      toast.success(`Proposed action for ${selectedFeedbackIds.length} feedback item(s).`, {
+                        autoClose: 2000
+                      });
                       setSelectedFeedbackIds([]);
                       setIsBulkProposeModalOpen(false);
                       await fetchFeedback();

@@ -51,8 +51,7 @@ const Header = ({ userName, userRole, date, onLogout }) => {
   const handleLogoutClick = async () => {
     setIsLoading(true);
     try {
-      // Removed artificial 2-second delay
-      await onLogout(); // Now awaits the actual onLogout function completion
+      await onLogout();
     } catch (error) {
       toast.error('Failed to logout. Please try again.');
       setIsLoading(false);
@@ -886,7 +885,6 @@ const FeedbackModal = ({
                       disabled={!adminAssignNotes.trim() || !selectedDept}
                       onClick={async () => {
                         try {
-                          // MODIFIED: Payload now matches bulk endpoint signature
                           const response = await axios.patch(`${BASE_URL}/api/dept/escalate-feedback`, {
                             ids: [feedback.id], // Send as array
                             adminNotes: adminAssignNotes.trim(),
@@ -895,10 +893,10 @@ const FeedbackModal = ({
                           });
 
                           if (response.status === 200) {
-                            // ... success logic ...
                             onClose();
-                            toast.success('Feedback assigned to department.');
-                            // The bulkFeedbackUpdate event will handle the refresh
+                            toast.success('Feedback assigned to department.', {
+                              autoClose: 2000,
+                            });
                           } else {
                             throw new Error('Unexpected response');
                           }
@@ -963,7 +961,9 @@ const FeedbackModal = ({
                             dept_status: 'no_action_needed',
                             finalActionDescription: 'No Action Required',
                           }));
-                          toast.success(`Feedback ${feedback.id.toUpperCase()} marked as 'No Action Needed'.`);
+                          toast.success(`Feedback ${feedback.id.toUpperCase()} marked as 'No Action Needed'.`, {
+                            autoClose: 2000,
+                          });
                           onClose();
                         } catch (err) {
                           console.error('Error marking no action needed:', err);
@@ -992,7 +992,9 @@ const FeedbackModal = ({
                                   : f
                               )
                             );
-                            toast.success('Feedback approved successfully!');
+                            toast.success('Feedback approved successfully!', {
+                              autoClose: 2000,
+                            });
                             onClose();
                           } else {
                             throw new Error('Unexpected response');
@@ -1066,7 +1068,9 @@ const FeedbackModal = ({
 
                         if (!response.data) throw new Error('Request failed');
                         
-                        toast.success('Revision request sent!');
+                        toast.success('Revision request sent!', {
+                          autoClose: 2000,
+                        });
                         setIsRequestingRevision(false);
                         setRevisionNotes('');
                         onClose();
@@ -1121,6 +1125,10 @@ const FeedbackTable = ({
   selectedFeedbackIds,
   setSelectedFeedbackIds
 }) => {
+  const selectableFeedback = feedback.filter(
+    f => !['approved', 'no_action_needed'].includes(f.dept_status)
+  );
+
   const selectAllRef = useRef();
 
   useEffect(() => {
@@ -1132,12 +1140,15 @@ const FeedbackTable = ({
 
   const handleSelectAll = (e) => {
       if (e.target.checked) {
-          const allIds = feedback.map(f => f.id);
-          setSelectedFeedbackIds(allIds);
+          const allSelectableIds = feedback
+              .filter(f => !['approved', 'no_action_needed'].includes(f.dept_status)) // ✅ match your UI logic
+              .map(f => f.id);
+          setSelectedFeedbackIds(allSelectableIds);
       } else {
           setSelectedFeedbackIds([]);
       }
   };
+
   const handleSelectOne = (id) => {
       setSelectedFeedbackIds(prev =>
           prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
@@ -1153,7 +1164,10 @@ const FeedbackTable = ({
                 ref={selectAllRef}
                 type="checkbox"
                 onChange={handleSelectAll}
-                checked={feedback.length > 0 && selectedFeedbackIds.length === feedback.length}
+                checked={
+                  selectableFeedback.length > 0 &&
+                  selectedFeedbackIds.length === selectableFeedback.length
+                }
                 aria-label="Select all feedback on this page"
               />
             </th>
@@ -1557,15 +1571,15 @@ const AdminDashboard = () => {
     setBulkDepartment('');
   };
 
-  // NEW: Specific API call handlers for each bulk action
   const handleBulkApprove = async () => {
     try {
       await axios.patch(`${BASE_URL}/api/dept/approve`, {
         ids: selectedFeedbackIds,
         userName: user.name,
       });
-      toast.success(`${selectedFeedbackIds.length} item(s) approved.`);
-      // No need to clear selection here, socket event will trigger refetch and clearing
+      toast.success(`${selectedFeedbackIds.length} item(s) approved.`, {
+        autoClose: 2000,
+      });
     } catch (err) {
       toast.error(`Approval failed: ${err.response?.data?.error || err.message}`);
     }
@@ -1601,7 +1615,9 @@ const AdminDashboard = () => {
       }
 
       await axios.patch(`${BASE_URL}${endpoint}`, payload);
-      toast.success(`Action successful for ${selectedFeedbackIds.length} item(s).`);
+      toast.success(`Action successful for ${selectedFeedbackIds.length} item(s).`, {
+        autoClose: 2000,
+      });
       closeBulkModal();
     } catch (err) {
       toast.error(`Action failed: ${err.response?.data?.error || err.message}`);
@@ -1631,7 +1647,9 @@ const AdminDashboard = () => {
       }
 
       await axios.patch(`${BASE_URL}${endpoint}`, payload);
-      toast.success(`Action successful for ${selectedFeedbackIds.length} item(s).`);
+      toast.success(`Action successful for ${selectedFeedbackIds.length} item(s).`, {
+        autoClose: 2000,
+      });
       closeBulkModal();
     } catch (err) {
       toast.error(`Action failed: ${err.response?.data?.error || err.message}`);
@@ -1736,7 +1754,9 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       await fetchFeedback(); // assuming this is your data fetcher
-      toast.info('Feedback refreshed.');
+      toast.info('Feedback refreshed.', {
+        autoClose: 1000,
+      });
     } catch (error) {
       console.error('Failed to refresh feedback:', error);
       toast.error('Failed to refresh feedback.');
@@ -1955,7 +1975,9 @@ const AdminDashboard = () => {
                   prev.map(f => (f.id === id ? { ...f, dept_status: 'approved' } : f))
                 );
                 setSelectedFeedback(prev => ({ ...prev, dept_status: 'approved' }));
-                toast.success('Feedback approved successfully!');
+                toast.success('Feedback approved successfully!', {
+                  autoClose: 2000,
+                });
                 closeModal();
               } catch (error) {
                 console.error('Error approving feedback:', error.response?.data || error.message);

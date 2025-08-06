@@ -674,26 +674,28 @@ const AuditTrailModal = ({ feedback, onClose, prepareRawFeedbackForDisplay }) =>
         <div className={styles.modalBody}>
           <div className={styles.detailSection}>
             <h3><i className="fas fa-history"></i> Action History</h3>
-            <table className={styles.auditTable}>
-              <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th>Action</th>
-                  <th>User</th>
-                  <th>Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                {auditTrail.map((entry, index) => (
-                  <tr key={index}>
-                    <td>{entry.timestamp.toLocaleString()}</td>
-                    <td>{entry.action}</td>
-                    <td>{entry.user}</td>
-                    <td>{entry.details}</td>
+            <div className={styles.auditTableWrapper}>
+              <table className={styles.auditTable}>
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                    <th>User</th>
+                    <th>Details</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {auditTrail.map((entry, index) => (
+                    <tr key={index}>
+                      <td>{entry.timestamp.toLocaleString()}</td>
+                      <td>{entry.action}</td>
+                      <td>{entry.user}</td>
+                      <td>{entry.details}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
           <div className={styles.detailSection}>
             <h3><i className="fas fa-comment-dots"></i> Feedback Details</h3>
@@ -1021,7 +1023,9 @@ const FeedbackModal = ({ feedback, onClose, onCreateReport, prepareRawFeedbackFo
       }
 
       updateSentiment(feedback.id, newSentiment);
-      toast.success('Sentiment updated successfully!');
+      toast.success('Sentiment updated successfully!', {
+        autoClose: 2000
+      });
     } catch (error) {
       console.error(`Failed to update feedback: ${error.message}`);
       toast.error(`Failed to update sentiment: ${error.message}`);
@@ -1159,9 +1163,13 @@ const ReportModal = ({
       } else if (hasContent) {
         message = 'Input text cleared.';
       }
-      toast.warn(message);
+      toast.warn(message, {
+        autoClose: 2000
+      });
     } else {
-      toast.info('Report creation canceled.');
+      toast.info('Report creation canceled.', {
+        autoClose: 2000
+      });
     }
 
     // Abort any ongoing generation
@@ -1268,8 +1276,9 @@ Provide clear, targeted, and actionable recommendations for the department to ad
 
                     const controller = new AbortController();
                     setIsGenerating(feedback.id, true, controller);
-                    toast.info('Generating report...');
-
+                    toast.info('Generating report...', {
+                      autoClose: 1000
+                    });
                     try {
                       const response = await fetch(`${BASE_URL}/api/generate-report`, {
                         method: 'POST',
@@ -1291,7 +1300,9 @@ Provide clear, targeted, and actionable recommendations for the department to ad
 
                       setReportContent(feedback.id, data.report);
                       setHasGenerated(feedback.id, true);
-                      toast.success('Report generated successfully!');
+                      toast.success('Report generated successfully!', {
+                        autoClose: 2000
+                      });
                     } catch (err) {
                       if (err.name === 'AbortError') {
                         toast.warn('Report generation aborted.');
@@ -1700,8 +1711,6 @@ const QADashboard = () => {
         }
     }
 
-    // 4. Perform UI updates (close modals, show toasts)
-    // React batches these state updates for performance
     if (shouldCloseIndividualModal) {
         setIsModalOpen(false);
         setIsReportModalOpen(false);
@@ -1832,7 +1841,9 @@ const QADashboard = () => {
         });
       }
 
-      toast.success('Report sent and feedback updated!');
+      toast.success('Report sent and feedback updated!', {
+        autoClose: 2000
+      });
       closeReportModal();
     } catch (error) {
       toast.error(`Failed to send report: ${error.message}`);
@@ -1896,7 +1907,9 @@ const QADashboard = () => {
         });
       }
 
-      toast.success('Feedback escalated to Admin!');
+      toast.success('Feedback escalated to Admin!', {
+        autoClose: 2000
+      });
       closeReportModal();
     } catch (error) {
       toast.error(`Failed to escalate feedback: ${error.message}`);
@@ -1927,7 +1940,9 @@ const QADashboard = () => {
         });
       }
 
-      toast.success(`Feedback ${feedback.id.toUpperCase()} tagged as spam!`);
+      toast.success(`Feedback ${feedback.id.toUpperCase()} tagged as spam!`, {
+        autoClose: 2000
+      });
     } catch (error) {
       toast.error(`Failed to tag as spam: ${error.message}`);
     }
@@ -1957,7 +1972,9 @@ const QADashboard = () => {
         });
       }
 
-      toast.success(`Feedback ${feedback.id.toUpperCase()} restored!`);
+      toast.success(`Feedback ${feedback.id.toUpperCase()} restored!`, {
+        autoClose: 2000
+      });
     } catch (error) {
       toast.error(`Failed to restore feedback: ${error.message}`);
     }
@@ -1995,7 +2012,9 @@ const QADashboard = () => {
       }
 
       setSelectedFeedbackIds(prev => prev.filter(id => !validIds.includes(id)));
-      toast.success(`${validIds.length} feedback items tagged as spam!`);
+      toast.success(`${validIds.length} feedback items tagged as spam!`, {
+        autoClose: 2000
+      });
 
       setFeedbackData(prev =>
         prev.map(f =>
@@ -2041,7 +2060,9 @@ const QADashboard = () => {
       }
 
       setSelectedFeedbackIds(prev => prev.filter(id => !spamIds.includes(id)));
-      toast.success(`${spamIds.length} feedback items restored!`);
+      toast.success(`${spamIds.length} feedback items restored!`, {
+        autoClose: 2000
+      });
 
       setFeedbackData(prev =>
         prev.map(f =>
@@ -2096,8 +2117,9 @@ const QADashboard = () => {
         });
       }
 
-      toast.success(`Bulk report created and ${validIds.length} feedback items updated!`);
-      closeBulkReportModal();
+      toast.success(`Bulk report created and ${validIds.length} feedback items updated!`, {
+        autoClose: 2000
+      });
 
       setFeedbackData(prev =>
         prev.map(f =>
@@ -2166,7 +2188,9 @@ const QADashboard = () => {
         });
       }
 
-      toast.success(`Bulk escalation successful for ${validIds.length} feedback items!`);
+      toast.success(`Bulk escalation successful for ${validIds.length} feedback items!`, {
+        autoClose: 2000
+      });
       closeBulkReportModal();
 
       setFeedbackData(prev =>
@@ -2498,7 +2522,9 @@ const QADashboard = () => {
   const handleRefresh = async () => {
     setLoading(true);
     await fetchFeedback();
-    toast.info('Feedback refreshed.');
+    toast.info('Feedback refreshed.', {
+      autoClose: 1000
+    });
     setLoading(false);
   };
 

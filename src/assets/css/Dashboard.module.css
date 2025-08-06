@@ -283,7 +283,7 @@
 .metricCardPrimary::before { background: linear-gradient(180deg, var(--primary-blue), var(--accent-teal)); }
 .metricCardWarning::before { background: linear-gradient(180deg, var(--accent-coral), var(--accent-gold)); }
 .metricCardSuccess::before { background: linear-gradient(180deg, var(--accent-lime), var(--accent-teal)); }
-.metricCardOrange::before { background: linear-gradient(180deg, #000000, #ff3a3a);}
+.metricCardOrange::before { background: linear-gradient(180deg, #ff8800, #fbff00);}
 
 .metricIcon {
     width: 50px;
@@ -1765,7 +1765,6 @@
     }
 }
 
-/* Responsive Design for Mobile Phones */
 @media (max-width: 480px) {
     .header {
         padding: 0.5rem;
@@ -1848,6 +1847,22 @@
 
     .metricValue {
         font-size: 1.8rem;
+    }
+
+    .customDateRange {
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      margin-left: 0;
+      padding: 0.75rem;
+    }
+
+    .datePickerGroup {
+      width: 100%;
+    }
+
+    .datePicker {
+      width: 100%;
     }
 
     .filtersContainer {
@@ -2158,6 +2173,14 @@
   background-color: white;
 }
 
+.auditTableWrapper {
+  overflow-x: auto;
+  width: 100%;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  margin-bottom: 1rem;
+}
+
 .auditTable th,
 .auditTable td {
   border: 1px solid #ddd;
@@ -2206,7 +2229,6 @@
     }
 }
 
-/* Responsive Design for Mobile Phones */
 @media (max-width: 480px) {
     .bulkActionWarning {
         font-size: 0.8rem;
@@ -2218,4 +2240,11 @@
     .bulkActionWarning i {
         font-size: 0.75rem;
     }
+
+    .auditTable th,
+    .auditTable td {
+      font-size: 0.8rem;
+      padding: 0.5rem;
+    }
+
 }
