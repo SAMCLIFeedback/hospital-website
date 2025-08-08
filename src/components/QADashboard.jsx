@@ -2562,7 +2562,7 @@ const QADashboard = () => {
             <p>{error}</p>
           </div>
         )}
-        <AnalyticsSection feedbackData={feedbackData} />
+        <AnalyticsSection feedbackData={timeFilteredFeedback} />
         <FilterSection
           filters={filters}
           setFilters={setFilters}

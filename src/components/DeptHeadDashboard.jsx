@@ -1491,7 +1491,7 @@ const DepartmentHeadsDashboard = () => {
 
           </div>
         </section>
-        <AnalyticsSection feedbackData={feedbackData} />
+        <AnalyticsSection feedbackData={timeFilteredFeedback} />
         <FilterSection
           filters={filters}
           setFilters={setFilters}

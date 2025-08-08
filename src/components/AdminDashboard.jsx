@@ -1881,7 +1881,7 @@ const AdminDashboard = () => {
             <MetricCard title="No Action Needed" value={noActionNeeded} icon="fas fa-folder-open" variant="primary" />
           </div>
         </section>
-        <AnalyticsSection feedbackData={feedbackData} />
+        <AnalyticsSection feedbackData={timeFilteredFeedback} />
         <FilterSection
           filters={filters}
           setFilters={setFilters}
