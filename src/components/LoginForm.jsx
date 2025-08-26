@@ -56,12 +56,13 @@ const LoginForm = ({
 
       localStorage.setItem(storageKey, JSON.stringify({ ...data, sessionId }));
       sessionStorage.setItem(sessionIdKey, sessionId);
-      navigate(navigateTo);
+      setTimeout(() => {
+        setIsLoading(false);
+        navigate(navigateTo);
+      }, 2000);
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'Login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
   };
 

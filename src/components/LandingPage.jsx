@@ -70,16 +70,16 @@ const LandingPage = () => {
     console.log(`Selected Role: ${role.title}, Auth Type: ${role.authType}`);
     
     if (role.authType === 'none') {
-      navigate('/patient-feedback');
+      setTimeout(() => navigate('/patient-feedback'), 1000);
     } else if (role.authType === 'email-pin') {
-      navigate('/staff-verification');
+      setTimeout(() => navigate('/staff-verification'), 1000);
     } else if (role.authType === 'QA') {
-      navigate('/QALogin');
+      setTimeout(() => navigate('/QALogin'), 1000);
     } else if (role.authType === 'deptHead') {
-      navigate('/departmentLogin');
+      setTimeout(() => navigate('/departmentLogin'), 1000);
     } else if (role.authType === 'admin') {
-      navigate('/adminLogin');
-    } else {
+      setTimeout(() => navigate('/adminLogin'), 1000);
+    }else {
       alert('Invalid role selection');
       setIsNavigating(false);
     }
