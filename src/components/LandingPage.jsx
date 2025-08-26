@@ -3,6 +3,7 @@ import styles from '../assets/css/LandingPage.module.css';
 import Loader from './Loader.jsx';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import {motion} from 'framer-motion';
 
 const LandingPage = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -124,37 +125,63 @@ const LandingPage = () => {
       <section className={styles.hero}>
         <div className={styles.container}>
           <div className={styles.heroContent}>
-            <h1 className={styles.heroHeading}>Your Feedback Shapes Better Care</h1>
-            <p className={styles.heroText}>Help us improve by sharing your experience.</p>
-            <div className={styles.statsCounter}>
+            <motion.h1 
+              className={styles.heroHeading}
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >Your Feedback Shapes Better Care</motion.h1>
+            <motion.p 
+              className={styles.heroText}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >Help us improve by sharing your experience.</motion.p>
+            <motion.div 
+              className={styles.statsCounter}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
               <span>
-                {loadingCount ? 'Loading...' : counter.toLocaleString()}
+                {loadingCount ? '' : counter.toLocaleString()}
               </span>
               &nbsp;feedback submissions this month
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Role Selection Grid */}
-      <section className={styles.roleSection}>
+      <motion.section className={styles.roleSection}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.8, ease: "easeOut" }} >
         <div className={styles.container}>
           <div className={styles.feedbackRoles}>
             <h2 className={styles.sectionHeading}>Provide Feedback</h2>
             <div className={styles.feedbackGrid}>
               {roleCards.filter(role => role.type === 'feedback').map((role, index) => (
-                <div
+                <motion.div
                   key={index}
                   className={styles.roleCard}
                   tabIndex={0}
                   role="button"
                   aria-label={`${role.title} feedback`}
                   onClick={() => handleRoleCardClick(role)}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ duration: 0, delay: index * 0.2 }}
                 >
                   <span className={styles.roleIcon}>{role.icon}</span>
                   <h3 className={styles.roleTitle}>{role.title}</h3>
                   <p className={styles.roleDescription}>{role.description}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -163,24 +190,28 @@ const LandingPage = () => {
             <h2 className={styles.sectionHeading}>Access Dashboards & Management</h2>
             <div className={styles.dashboardGrid}>
               {roleCards.filter(role => role.type === 'dashboard').map((role, index) => (
-                <div
+                <motion.div
                   key={index}
                   className={styles.roleCard}
                   tabIndex={0}
                   role="button"
                   aria-label={`${role.title} feedback`}
                   onClick={() => handleRoleCardClick(role)}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ duration: 0, delay: index * 0.2 }}
                 >
                   <span className={styles.roleIcon}>{role.icon}</span>
                   <h3 className={styles.roleTitle}>{role.title}</h3>
                   <p className={styles.roleDescription}>{role.description}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* Testimonial Carousel */}
       <section className={styles.testimonialSection}>
