@@ -16,7 +16,6 @@ import ProtectedRoute from './components/ProtectRoute.jsx';
 
 const App = () => {
   return (
-    // Add the basename prop here
     //<Router basename="/hospital-website">
     <Router basename="/hospital-website">
       <ScrollToTop />
