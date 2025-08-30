@@ -147,7 +147,7 @@ const LandingPage = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <span>
-                {loadingCount ? '' : counter.toLocaleString()}
+                {loadingCount ? 'Loading...' : counter.toLocaleString()}
               </span>
               &nbsp;feedback submissions this month
             </motion.div>
@@ -214,7 +214,9 @@ const LandingPage = () => {
       </motion.section>
 
       {/* Testimonial Carousel */}
-      <section className={styles.testimonialSection}>
+      <section 
+        className={styles.testimonialSection}
+      >
         <div className={styles.container}>
           <div className={styles.testimonialCarousel}>
             {testimonials.map((testimonial, index) => (
