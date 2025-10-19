@@ -1,18 +1,21 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig(({ command }) => {
-  // Common configurations for both 'serve' and 'build'
   const config = {
     plugins: [react()],
     resolve: {
       alias: {
         '@': '/src',
+        '@assets': path.resolve(__dirname, './src/assets'),
+        '@components': path.resolve(__dirname, './src/components'),
+        '@pages': path.resolve(__dirname, './src/pages'),
+        '@data': path.resolve(__dirname, './src/data'),
       },
     },
   };
 
-  // Development-specific configurations
   if (command === 'serve') {
     config.server = {
       proxy: {
@@ -31,9 +34,8 @@ export default defineConfig(({ command }) => {
     };
   }
 
-  // Production-specific configurations for 'build'
   if (command === 'build') {
-    config.base = '/hospital-website/'; 
+    config.base = '/hospital-website/';
   }
 
   return config;
