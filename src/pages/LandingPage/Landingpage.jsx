@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import styles from '../assets/css/LandingPage.module.css';
-import Loader from './Loader.jsx';
-import { useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png';
 import {motion} from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import styles from '@assets/css/LandingPage.module.css';
+import Loader from '@components/Loader.jsx';
+import logo from '@assets/logo.png';
 
 const LandingPage = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -31,21 +31,21 @@ const LandingPage = () => {
         icon: '🏥',
         title: 'Patient/Visitor',
         description: 'Share your experience as a patient or visitor receiving care at our facility.',
-        authType: 'none', // No authentication needed
+        authType: 'none',
         type: 'feedback'
     },
     {
         icon: '🧑‍⚕️',
         title: 'Hospital Staff',
         description: 'Internal feedback from medical professionals and healthcare workers.',
-        authType: 'email-pin', // Email verification + PIN
+        authType: 'email-pin',
         type: 'feedback'
     },
     {
         icon: '📊',
         title: 'QA Team',
         description: 'Quality assurance team members providing systematic feedback and analysis.',
-        authType: 'QA', // Full credentials required
+        authType: 'QA',
         type: 'dashboard'
     },
     {
