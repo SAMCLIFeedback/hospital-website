@@ -4,65 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import styles from '@assets/css/LandingPage.module.css';
 import Loader from '@components/Loader.jsx';
 import logo from '@assets/logo.png';
+import testimonials from './testimonials.js'
+import roleCards from './roleCards.js'
 
 const LandingPage = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [counter, setCounter] = useState(0);
   const [loadingCount, setLoadingCount] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
-
-  const testimonials = [
-    {
-      quote: "Thanks to your feedback, we reduced ER wait times by 40% and improved patient satisfaction scores! 👋",
-      author: "Dr. Sarah Johnson, Emergency Department"
-    },
-    {
-      quote: "Patient feedback helped us redesign our discharge process, making it faster and more comfortable for families. 👍",
-      author: "Maria Rodriguez, Patient Experience Coordinator"
-    },
-    {
-      quote: "Your suggestions led to better communication tools that improved coordination between departments. 💬",
-      author: "James Chen, Quality Improvement Manager"
-    }
-  ];
-
-  const roleCards = [
-    {
-        icon: '🏥',
-        title: 'Patient/Visitor',
-        description: 'Share your experience as a patient or visitor receiving care at our facility.',
-        authType: 'none',
-        type: 'feedback'
-    },
-    {
-        icon: '🧑‍⚕️',
-        title: 'Hospital Staff',
-        description: 'Internal feedback from medical professionals and healthcare workers.',
-        authType: 'email-pin',
-        type: 'feedback'
-    },
-    {
-        icon: '📊',
-        title: 'QA Team',
-        description: 'Quality assurance team members providing systematic feedback and analysis.',
-        authType: 'QA',
-        type: 'dashboard'
-    },
-    {
-        icon: '👨‍💼',
-        title: 'Department Head',
-        description: 'Leadership feedback on departmental operations and strategic improvements.',
-        authType: 'deptHead',
-        type: 'dashboard'
-    },
-    {
-        icon: '👩‍',
-        title: 'Hospital Administrator',
-        description: 'View performance metrics and provide executive-level oversight on care quality and operations.',
-        authType: 'admin',
-        type: 'dashboard'
-    },
-  ];
 
   const navigate = useNavigate();
 
@@ -118,7 +67,6 @@ const LandingPage = () => {
 
   return (
     <div className={styles.landingPage}>
-      {/* Global loader for navigation */}
       {isNavigating && <Loader />} 
       
       {/* Hero Section */}
