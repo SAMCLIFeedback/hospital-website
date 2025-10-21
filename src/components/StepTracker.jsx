@@ -1,6 +1,4 @@
-// components/StepTracker.jsx
-import React from 'react';
-import styles from '../assets/css/StepTracker.module.css';
+import styles from '@assets/css/StepTracker.module.css';
 
 const StepTracker = ({ completedSteps, totalSteps }) => {
   return (
