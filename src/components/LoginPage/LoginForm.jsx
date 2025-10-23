@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import FormField from './FormField';
 import Button from './LoginButton';
-import Loader from './Loader';
-import styles from '../assets/css/LoginForm.module.css'; // Assuming you'll create this new CSS module
+import Loader from '../Loader';
+import styles from '@assets/css/LoginForm.module.css';
 
 // Simple UUID generator for session IDs
 const generateSessionId = () => {

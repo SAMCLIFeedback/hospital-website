@@ -1,5 +1,4 @@
-import React from 'react';
-import styles from '../assets/css/FormField.module.css';
+import styles from '@assets/css/FormField.module.css';
 
 const FormField = ({ label, type, value, onChange, placeholder, required }) => (
   <div className={styles.formField}>
