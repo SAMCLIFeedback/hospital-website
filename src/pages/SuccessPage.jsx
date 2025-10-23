@@ -1,10 +1,10 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import styles from '../assets/css/SuccessPage.module.css';
+import styles from '@assets/css/SuccessPage.module.css';
 
 const SuccessPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || 'patient'; // default to patient if undefined
+  const from = location.state?.from || 'patient';
 
   const redirectPath = from === 'staff' ? '/staff-feedback' : '/patient-feedback';
 
@@ -25,7 +25,8 @@ const SuccessPage = () => {
           </button>
         </div>
         <p className={styles.note}>
-          Want to return home instead? <a href="https://samclifeedback.github.io/hospital-website/" className={styles.homeLink}>Click here</a>
+          {/* Want to return home instead? <a href="https://samclifeedback.github.io/hospital-website/" className={styles.homeLink}>Click here</a> */}
+          Want to return home instead? <a href="/" className={styles.homeLink}>Click here</a>
         </p>
       </div>
     </div>
