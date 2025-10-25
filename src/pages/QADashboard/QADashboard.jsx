@@ -15,7 +15,7 @@ import FeedbackTable from '@components/QADashboard/FeedbackTable';
 import FeedbackModal from '@components/QADashboard/FeedbackModal';
 import ReportModal from '@components/QADashboard/ReportModal';
 import BulkReportModal from '@components/QADashboard/BulkReportModal';
-import departmentsForAssignment from './departments';
+import { departments } from '@data/departments';
 import "react-datepicker/dist/react-datepicker.css";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -314,7 +314,7 @@ const QADashboard = () => {
     setIsModalOpen,
     reportStates,
     setReportStates,
-    departmentsForAssignment
+    departments
   });
 
   const handleViewHistory = handleViewHistoryFactory({
@@ -628,7 +628,7 @@ const QADashboard = () => {
     const matchesRating = filters.rating === 'all' || String(item.rating) === filters.rating;
     const matchesImpactSeverity = filters.impactSeverity === 'all' || item.impactSeverity === filters.impactSeverity;
     let matchesSource = filters.source === 'all' || (filters.source === 'visitor' ? (item.source === 'visitor' || item.source === 'family') : item.source === filters.source);
-    let matchesDepartment = filters.department === 'all' || (filters.department === 'others' ? !departmentsForAssignment.includes(item.department) || !item.department : item.department === filters.department);
+    let matchesDepartment = filters.department === 'all' || (filters.department === 'others' ? !departments.includes(item.department) || !item.department : item.department === filters.department);
     const matchesSearchId = !searchId || (item.id && item.id.toLowerCase().includes(searchId.toLowerCase()));
     
     return matchesStatus && matchesSentiment && matchesSource && matchesUrgent && matchesFeedbackType && matchesRating && matchesImpactSeverity && matchesDepartment && matchesSearchId;
@@ -693,7 +693,7 @@ const QADashboard = () => {
           customEndDate={customEndDate}
           setCustomEndDate={setCustomEndDate}
           loading={loading}
-          departments={departmentsForAssignment}
+          departments={departments}
           selectedFeedbackIds={selectedFeedbackIds}
           setSelectedFeedbackIds={setSelectedFeedbackIds}
           handleBulkSpam={handleBulkSpam}
@@ -764,7 +764,7 @@ const QADashboard = () => {
           <ReportModal
             BASE_URL={BASE_URL}
             feedback={selectedFeedback}
-            departments={departmentsForAssignment}
+            departments={departments}
             onClose={closeReportModal}
             onGenerateReport={handleGenerateReport}
             onEscalate={handleEscalate}
@@ -782,7 +782,7 @@ const QADashboard = () => {
         {isBulkReportModalOpen && (
           <BulkReportModal
             selectedFeedbackIds={selectedFeedbackIds}
-            departments={departmentsForAssignment}
+            departments={departments}
             onClose={closeBulkReportModal}
             onBulkGenerateReport={handleBulkGenerateReport}
             onBulkEscalate={handleBulkEscalate}
