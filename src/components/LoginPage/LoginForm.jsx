@@ -51,6 +51,7 @@ const LoginForm = ({
       const data = await response.json();
 
       if (!response.ok || !data || !data.username) {
+        setIsLoading(false);
         throw new Error(data.message || 'Invalid username or password.');
       }
 
