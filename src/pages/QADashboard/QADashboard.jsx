@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom'; 
+import { v4 as uuidv4 } from 'uuid';
+import { toast, ToastContainer } from 'react-toastify';
+import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+import { handleLogout, handleBroadcastMessageFactory, handleGenerateReportFactory, handleEscalateFactory, handleTagAsSpamFactory, handleRestoreFactory, handleBulkRestoreFactory, handleBulkSpamFactory, handleBulkGenerateReportFactory, handleBulkEscalateFactory, handleViewDetailsFactory, handleViewHistoryFactory } from './QADashboard.handlers';
 import styles from '@assets/css/Dashboard.module.css';
 import io from 'socket.io-client';
-import { v4 as uuidv4 } from 'uuid';
-import "react-datepicker/dist/react-datepicker.css";
-import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom'; 
 import Header from '@components/QADashboard/Header';
 import MetricCard from '@components/QADashboard/MetricCard';
 import AnalyticsSection from '@components/QADashboard/AnalyticsSection';
@@ -16,6 +15,9 @@ import FeedbackTable from '@components/QADashboard/FeedbackTable';
 import FeedbackModal from '@components/QADashboard/FeedbackModal';
 import ReportModal from '@components/QADashboard/ReportModal';
 import BulkReportModal from '@components/QADashboard/BulkReportModal';
+import departmentsForAssignment from './departments';
+import "react-datepicker/dist/react-datepicker.css";
+import 'react-toastify/dist/ReactToastify.css';
 
 class ErrorBoundary extends React.Component {
   state = { hasError: false };
@@ -44,29 +46,9 @@ class ErrorBoundary extends React.Component {
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-// Main Dashboard Component
 const QADashboard = () => {
-
   const navigate = useNavigate();
   const sessionId = sessionStorage.getItem('current_qa_session');
-  const user = JSON.parse(localStorage.getItem(`qa_user_session_${sessionId}`)) || {
-    name: 'Unknown',
-    role: 'Unknown',
-  };
-
-  const handleLogout = async () => {
-    try {
-      localStorage.removeItem(`qa_user_session_${sessionId}`);
-      sessionStorage.removeItem('current_qa_session');
-      navigate('/');
-    } catch (error) {
-      console.error('Logout error:', error.message);
-      setError('Failed to logout. Please try again.');
-    }
-  };
-
   const [feedbackData, setFeedbackData] = useState([]);
   const [tabId] = useState(uuidv4());
   const [loading, setLoading] = useState(false);
@@ -77,6 +59,16 @@ const QADashboard = () => {
   const [isAuditTrailModalOpen, setIsAuditTrailModalOpen] = useState(false);
   const [reportStates, setReportStates] = useState({});
   const [timeFilter, setTimeFilter] = useState('all');
+  const [error, setError] = useState(null);
+  const [searchId, setSearchId] = useState('');
+  const [customStartDate, setCustomStartDate] = useState(null);
+  const [customEndDate, setCustomEndDate] = useState(null);
+  const [selectedFeedbackIds, setSelectedFeedbackIds] = useState([]);
+  const [bulkReportContent, setBulkReportContent] = useState('');
+  const [bulkReportDepartment, setBulkReportDepartment] = useState('');
+  const broadcastChannelRef = useRef(null);
+  const processedEventsRef = useRef(new Set());
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [filters, setFilters] = useState({
     status: 'all',
     sentiment: 'all',
@@ -88,49 +80,11 @@ const QADashboard = () => {
     department: 'all',
     currentPage: 1,
   });
-  const [error, setError] = useState(null);
-  const [searchId, setSearchId] = useState('');
-  const [customStartDate, setCustomStartDate] = useState(null);
-  const [customEndDate, setCustomEndDate] = useState(null);
-  const [selectedFeedbackIds, setSelectedFeedbackIds] = useState([]);
-  const [bulkReportContent, setBulkReportContent] = useState('');
-  const [bulkReportDepartment, setBulkReportDepartment] = useState('');
-  const broadcastChannelRef = useRef(null);
-  const processedEventsRef = useRef(new Set());
 
-  const departmentsForAssignment = [
-    'General Feedback',
-    'Anesthesiology',
-    'Cardiology',
-    'Dermatology',
-    'Internal Medicine',
-    'Obstetrics and Gynecology (OB-GYNE)',
-    'Pediatrics',
-    'Radiology',
-    'Rehabilitation Medicine',
-    'Surgery',
-    'Pathology',
-    'Urology',
-    'Nephrology',
-    'Orthopedics',
-    'Ophthalmology',
-    'ENT (Ear, Nose, Throat)',
-    'Family Medicine',
-    'BESTHEALTH',
-    'Dental Clinic',
-    'Diagnostics',
-    'Dietary',
-    'Emergency Room (ER)',
-    'Hemodialysis',
-    'Intensive Care Unit (ICU)',
-    'Inpatient Department',
-    'Neonatal ICU (NICU)',
-    'Nursing Service',
-    'Operating Room',
-    'Outpatient Department',
-    'Pharmacy',
-    'Physical Therapy'
-  ];
+  const user = JSON.parse(localStorage.getItem(`qa_user_session_${sessionId}`)) || {
+    name: 'Unknown',
+    role: 'Unknown',
+  };
 
   const socket = io(BASE_URL, {
     reconnection: true,
@@ -138,7 +92,7 @@ const QADashboard = () => {
     reconnectionDelay: 1000,
     autoConnect: false,
   });
-
+  
   const fetchFeedback = async () => {
     try {
       setLoading(true);
@@ -203,79 +157,27 @@ const QADashboard = () => {
     }
   };
 
-  const handleBroadcastMessage = useCallback((event) => {
-    const { feedbackIds, actionType, tabId: originTabId } = event.data;
-
-    if (originTabId === tabId) return;
-
-    const eventKey = `${actionType}-${originTabId}-${feedbackIds.join(',')}`;
-    if (processedEventsRef.current.has(eventKey)) return;
-    processedEventsRef.current.add(eventKey);
-
-    let shouldCloseIndividualModal = false;
-    let shouldCloseBulkModal = false;
-    let toastMessage = '';
-    const idsSet = new Set(feedbackIds);
-    const firstId = feedbackIds[0]?.toUpperCase();
-
-    // 1. Update master data list using functional updates to avoid stale state
-    setFeedbackData(prev =>
-        prev.map(fb => {
-            if (!idsSet.has(fb.id)) return fb;
-            if (actionType === 'spam') return { ...fb, status: 'spam' };
-            if (actionType === 'restore') return { ...fb, status: 'unassigned' };
-            if (actionType === 'report') return { ...fb, status: 'assigned', dept_status: 'needs_action' };
-            if (actionType === 'escalate') return { ...fb, status: 'escalated', dept_status: 'escalated' };
-            return fb;
-        })
-    );
-
-    // 2. Check if an individual modal is open and affected
-    if (selectedFeedback && idsSet.has(selectedFeedback.id)) {
-        if (isModalOpen || isReportModalOpen || isAuditTrailModalOpen) {
-            shouldCloseIndividualModal = true;
-            if (actionType === 'spam') toastMessage = `Feedback ${firstId} was marked as spam in another tab. Modal closed.`;
-            else if (actionType === 'report') toastMessage = `Feedback ${firstId} was assigned in another tab. Modal closed.`;
-            else if (actionType === 'escalate') toastMessage = `Feedback ${firstId} was escalated in another tab. Modal closed.`;
-        }
-    }
-
-    // 3. Check if bulk selection/modal is affected
-    const invalidatingActions = ['spam', 'report', 'escalate'];
-    if (invalidatingActions.includes(actionType)) {
-        // Read the current selected IDs from state
-        const newSelectedIds = selectedFeedbackIds.filter(id => !idsSet.has(id));
-        // If the selection has changed, update the state
-        if (newSelectedIds.length < selectedFeedbackIds.length) {
-            setSelectedFeedbackIds(newSelectedIds);
-            // If the bulk modal was open and the selection is now empty, close it
-            if (isBulkReportModalOpen && newSelectedIds.length === 0) {
-                shouldCloseBulkModal = true;
-                toastMessage = 'Bulk modal closed as all selected items were processed elsewhere.';
-            }
-        }
-    }
-
-    if (shouldCloseIndividualModal) {
-        setIsModalOpen(false);
-        setIsReportModalOpen(false);
-        setIsAuditTrailModalOpen(false);
-        setSelectedFeedback(null);
-    }
-
-    if (shouldCloseBulkModal) {
-        setIsBulkReportModalOpen(false);
-        setBulkReportContent('');
-        setBulkReportDepartment('');
-    }
-
-    if (toastMessage) {
-        toast.info(toastMessage);
-    }
-
-    // Clean up the processed event key after a delay
-    setTimeout(() => processedEventsRef.current.delete(eventKey), 5000);
-  }, [
+  const handleBroadcastMessage = useCallback(
+    handleBroadcastMessageFactory({
+      tabId,
+      processedEventsRef,
+      selectedFeedback,
+      isModalOpen,
+      isReportModalOpen,
+      isAuditTrailModalOpen,
+      isBulkReportModalOpen,
+      selectedFeedbackIds,
+      setFeedbackData,
+      setSelectedFeedbackIds,
+      setIsModalOpen,
+      setIsReportModalOpen,
+      setIsAuditTrailModalOpen,
+      setSelectedFeedback,
+      setIsBulkReportModalOpen,
+      setBulkReportContent,
+      setBulkReportDepartment,
+    }),
+    [
       tabId,
       selectedFeedback,
       isModalOpen,
@@ -283,534 +185,8 @@ const QADashboard = () => {
       isAuditTrailModalOpen,
       isBulkReportModalOpen,
       selectedFeedbackIds,
-  ]);
-
-  useEffect(() => {
-    if (user.name.toLowerCase() === 'unknown') {
-      toast.info('User not authenticated. Logging out.');
-      handleLogout();
-    }
-  }, [user.name, handleLogout]);
-
-  useEffect(() => {
-    fetchFeedback();
-  }, [filters, timeFilter]);
-
-  useEffect(() => {
-    broadcastChannelRef.current = new BroadcastChannel('feedback_updates');
-    broadcastChannelRef.current.onmessage = handleBroadcastMessage;
-
-    socket.connect();
-    socket.on('connect', () => console.log('WebSocket connected:', socket.id));
-    
-    socket.on('feedbackUpdate', (updatedFeedback) => {
-      if (!updatedFeedback || !updatedFeedback.id) {
-        console.warn('Invalid feedbackUpdate data:', updatedFeedback);
-        toast.error('Received invalid feedback update from server.');
-        return;
-      }
-
-      setFeedbackData(prevData => {
-        const normalizedFeedback = {
-          ...updatedFeedback,
-          date: updatedFeedback.date || new Date().toISOString(),
-          reportCreatedAt: updatedFeedback.reportCreatedAt || null,
-          actionHistory: updatedFeedback.actionHistory || [], // Include actionHistory
-        };
-
-        const index = prevData.findIndex(f => f.id === normalizedFeedback.id);
-        const newData = index !== -1
-          ? [...prevData.slice(0, index), { ...prevData[index], ...normalizedFeedback }, ...prevData.slice(index + 1)]
-          : [normalizedFeedback, ...prevData];
-        
-        return Array.from(new Map(newData.map(f => [f.id, f])).values()).sort((a, b) => new Date(b.date) - new Date(a.date));
-      });
-    });
-
-    socket.on('bulkFeedbackUpdate', () => {
-      fetchFeedback();
-      setSelectedFeedbackIds([]);
-    });
-    socket.on('connect_error', (err) => toast.error('Failed to connect to real-time updates. Retrying...'));
-    socket.on('disconnect', () => console.log('WebSocket disconnected'));
-
-    return () => {
-      socket.off('connect');
-      socket.off('feedbackUpdate');
-      socket.off('bulkFeedbackUpdate');
-      socket.off('connect_error');
-      socket.off('disconnect');
-      socket.disconnect();
-      broadcastChannelRef.current?.close();
-      processedEventsRef.current.clear();
-    };
-  }, [handleBroadcastMessage]);
-
-  const handleGenerateReport = async (feedbackId, reportContent, reportDepartment) => {
-    const feedback = feedbackData.find(f => f.id === feedbackId);
-    if (!feedback || !reportContent || !reportDepartment) {
-      toast.error('Missing required information to generate the report.');
-      return;
-    }
-    if (feedback.status === 'spam') {
-      toast.error('Cannot generate a report for spam feedback.');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${BASE_URL}/api/feedback/${feedbackId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: 'assigned',
-          dept_status: 'needs_action',
-          department: reportDepartment,
-          reportDetails: String(reportContent).trim(),
-          reportCreatedAt: new Date().toISOString(),
-          userName: user.name,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to update feedback');
-      }
-      const { feedback: updatedFeedback } = await response.json();
-      socket.emit('feedbackUpdate', updatedFeedback);
-
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({
-          feedbackIds: [feedbackId],
-          actionType: 'report',
-          tabId
-        });
-      }
-
-      toast.success('Report sent and feedback updated!', {
-        autoClose: 2000
-      });
-      closeReportModal();
-    } catch (error) {
-      toast.error(`Failed to send report: ${error.message}`);
-    }
-  };
-
-  const handleEscalate = async (feedbackId, reportContent, reportDepartment) => {
-    const feedback = feedbackData.find(f => f.id === feedbackId);
-    if (!feedback || !reportContent) {
-      toast.error('Missing required information to escalate.');
-      return;
-    }
-    if (['spam', 'assigned', 'escalated'].includes(feedback.status)) {
-      toast.error(`Cannot escalate feedback with status: ${feedback.status}.`);
-      return;
-    }
-
-    try {
-      const response = await fetch(`${BASE_URL}/api/feedback/escalate`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ids: [feedbackId],
-          department: reportDepartment,
-          reportDetails: reportContent.trim(),
-          userName: user.name, // Add user name
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to escalate feedback');
-      }
-
-      const updated = {
-        ...feedback,
-        status: 'escalated',
-        dept_status: 'escalated',
-        department: reportDepartment,
-        reportDetails: reportContent.trim(),
-        reportCreatedAt: new Date().toISOString(),
-      };
-
-      setFeedbackData(prev =>
-        prev.map(f => (f.id === feedbackId ? updated : f))
-      );
-
-      setReportStates(prev => {
-        const newState = { ...prev };
-        delete newState[feedbackId];
-        return newState;
-      });
-
-      socket.emit('bulkFeedbackUpdate');
-
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({
-          feedbackIds: [feedbackId],
-          actionType: 'escalate',
-          tabId
-        });
-      }
-
-      toast.success('Feedback escalated to Admin!', {
-        autoClose: 2000
-      });
-      closeReportModal();
-    } catch (error) {
-      toast.error(`Failed to escalate feedback: ${error.message}`);
-    }
-  };
-
-  const handleTagAsSpam = async (feedback) => {
-    if (!feedback?.id) return;
-    try {
-      const response = await fetch(`${BASE_URL}/api/feedback/${feedback.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'spam', userName: user.name }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to tag as spam');
-      }
-      const updatedFeedback = await response.json();
-      socket.emit('feedbackUpdate', updatedFeedback);
-
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({
-          feedbackIds: [feedback.id],
-          actionType: 'spam',
-          tabId
-        });
-      }
-
-      toast.success(`Feedback ${feedback.id.toUpperCase()} tagged as spam!`, {
-        autoClose: 2000
-      });
-    } catch (error) {
-      toast.error(`Failed to tag as spam: ${error.message}`);
-    }
-  };
-
-  const handleRestore = async (feedback) => {
-    if (!feedback?.id) return;
-    try {
-      const response = await fetch(`${BASE_URL}/api/feedback/${feedback.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'unassigned', userName: user.name }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to restore feedback');
-      }
-      const updatedFeedback = await response.json();
-      socket.emit('feedbackUpdate', updatedFeedback);
-
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({
-          feedbackIds: [feedback.id],
-          actionType: 'restore',
-          tabId
-        });
-      }
-
-      toast.success(`Feedback ${feedback.id.toUpperCase()} restored!`, {
-        autoClose: 2000
-      });
-    } catch (error) {
-      toast.error(`Failed to restore feedback: ${error.message}`);
-    }
-  };
-
-  const handleBulkSpam = async () => {
-    const validIds = selectedFeedbackIds.filter(id => {
-      const fb = feedbackData.find(f => f.id === id);
-      return fb && fb.status !== 'assigned' && fb.status !== 'spam';
-    });
-    if (validIds.length === 0) {
-      toast.warn('No valid items selected for this action.');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${BASE_URL}/api/feedback/bulk-status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: validIds, status: 'spam', userName: user.name }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Bulk spam tagging failed');
-      }
-
-      socket.emit('bulkFeedbackUpdate');
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({
-          feedbackIds: validIds,
-          actionType: 'spam',
-          tabId
-        });
-      }
-
-      setSelectedFeedbackIds(prev => prev.filter(id => !validIds.includes(id)));
-      toast.success(`${validIds.length} feedback items tagged as spam!`, {
-        autoClose: 2000
-      });
-
-      setFeedbackData(prev =>
-        prev.map(f =>
-          validIds.includes(f.id) ? { ...f, status: 'spam' } : f
-        )
-      );
-      if (selectedFeedback && validIds.includes(selectedFeedback.id)) {
-        setSelectedFeedback(prev => ({ ...prev, status: 'spam' }));
-      }
-    } catch (error) {
-      toast.error(`Bulk spam action failed: ${error.message}`);
-    }
-  };
-  
-  const handleBulkRestore = async () => {
-    const spamIds = selectedFeedbackIds.filter(id => {
-      const fb = feedbackData.find(f => f.id === id);
-      return fb && fb.status === 'spam';
-    });
-    if (spamIds.length === 0) {
-      toast.warn('No spam items selected for restoration.');
-      return;
-    }
-    try {
-      const response = await fetch(`${BASE_URL}/api/feedback/bulk-status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: spamIds, status: 'unassigned', userName: user.name }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Bulk restore failed');
-      }
-
-      socket.emit('bulkFeedbackUpdate');
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({
-          feedbackIds: spamIds,
-          actionType: 'restore',
-          tabId
-        });
-      }
-
-      setSelectedFeedbackIds(prev => prev.filter(id => !spamIds.includes(id)));
-      toast.success(`${spamIds.length} feedback items restored!`, {
-        autoClose: 2000
-      });
-
-      setFeedbackData(prev =>
-        prev.map(f =>
-          spamIds.includes(f.id) ? { ...f, status: 'unassigned' } : f
-        )
-      );
-      if (selectedFeedback && spamIds.includes(selectedFeedback.id)) {
-        setSelectedFeedback(prev => ({ ...prev, status: 'unassigned' }));
-      }
-    } catch (error) {
-      toast.error(`Bulk restore failed: ${error.message}`);
-    }
-  };
-
-  const handleBulkGenerateReport = async () => {
-    if (!bulkReportContent || !bulkReportDepartment) {
-      toast.error('Please provide report details and select a department.');
-      return;
-    }
-    const validIds = selectedFeedbackIds.filter(id => {
-      const fb = feedbackData.find(f => f.id === id);
-      return fb && fb.status !== 'assigned' && fb.status !== 'spam';
-    });
-    if (validIds.length === 0) {
-      toast.error('No valid items selected for bulk report.');
-      return;
-    }
-    try {
-      const response = await fetch(`${BASE_URL}/api/feedback/bulk-report`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ids: validIds,
-          department: bulkReportDepartment,
-          reportDetails: bulkReportContent,
-          dept_status: 'needs_action',
-          userName: user.name,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Bulk report creation failed');
-      }
-
-      socket.emit('bulkFeedbackUpdate');
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({
-          feedbackIds: validIds,
-          actionType: 'report',
-          tabId
-        });
-      }
-
-      toast.success(`Bulk report created and ${validIds.length} feedback items updated!`, {
-        autoClose: 2000
-      });
-
-      closeBulkReportModal();
-
-      setFeedbackData(prev =>
-        prev.map(f =>
-          validIds.includes(f.id)
-            ? {
-                ...f,
-                status: 'assigned',
-                dept_status: 'needs_action',
-                department: bulkReportDepartment,
-                reportDetails: bulkReportContent
-              }
-            : f
-        )
-      );
-      if (selectedFeedback && validIds.includes(selectedFeedback.id)) {
-        setSelectedFeedback(prev => ({
-          ...prev,
-          status: 'assigned',
-          dept_status: 'needs_action',
-          department: bulkReportDepartment,
-          reportDetails: bulkReportContent
-        }));
-      }
-    } catch (error) {
-      toast.error(`Failed to create bulk report: ${error.message}`);
-    }
-  };
-
-  const handleBulkEscalate = async () => {
-    if (!bulkReportContent) {
-      toast.error('Please provide report details to escalate.');
-      return;
-    }
-    const validIds = selectedFeedbackIds.filter(id => {
-      const fb = feedbackData.find(f => f.id === id);
-      return fb && fb.status !== 'assigned' && fb.status !== 'spam' && fb.status !== 'escalated';
-    });
-    if (validIds.length === 0) {
-      toast.error('No valid items selected for escalation.');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${BASE_URL}/api/feedback/escalate`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ids: validIds,
-          department: bulkReportDepartment,
-          reportDetails: bulkReportContent,
-          userName: user.name,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Bulk escalation failed');
-      }
-
-      socket.emit('bulkFeedbackUpdate');
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.postMessage({
-          feedbackIds: validIds,
-          actionType: 'escalate',
-          tabId
-        });
-      }
-
-      toast.success(`Bulk escalation successful for ${validIds.length} feedback items!`, {
-        autoClose: 2000
-      });
-      closeBulkReportModal();
-
-      setFeedbackData(prev =>
-        prev.map(f =>
-          validIds.includes(f.id)
-            ? {
-                ...f,
-                status: 'escalated',
-                dept_status: 'escalated',
-                department: bulkReportDepartment || 'Admin Escalation',
-                reportDetails: bulkReportContent
-              }
-            : f
-        )
-      );
-    } catch (error) {
-      toast.error(`Failed to escalate feedback: ${error.message}`);
-    }
-  };
-
-  const handleViewDetails = (feedback) => {
-    setSelectedFeedback(feedback);
-    setIsModalOpen(true);
-
-    const existingState = reportStates[feedback.id] || {};
-
-    let initialDepartment = '';
-    if (feedback.department && departmentsForAssignment.includes(feedback.department)) {
-      initialDepartment = feedback.department;
-    }
-
-    const newState = {
-      ...existingState,
-      reportContent: existingState.reportContent ?? feedback.reportDetails ?? '',
-      reportDepartment: existingState.reportDepartment ?? initialDepartment,
-      reportViewed: existingState.reportViewed ?? false,
-      hasGenerated: existingState.hasGenerated ?? false,
-    };
-
-    setReportStates(prev => ({
-      ...prev,
-      [feedback.id]: newState,
-    }));
-  };
-
-  const handleViewGeneratedReport = (feedback) => {
-    setSelectedFeedback(feedback);
-    setIsReportModalOpen(true);
-    setReportViewed(feedback.id, true);
-  };
-
-  const handleViewHistory = async (feedback) => {
-    try {
-      const response = await fetch(`${BASE_URL}/api/feedback/${feedback.id}`);
-      if (!response.ok) throw new Error('Failed to fetch latest feedback');
-
-      const updated = await response.json();
-      setSelectedFeedback(updated);
-      setIsAuditTrailModalOpen(true);
-    } catch (err) {
-      toast.error(`Failed to load history: ${err.message}`);
-    }
-  };
-
-  const handleCreateReportClick = () => {
-    setIsModalOpen(false);
-    setIsReportModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedFeedback(null);
-  };
+    ]
+  );
 
   const closeReportModal = () => {
     setIsReportModalOpen(false);
@@ -823,10 +199,130 @@ const QADashboard = () => {
     setSelectedFeedbackIds([]);
   };
 
-  const closeAuditTrailModal = () => {
-    setIsAuditTrailModalOpen(false);
-    setSelectedFeedback(null);
+  const handleGenerateReport = handleGenerateReportFactory({
+    feedbackData,
+    BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    user,
+    socket,
+    broadcastChannelRef,
+    tabId,
+    closeReportModal,
+  });
+
+  const handleEscalate = handleEscalateFactory({
+    feedbackData,
+    setFeedbackData,
+    setReportStates,
+    socket,
+    broadcastChannelRef,
+    tabId,
+    toast,
+    user,
+    closeReportModal,
+    BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  });
+
+  const handleTagAsSpam = handleTagAsSpamFactory({
+    BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    user,
+    socket,
+    broadcastChannelRef,
+    tabId,
+  });
+
+  const handleRestore = handleRestoreFactory({
+    BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    user,
+    socket,
+    broadcastChannelRef,
+    tabId,
+  });
+
+  const handleBulkSpam = handleBulkSpamFactory({
+    feedbackData,
+    selectedFeedbackIds,
+    setSelectedFeedbackIds,
+    setFeedbackData,
+    selectedFeedback,
+    setSelectedFeedback,
+    BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    user,
+    socket,
+    broadcastChannelRef,
+    tabId,
+  });
+
+  const handleBulkRestore = handleBulkRestoreFactory({
+    feedbackData,
+    selectedFeedbackIds,
+    setSelectedFeedbackIds,
+    setFeedbackData,
+    selectedFeedback,
+    setSelectedFeedback,
+    BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    user,
+    socket,
+    broadcastChannelRef,
+    tabId,
+  });
+
+  const handleBulkGenerateReport = handleBulkGenerateReportFactory({
+    feedbackData,
+    selectedFeedbackIds,
+    bulkReportContent,
+    bulkReportDepartment,
+    user,
+    socket,
+    broadcastChannelRef,
+    tabId,
+    toast,
+    closeBulkReportModal,
+    setFeedbackData,
+    selectedFeedback,
+    setSelectedFeedback,
+    BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  });
+
+  const handleBulkEscalate = handleBulkEscalateFactory({
+    feedbackData,
+    selectedFeedbackIds,
+    bulkReportContent,
+    bulkReportDepartment,
+    user,
+    socket,
+    broadcastChannelRef,
+    tabId,
+    toast,
+    closeBulkReportModal,
+    setFeedbackData,
+    BASE_URL
+  });
+  
+  const handleViewGeneratedReport = (feedback) => {
+    setSelectedFeedback(feedback);
+    setIsReportModalOpen(true);
+    setReportViewed(feedback.id, true);
   };
+
+  const handleCreateReportClick = () => {
+    setIsModalOpen(false);
+    setIsReportModalOpen(true);
+  };
+
+  const handleViewDetails = handleViewDetailsFactory({
+    setSelectedFeedback,
+    setIsModalOpen,
+    reportStates,
+    setReportStates,
+    departmentsForAssignment
+  });
+
+  const handleViewHistory = handleViewHistoryFactory({
+    BASE_URL,
+    toast,
+    setSelectedFeedback,
+    setIsAuditTrailModalOpen
+  });
 
   const handleOpenBulkReportModal = () => {
     if (selectedFeedbackIds.length === 0) {
@@ -844,24 +340,49 @@ const QADashboard = () => {
     }
     setIsBulkReportModalOpen(true);
   };
-
-  const updateSentiment = (id, newSentiment) => {
-    setFeedbackData(prevData =>
-      prevData.map(f =>
-        f.id === id ? {
-          ...f,
-          sentiment: newSentiment,
-          sentiment_status: 'completed',
-        } : f
-      )
-    );
-    if (selectedFeedback?.id === id) {
-      setSelectedFeedback({
-        ...selectedFeedback,
-        sentiment: newSentiment,
-        sentiment_status: 'completed',
-      });
+  
+  const handlePageChange = page => {
+    if (page >= 1 && page <= totalPages) {
+      setFilters(prev => ({ ...prev, currentPage: page }));
     }
+  };
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    await fetchFeedback();
+    toast.info('Feedback refreshed.', {
+      autoClose: 1000
+    });
+    setLoading(false);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      status: 'all',
+      sentiment: 'all',
+      source: 'all',
+      urgent: 'all',
+      feedbackType: 'all',
+      rating: 'all',
+      impactSeverity: 'all',
+      department: 'all',
+      currentPage: 1,
+    });
+    setTimeFilter('all');
+    setSearchId('');
+    setCustomStartDate(null);
+    setCustomEndDate(null);
+    setSelectedFeedbackIds([]);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedFeedback(null);
+  };
+
+  const closeAuditTrailModal = () => {
+    setIsAuditTrailModalOpen(false);
+    setSelectedFeedback(null);
   };
 
   const setReportContent = (feedbackId, content) => {
@@ -914,6 +435,25 @@ const QADashboard = () => {
         reportViewed: value,
       },
     }));
+  };
+
+  const updateSentiment = (id, newSentiment) => {
+    setFeedbackData(prevData =>
+      prevData.map(f =>
+        f.id === id ? {
+          ...f,
+          sentiment: newSentiment,
+          sentiment_status: 'completed',
+        } : f
+      )
+    );
+    if (selectedFeedback?.id === id) {
+      setSelectedFeedback({
+        ...selectedFeedback,
+        sentiment: newSentiment,
+        sentiment_status: 'completed',
+      });
+    }
   };
 
   const prepareRawFeedbackForDisplay = feedback => {
@@ -989,25 +529,6 @@ const QADashboard = () => {
     return '';
   };
 
-  const handleClearFilters = () => {
-    setFilters({
-      status: 'all',
-      sentiment: 'all',
-      source: 'all',
-      urgent: 'all',
-      feedbackType: 'all',
-      rating: 'all',
-      impactSeverity: 'all',
-      department: 'all',
-      currentPage: 1,
-    });
-    setTimeFilter('all');
-    setSearchId('');
-    setCustomStartDate(null);
-    setCustomEndDate(null);
-    setSelectedFeedbackIds([]);
-  };
-
   const filterByTime = data => {
     if (timeFilter === 'custom' && customStartDate && customEndDate) {
       const endOfDay = new Date(customEndDate);
@@ -1038,6 +559,67 @@ const QADashboard = () => {
     });
   };
 
+  useEffect(() => {
+    if (user.name.toLowerCase() === 'unknown') {
+      toast.info('User not authenticated. Logging out.');
+      handleLogout({ sessionId, navigate, setError });
+    }
+  }, [user.name, sessionId, navigate, setError]);
+
+  useEffect(() => {
+    fetchFeedback();
+  }, [filters, timeFilter]);
+
+  useEffect(() => {
+    broadcastChannelRef.current = new BroadcastChannel('feedback_updates');
+    broadcastChannelRef.current.onmessage = handleBroadcastMessage;
+
+    socket.connect();
+    socket.on('connect', () => console.log('WebSocket connected:', socket.id));
+    
+    socket.on('feedbackUpdate', (updatedFeedback) => {
+      if (!updatedFeedback || !updatedFeedback.id) {
+        console.warn('Invalid feedbackUpdate data:', updatedFeedback);
+        toast.error('Received invalid feedback update from server.');
+        return;
+      }
+
+      setFeedbackData(prevData => {
+        const normalizedFeedback = {
+          ...updatedFeedback,
+          date: updatedFeedback.date || new Date().toISOString(),
+          reportCreatedAt: updatedFeedback.reportCreatedAt || null,
+          actionHistory: updatedFeedback.actionHistory || [], // Include actionHistory
+        };
+
+        const index = prevData.findIndex(f => f.id === normalizedFeedback.id);
+        const newData = index !== -1
+          ? [...prevData.slice(0, index), { ...prevData[index], ...normalizedFeedback }, ...prevData.slice(index + 1)]
+          : [normalizedFeedback, ...prevData];
+        
+        return Array.from(new Map(newData.map(f => [f.id, f])).values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+      });
+    });
+
+    socket.on('bulkFeedbackUpdate', () => {
+      fetchFeedback();
+      setSelectedFeedbackIds([]);
+    });
+    socket.on('connect_error', (err) => toast.error('Failed to connect to real-time updates. Retrying...'));
+    socket.on('disconnect', () => console.log('WebSocket disconnected'));
+
+    return () => {
+      socket.off('connect');
+      socket.off('feedbackUpdate');
+      socket.off('bulkFeedbackUpdate');
+      socket.off('connect_error');
+      socket.off('disconnect');
+      socket.disconnect();
+      broadcastChannelRef.current?.close();
+      processedEventsRef.current.clear();
+    };
+  }, [handleBroadcastMessage]);
+
   const filteredFeedback = feedbackData.filter(item => {
     const matchesStatus = filters.status === 'all' || item.status === filters.status;
     const matchesSentiment = filters.sentiment === 'all' || item.sentiment === filters.sentiment || (!item.sentiment && filters.sentiment === 'pending');
@@ -1051,30 +633,15 @@ const QADashboard = () => {
     
     return matchesStatus && matchesSentiment && matchesSource && matchesUrgent && matchesFeedbackType && matchesRating && matchesImpactSeverity && matchesDepartment && matchesSearchId;
   });
-
   const timeFilteredFeedback = filterByTime(filteredFeedback);
   const itemsPerPage = 50;
   const totalPages = Math.ceil(timeFilteredFeedback.length / itemsPerPage);
+
   if (filters.currentPage > totalPages && totalPages > 0) {
     setFilters(prev => ({ ...prev, currentPage: 1 }));
   }
+
   const paginatedFeedback = timeFilteredFeedback.slice((filters.currentPage - 1) * itemsPerPage, filters.currentPage * itemsPerPage);
-
-  const handlePageChange = page => {
-    if (page >= 1 && page <= totalPages) {
-      setFilters(prev => ({ ...prev, currentPage: page }));
-    }
-  };
-
-  const handleRefresh = async () => {
-    setLoading(true);
-    await fetchFeedback();
-    toast.info('Feedback refreshed.', {
-      autoClose: 1000
-    });
-    setLoading(false);
-  };
-
   const todayFeedbackCount = feedbackData.filter(f => new Date(f.date).toDateString() === new Date().toDateString()).length;
   const totalFeedback = feedbackData.length;
   const unassignedFeedbackCount = feedbackData.filter(f => f.status === 'unassigned').length;
@@ -1089,7 +656,7 @@ const QADashboard = () => {
         userName={user.name}
         userRole={user.role}
         date={new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        onLogout={handleLogout}
+        onLogout={() => handleLogout({ sessionId, navigate, setError })}
       />
       <main className={styles.mainContent}>
         <section className={styles.overviewSection}>
