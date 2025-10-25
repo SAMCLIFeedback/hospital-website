@@ -618,6 +618,7 @@ const AdminDashboard = () => {
         </div>
         {isModalOpen && selectedFeedback && (
           <FeedbackModal
+            BASE_URL={BASE_URL}
             feedback={selectedFeedback}
             onClose={closeModal}
             prepareRawFeedbackForDisplay={prepareRawFeedbackForDisplay}

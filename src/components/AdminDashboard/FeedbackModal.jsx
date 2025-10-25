@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import styles from '@assets/css/Dashboard.module.css';
+import axios from 'axios';
 
-const FeedbackModal = ({
+const FeedbackModal = ({ 
+  BASE_URL,
   feedback,
   onClose,
   prepareRawFeedbackForDisplay,
