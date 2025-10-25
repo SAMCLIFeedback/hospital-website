@@ -9,7 +9,7 @@ import io from 'socket.io-client';
 import Header from '@components/QADashboard/Header';
 import MetricCard from '@components/MetricCard';
 import AnalyticsSection from '@sections/QADashboard/AnalyticsSection';
-import FilterSection from '@components/QADashboard/FilterSection';
+import FilterSection from '@sections/QADashboard/FilterSection';
 import AuditTrailModal from '@components/QADashboard/AuditTrailModal';
 import FeedbackTable from '@components/QADashboard/FeedbackTable';
 import FeedbackModal from '@components/QADashboard/FeedbackModal';
