@@ -8,7 +8,7 @@ import styles from '@assets/css/Dashboard.module.css';
 import io from 'socket.io-client';
 import Header from '@components/QADashboard/Header';
 import MetricCard from '@components/MetricCard';
-import AnalyticsSection from '@components/QADashboard/AnalyticsSection';
+import AnalyticsSection from '@sections/QADashboard/AnalyticsSection';
 import FilterSection from '@components/QADashboard/FilterSection';
 import AuditTrailModal from '@components/QADashboard/AuditTrailModal';
 import FeedbackTable from '@components/QADashboard/FeedbackTable';
