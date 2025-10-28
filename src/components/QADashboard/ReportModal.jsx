@@ -143,10 +143,6 @@ Provide clear, targeted, and actionable recommendations for the department to ad
                       toast.error('Missing feedback description or sentiment.');
                       return;
                     }
-                    if (!reportDepartment) {
-                      toast.error('Please select a department before generating the report.');
-                      return;
-                    }
                     if (feedback.status === 'spam') {
                       toast.error('Cannot generate report for spam feedback. Restore to unassigned first.');
                       return;
