@@ -1,22 +1,21 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import LandingPage from './components/LandingPage.jsx';
-import ExternalFeedback from './components/ExternalFeedback.jsx';
-import SuccessPage from './components/SuccessPage.jsx';
-import ScrollToTop from './components/ScrollToTop.jsx';
-import StaffsVerification from './components/StaffsVerification.jsx';
-import StaffFeedbackForm from './components/InternalFeedback.jsx';
-import QADashboard from './components/QADashboard.jsx';
-import DeptHeadDashboard from './components/DeptHeadDashboard.jsx';
-import DepartmentLogin from './components/DepartmentLogin.jsx';
-import QALogin from './components/QALogin.jsx';
-import AdminDashboard from './components/AdminDashboard.jsx';
-import AdminLogin from './components/AdminLogin.jsx';
-import ProtectedRoute from './components/ProtectRoute.jsx';
+import LandingPage from '@pages/LandingPage/Landingpage.jsx';
+import ExternalFeedback from '@pages/ExternalFeedback/ExternalFeedback.jsx';
+import SuccessPage from '@pages/SuccessPage.jsx';
+import ScrollToTop from '@components/ScrollToTop.jsx';
+import StaffsVerification from '@pages/StaffsVerification.jsx';
+import InternalFeedback from '@pages/InternalFeedback/InternalFeedback.jsx';
+import QADashboard from '@pages/QADashboard/QADashboard.jsx';
+import DeptHeadDashboard from '@pages/DeptHeadDashboard.jsx';
+import DepartmentLogin from '@pages/LoginPages/DepartmentLogin.jsx';
+import QALogin from '@pages/LoginPages/QALogin.jsx';
+import AdminDashboard from '@pages/AdminDashboard.jsx';
+import AdminLogin from '@pages/LoginPages/AdminLogin.jsx';
+import ProtectedRoute from '@components/ProtectRoute.jsx';
 
 const App = () => {
   return (
-    //<Router basename="/hospital-website">
+    //<Router basename="/">
     <Router basename="/hospital-website">
       <ScrollToTop />
       <Routes>
@@ -28,7 +27,7 @@ const App = () => {
           path="/staff-feedback"
           element={
             <ProtectedRoute>
-              <StaffFeedbackForm />
+              <InternalFeedback />
             </ProtectedRoute>
           }
         />
