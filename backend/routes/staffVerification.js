@@ -28,14 +28,29 @@ function generatePIN() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Nodemailer setup
+// Nodemailer setup (localhost)
+// const transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   auth: {
+//     user: 'samclifeedback@gmail.com',
+//     pass: 'jlqa vdai rikb usnp'
+//   }
+// });
+
+// Nodemailer setup (Brevo SMTP)
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp-relay.brevo.com',
+  port: 587,
+  secure: false, // use true if port 465
   auth: {
-    user: 'samclifeedback@gmail.com',
-    pass: 'jlqa vdai rikb usnp'
-  }
+    user: process.env.BREVO_USER,
+    pass: process.env.BREVO_SMTP_KEY,
+  },
+  tls: {
+    rejectUnauthorized: false, // keep this false on Render to avoid TLS issues
+  },
 });
+
 
 // Send PIN
 router.post('/send-pin', async (req, res) => {
@@ -62,8 +77,30 @@ router.post('/send-pin', async (req, res) => {
     await transporter.sendMail({
       from: 'samclifeedback@gmail.com',
       to: email,
-      subject: 'Your Verification PIN',
-      text: `Your verification PIN is: ${pin}`
+      subject: 'Your Verification PIN for Smart Feedback Mechanism',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9;">
+          <div style="max-width: 500px; margin: auto; background: white; border-radius: 10px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <h2 style="color: #22c55e; text-align: center;">Smart Feedback Mechanism</h2>
+            <p style="font-size: 16px; color: #333;">
+              Hello,
+            </p>
+            <p style="font-size: 16px; color: #333;">
+              To verify your email address, please use the following 6-digit PIN:
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="font-size: 28px; font-weight: bold; color: #22c55e; letter-spacing: 3px;">${pin}</span>
+            </div>
+            <p style="font-size: 14px; color: #555;">
+              This PIN will expire in 10 minutes. If you didn’t request this, you can safely ignore this message.
+            </p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
+            <p style="font-size: 12px; color: #999; text-align: center;">
+              © ${new Date().getFullYear()} San Antonio Medical Center of Lipa, Inc.
+            </p>
+          </div>
+        </div>
+      `
     });
 
     savePins(pins);

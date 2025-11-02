@@ -25,3 +25,7 @@ dist-ssr
 
 # Environment variables
 backend/.env
+
+# json datas
+backend/pins.json
+scr/data/verified-emails.json
