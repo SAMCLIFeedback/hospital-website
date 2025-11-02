@@ -4,8 +4,11 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const nodemailer = require('nodemailer');
 const router = express.Router();
+
+const SibApiV3Sdk = require('@getbrevo/brevo');
+const brevoClient = new SibApiV3Sdk.TransactionalEmailsApi();
+brevoClient.setApiKey(SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
 const pinsFilePath = path.join(__dirname, '../pins.json');
 
@@ -37,20 +40,6 @@ function generatePIN() {
 //   }
 // });
 
-// Nodemailer setup (Brevo SMTP)
-const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',
-  port: 587,
-  secure: false, // use true if port 465
-  auth: {
-    user: process.env.BREVO_USER,
-    pass: process.env.BREVO_SMTP_KEY,
-  },
-  tls: {
-    rejectUnauthorized: false, // keep this false on Render to avoid TLS issues
-  },
-});
-
 
 // Send PIN
 router.post('/send-pin', async (req, res) => {
@@ -74,11 +63,11 @@ router.post('/send-pin', async (req, res) => {
   };
 
   try {
-    await transporter.sendMail({
-      from: 'samclifeedback@gmail.com',
-      to: email,
+    await brevoClient.sendTransacEmail({
+      sender: { name: 'Smart Feedback Mechanism', email: 'samclifeedback@gmail.com' },
+      to: [{ email }],
       subject: 'Your Verification PIN for Smart Feedback Mechanism',
-      html: `
+      htmlContent: `
         <div style="font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9;">
           <div style="max-width: 500px; margin: auto; background: white; border-radius: 10px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
             <h2 style="color: #22c55e; text-align: center;">Smart Feedback Mechanism</h2>
@@ -100,7 +89,7 @@ router.post('/send-pin', async (req, res) => {
             </p>
           </div>
         </div>
-      `
+      `,
     });
 
     savePins(pins);
