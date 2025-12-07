@@ -14,11 +14,7 @@ const RoleSelectionGrid = ({roleCards, setIsNavigating, styles}) => {
       setTimeout(() => navigate('/staff-verification'), 1000);
     } else if (role.authType === 'QA') {
       setTimeout(() => navigate('/QALogin'), 1000);
-    } else if (role.authType === 'deptHead') {
-      setTimeout(() => navigate('/departmentLogin'), 1000);
-    } else if (role.authType === 'admin') {
-      setTimeout(() => navigate('/adminLogin'), 1000);
-    }else {
+    } else {
       alert('Invalid role selection');
       setIsNavigating(false);
     }
@@ -34,6 +30,7 @@ const RoleSelectionGrid = ({roleCards, setIsNavigating, styles}) => {
         <div className={styles.feedbackRoles}>
           <h2 className={styles.sectionHeading}>Provide Feedback</h2>
           <div className={styles.feedbackGrid}>
+            {/* Displaying roles with type 'feedback' */}
             {roleCards.filter(role => role.type === 'feedback').map((role, index) => (
               <motion.div
                 key={index}

@@ -19,21 +19,7 @@ const roleCards = [
       description: 'Quality assurance team members providing systematic feedback and analysis.',
       authType: 'QA',
       type: 'dashboard'
-  },
-  {
-      icon: '👨‍💼',
-      title: 'Department Head',
-      description: 'Leadership feedback on departmental operations and strategic improvements.',
-      authType: 'deptHead',
-      type: 'dashboard'
-  },
-  {
-      icon: '👩‍',
-      title: 'Hospital Administrator',
-      description: 'View performance metrics and provide executive-level oversight on care quality and operations.',
-      authType: 'admin',
-      type: 'dashboard'
-  },
+  }
 ];
 
 export default roleCards;
