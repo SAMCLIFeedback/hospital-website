@@ -7,7 +7,7 @@
 
 /* Hero Section */
 .landingPage .hero {
-    margin: 80px 0 100px 0;
+    margin: 0;
     min-height: 60vh;
     display: flex;
     align-items: center;
@@ -116,6 +116,7 @@
 }
 
 .landingPage .roleCard {
+    max-width: fit-content;
     background: white;
     border-radius: 20px;
     padding: 2.5rem;
@@ -373,9 +374,15 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
-    margin-top: 1rem; /* Adjust as needed */
-    margin-bottom: 4rem; /* Space between sections */
+    margin-top: 1rem;
+    margin-bottom: 4rem;
+    max-width: 1200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    justify-items: center;
 }
+
 
 /* Specific styling for feedback cards if desired */
 .landingPage .feedbackGrid .roleCard {
