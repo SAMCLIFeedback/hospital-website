@@ -15,8 +15,8 @@ import ProtectedRoute from '@components/ProtectRoute.jsx';
 
 const App = () => {
   return (
-    //<Router basename="/">
-    <Router basename="/hospital-website">
+    //<Router basename="/hospital-website">
+    <Router basename="/">
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<LandingPage />} />
