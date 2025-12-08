@@ -1,10 +1,11 @@
+// routes/validateToken.js
 const express = require('express');
 const router = express.Router();
-const PatientToken = require('../models/PatientToken'); // adjust path if needed
+const PatientToken = require('../models/PatientToken');
 
-// GET /api/validate-token/:token
 router.get('/:token', async (req, res) => {
   const { token } = req.params;
+  const { expectedType } = req.query; // sent from frontend
 
   if (!token) {
     return res.json({ valid: false, reason: 'missing' });
@@ -21,7 +22,15 @@ router.get('/:token', async (req, res) => {
       return res.json({ valid: false, reason: 'used' });
     }
 
-    // token is valid
+    // Block if trying to use wrong form
+    if (expectedType && tokenDoc.type !== expectedType && tokenDoc.type !== 'admin') {
+      return res.json({ 
+        valid: false, 
+        reason: 'wrong_form',
+        message: 'This QR code is not valid for this feedback form.'
+      });
+    }
+
     return res.json({ valid: true });
   } catch (err) {
     console.error('Token validation error:', err);

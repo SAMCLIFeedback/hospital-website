@@ -52,24 +52,28 @@ const ExternalFeedback = () => {
     if (!token) {
       setIsValidToken(false);
       setTokenError('missing');
-    } else {
-      fetch(`${BASE_URL}/api/validate-token/${token}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.valid) {
-            setIsValidToken(true);
-            setTokenError(null);
-          } else {
-            setIsValidToken(false);
-            setTokenError(data.reason); // 'used' or 'not_found'
-          }
-        })
-        .catch(() => {
-          setIsValidToken(false);
-          setTokenError('not_found');
-        });
+      return;
     }
-  }, [token]);
+
+    // Detect which form we are on
+    const expectedType = window.location.pathname.includes('/patient-feedback') ? 'patient' : 'visitor';
+
+    fetch(`${BASE_URL}/api/validate-token/${token}?expectedType=${expectedType}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.valid) {
+          setIsValidToken(true);
+          setTokenError(null);
+        } else {
+          setIsValidToken(false);
+          setTokenError(data.reason);
+        }
+      })
+      .catch(() => {
+        setIsValidToken(false);
+        setTokenError('server_error');
+      });
+  }, [token, BASE_URL]);
 
   // Track completed steps
   useEffect(() => {
@@ -242,11 +246,13 @@ const ExternalFeedback = () => {
   };
 
   if (!isValidToken) {
-    let message;
+    let message = "Invalid or missing token. Please scan a valid QR code.";
     if (tokenError === 'used') {
       message = "This feedback token has already been used.";
-    } else if (tokenError === 'missing' || tokenError === 'not_found') {
-      message = "Invalid or missing token. Please scan a valid QR code.";
+    } else if (tokenError === 'wrong_form') {
+      message = "This QR code is for " + 
+        (window.location.pathname.includes('patient') ? "visitors only" : "patients only") + 
+        ". Please use the correct form.";
     }
 
     return (

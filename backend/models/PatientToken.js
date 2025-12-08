@@ -1,3 +1,4 @@
+// models/PatientToken.js
 const mongoose = require('mongoose');
 
 const PatientTokenSchema = new mongoose.Schema({
@@ -6,16 +7,21 @@ const PatientTokenSchema = new mongoose.Schema({
     required: true, 
     unique: true 
   },
+  type: {
+    type: String,
+    enum: ['patient', 'visitor', 'admin'],
+    required: true
+  },
   used: { 
     type: Boolean, 
     default: false 
   },
   createdAt: { 
-    type: Date, 
+    type: Date,
     default: Date.now 
   },
   usedAt: { 
-    type: Date, 
+    type: Date,
     default: null 
   },
   feedbackId: { 
