@@ -274,7 +274,7 @@ const ExternalFeedback = () => {
 
       <div className={styles.form}>
         <form onSubmit={handleSubmit}>
-          <RespondentAffiliation styles={styles} formData={formData} handleInputChange={handleInputChange} roleOptions={roleOptions} type={'patients'} />
+          <RespondentAffiliation styles={styles} formData={formData} handleInputChange={handleInputChange} roleOptions={roleOptions} type={'visitors'}/>
           <FeedbackType styles={styles} feedbackTypes={feedbackTypes} formData={formData} handleInputChange={handleInputChange} />
           <DepartmentConcerned
             styles={styles}

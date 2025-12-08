@@ -23,8 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment variables
+# Environment variables/others
 backend/.env
+backend/qr_codes
 
 # json datas
 backend/pins.json
