@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from '@assets/css/StaffsVerification.module.css';
-import verifiedEmails from '@data/verified-emails.json';
 import Loader from '@components/Loader.jsx';
 import { useNavigate } from 'react-router-dom';
 import StepEmailInput from '@components/StaffVerification/StepEmailInput';
 import StepPinEntry from '@components/StaffVerification/StepPinEntry';
 import PrivacyModal from '@components/StaffVerification/PrivacyModal';
+import LockModal from '@components/StaffVerification/LockModal'; // ← NEW
 
 const StaffsVerification = () => {
   const [step, setStep] = useState(1);
@@ -17,12 +17,31 @@ const StaffsVerification = () => {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const [attemptCount, setAttemptCount] = useState(0);
+  const [showLoader, setShowLoader] = useState(false);
+
+  // ←←← NEW: Lock States
+  const [showLockModal, setShowLockModal] = useState(false);
+  const [nextOpenDate, setNextOpenDate] = useState(null);
+
   const pinRefs = useRef([]);
   const emailInputContainerRef = useRef(null);
   const navigate = useNavigate();
-  const [showLoader, setShowLoader] = useState(false);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+  useEffect(() => {
+    const today = new Date();
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const isLastDay = today.getDate() === lastDayOfMonth.getDate();
+
+    if (isLastDay) {
+      setShowLockModal(false);
+    } else {
+      setNextOpenDate(lastDayOfMonth);
+      setShowLockModal(true);
+    }
+  }, []);
+
+  // Resend timer
   useEffect(() => {
     let interval;
     if (resendTimer > 0) {
@@ -33,6 +52,7 @@ const StaffsVerification = () => {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
+  // Email input focus styling
   useEffect(() => {
     const handleFocusIn = () => {
       emailInputContainerRef.current?.classList.add(styles.focusWithin);
@@ -71,16 +91,22 @@ const StaffsVerification = () => {
     }
 
     const fullEmail = `${enteredPrefix.toLowerCase()}@gmail.com`;
-    const isVerified = verifiedEmails.includes(fullEmail);
-
-    if (!isVerified) {
-      setError('This email is not authorized for verification.');
-      return;
-    }
-
-    setIsLoading(true);
 
     try {
+      const checkResponse = await fetch(`${BASE_URL}/api/check-staff-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: fullEmail })
+      });
+
+      const checkData = await checkResponse.json();
+
+      if (!checkData.success) {
+        setError(checkData.message);
+        return;
+      }
+
+      setIsLoading(true);
       const response = await fetch(`${BASE_URL}/api/send-pin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,10 +114,7 @@ const StaffsVerification = () => {
       });
 
       const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.message || 'Error sending PIN');
-      }
+      if (!data.success) throw new Error(data.message || 'Error sending PIN');
 
       setEmail(fullEmail);
       setStep(2);
@@ -105,12 +128,10 @@ const StaffsVerification = () => {
 
   const handlePinChange = (index, value) => {
     if (value.length > 1) return;
-
     const newPin = [...pin];
     newPin[index] = value;
     setPin(newPin);
     setError('');
-
     if (value && index < 5) {
       pinRefs.current[index + 1]?.focus();
     }
@@ -125,16 +146,15 @@ const StaffsVerification = () => {
   const handlePinSubmit = async (e) => {
     e.preventDefault();
     const pinCode = pin.join('');
-
     if (pinCode.length !== 6) {
       setError('Please enter the complete 6-digit code.');
       return;
     }
 
     setIsLoading(true);
-    setShowLoader(true); // Show loader at the beginning of the async operation
+    setShowLoader(true);
     setAttemptCount(prev => prev + 1);
-  
+
     try {
       const response = await fetch(`${BASE_URL}/api/verify-pin`, {
         method: 'POST',
@@ -153,18 +173,17 @@ const StaffsVerification = () => {
         }
         setPin(['', '', '', '', '', '']);
         pinRefs.current[0]?.focus();
-        setShowLoader(false); // Hide loader on verification failure
+        setShowLoader(false);
         return;
       }
 
       sessionStorage.setItem('staff_token', data.token);
-      navigate('/staff-feedback');
-
+      navigate('/staff-feedback', { replace: true });
     } catch (err) {
       setError('Verification failed. Please try again.');
-      setShowLoader(false); // Hide loader on any verification error
+      setShowLoader(false);
     } finally {
-      setIsLoading(false); // Always set isLoading to false
+      setIsLoading(false);
     }
   };
 
@@ -194,51 +213,69 @@ const StaffsVerification = () => {
     }
   };
 
+  // ←←← FINAL RENDER
   return (
-    <div className={styles.container}>
-      {showLoader && <Loader />}
-      <div className={styles.mainCard}>
-        <div className={styles.card}>
-          {step === 1 ? (
-            <StepEmailInput 
-              styles={styles} 
-              setShowPrivacyModal={setShowPrivacyModal} 
-              emailInputContainerRef={emailInputContainerRef} 
-              emailPrefix={emailPrefix} 
-              setEmailPrefix={setEmailPrefix} 
-              handleEmailSubmit={handleEmailSubmit} 
-              isLoading={isLoading}
-              error={error}
-            />
-          ) : (
-            <StepPinEntry
-              styles={styles}
-              email={email}
-              pin={pin}
-              pinRefs={pinRefs}
-              handlePinChange={handlePinChange}
-              handlePinKeyDown={handlePinKeyDown}
-              handlePinSubmit={handlePinSubmit}
-              handleResendPin={handleResendPin}
-              setStep={setStep}
-              isLoading={isLoading}
-              resendTimer={resendTimer}
-              attemptCount={attemptCount}
-              error={error}
-            />
+    <>
+      {/* MONTHLY LOCK MODAL */}
+      {showLockModal && (
+        <LockModal
+          nextOpenDate={nextOpenDate}
+          onUnlock={() => {
+            sessionStorage.setItem('staff_bypass_unlocked', 'true');
+            setShowLockModal(false);
+          }}
+        />
+      )}
+
+      {/* ORIGINAL PAGE — only visible when unlocked */}
+      {!showLockModal && (
+        <div className={styles.container}>
+          {showLoader && <Loader />}
+          <div className={styles.mainCard}>
+            <div className={styles.card}>
+              {step === 1 ? (
+                <StepEmailInput
+                  styles={styles}
+                  setShowPrivacyModal={setShowPrivacyModal}
+                  emailInputContainerRef={emailInputContainerRef}
+                  emailPrefix={emailPrefix}
+                  setEmailPrefix={setEmailPrefix}
+                  handleEmailSubmit={handleEmailSubmit}
+                  isLoading={isLoading}
+                  error={error}
+                />
+              ) : (
+                <StepPinEntry
+                  styles={styles}
+                  email={email}
+                  pin={pin}
+                  pinRefs={pinRefs}
+                  handlePinChange={handlePinChange}
+                  handlePinKeyDown={handlePinKeyDown}
+                  handlePinSubmit={handlePinSubmit}
+                  handleResendPin={handleResendPin}
+                  setStep={setStep}
+                  isLoading={isLoading}
+                  resendTimer={resendTimer}
+                  attemptCount={attemptCount}
+                  error={error}
+                />
+              )}
+            </div>
+
+            <div className={styles.disclaimer}>
+              <p className={styles.disclaimerText}>
+                Your feedback cannot be traced back to you. QA and managers will only see anonymous responses.
+              </p>
+            </div>
+          </div>
+
+          {showPrivacyModal && (
+            <PrivacyModal styles={styles} setShowPrivacyModal={setShowPrivacyModal} />
           )}
         </div>
-        <div className={styles.disclaimer}>
-          <p className={styles.disclaimerText}>
-            🔒 Your feedback cannot be traced back to you. QA and managers will only see anonymous responses.
-          </p>
-        </div>
-      </div>
-
-      {showPrivacyModal && (
-        <PrivacyModal styles={styles} setShowPrivacyModal={setShowPrivacyModal}/>
       )}
-    </div>
+    </>
   );
 };
 

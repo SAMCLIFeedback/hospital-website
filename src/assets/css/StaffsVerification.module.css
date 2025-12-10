@@ -535,3 +535,82 @@
         transform: translateX(3px);
     }
 }
+
+.lockOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lockModal {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 440px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+.lockIcon {
+  font-size: 70px;
+  margin-bottom: 8px;
+}
+
+.lockModal h2 {
+  color: #c62828;
+  margin: 12px 0 16px;
+}
+
+.nextOpenBox {
+  background: #fff3e0;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 20px 0;
+  font-size: 1.1em;
+  border: 1px solid #ffcc80;
+}
+
+.bypassForm input {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  text-align: center;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+
+.bypassForm input:focus {
+  outline: none;
+  border-color: #1565c0;
+}
+
+.bypassForm button {
+  width: 100%;
+  padding: 14px;
+  background: #1565c0;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.bypassForm button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.errorText {
+  color: #d32f2f;
+  margin: 10px 0 0;
+  font-weight: 500;
+}

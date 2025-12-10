@@ -68,6 +68,8 @@ const deptActionRoutes = require('./routes/proposeRoute');
 const submissionCountRoute = require('./routes/submissionCounts')
 const validateTokenRoute = require('./routes/validateToken');
 const markTokenUsedRouter = require('./routes/markTokenUsed');
+const checkStaffEmailRoute = require('./routes/checkStaffEmail');
+const staffRoutes = require('./routes/modalLock');
 
 const ExternalFeedback = require('./models/ExternalFeedback');
 const InternalFeedback = require('./models/InternalFeedback');
@@ -501,6 +503,8 @@ app.patch('/api/feedback/bulk-report', async (req, res) => {
   }
 });
 
+app.use('/api', staffRoutes);
+app.use('/api/check-staff-email', checkStaffEmailRoute);
 app.use('/api/validate-token', validateTokenRoute);
 app.use('/api/mark-token-used', markTokenUsedRouter);
 app.use('/api/dept', deptActionRoutes);
