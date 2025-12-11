@@ -19,7 +19,7 @@ const DepartmentConcerned = ({
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
         <h2 className={styles.sectionLabel}>
-          <span className={styles.stepNumber}>2</span>
+          <span className={styles.stepNumber}>3</span>
           Which department is this about?
           <span className={styles.required}>*</span>
         </h2>

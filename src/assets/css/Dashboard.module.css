@@ -2248,3 +2248,50 @@
     }
 
 }
+
+/* Dashboard.module.css — FINAL VERSION (Stacked Sentiment Chart) */
+
+.chartContainerFull {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  margin: 2rem 0;
+  border: 1px solid #eee;
+}
+
+.chartNote {
+  margin-top: 1.5rem;
+  font-size: 0.94rem;
+  color: #444;
+  text-align: center;
+  font-style: italic;
+  line-height: 1.7;
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.chartNote strong {
+  font-weight: 600;
+}
+
+/* Clean up ALL old sentiment styles */
+.sentimentFullWidthGrid,
+.sentimentFullCard,
+.chartFill,
+.sentimentHorizontalScroll,
+.sentimentCompactGrid,
+.sentimentMiniCard,
+.topBottomGrid,
+.sentimentCard,
+.tableToggle,
+.smallButton,
+.sentimentTableWrapper,
+.sentimentTable,
+.positiveRow,
+.neutralRow,
+.negativeRow {
+  display: none !important;
+}

@@ -8,7 +8,11 @@ const InternalFeedbackSchema = new mongoose.Schema({
   description: { type: String, required: true },
   isAnonymous: { type: Boolean, default: true },
   email: { type: String, default: null },
+  // Target Department: "Which department is this about?"
   department: { type: String, required: true },
+  // <--- NEW FIELD ADDED HERE --->
+  // Source Department: "This feedback is coming from:"
+  sourceDepartment: { type: String, required: true }, 
   sentiment: { type: String, default: null },
   sentiment_status: { type: String, default: 'pending' },
   sentiment_attempts: { type: Number, default: 0 },

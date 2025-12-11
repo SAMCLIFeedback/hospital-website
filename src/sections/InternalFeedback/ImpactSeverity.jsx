@@ -3,7 +3,7 @@ const ImpactSeverity = ({styles, impactOptions, formData, handleInputChange}) =>
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
         <h2 className={styles.sectionLabel}>
-          <span className={styles.stepNumber}>3</span>
+          <span className={styles.stepNumber}>4</span>
           How does this impact daily operations?
           <span className={styles.required}>*</span>
         </h2>

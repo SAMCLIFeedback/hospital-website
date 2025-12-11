@@ -3,7 +3,7 @@ const SubmissionPreference = ({styles, formData, handleInputChange, }) => {
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
         <h2 className={styles.sectionLabel}>
-          <span className={styles.stepNumber}>{formData.feedbackNature === 'recognition' ? 4 : 5}</span>
+          <span className={styles.stepNumber}>{formData.feedbackNature === 'recognition' ? 5 : 6}</span>
           How would you like to submit this?
           <span className={styles.required}>*</span>
         </h2>

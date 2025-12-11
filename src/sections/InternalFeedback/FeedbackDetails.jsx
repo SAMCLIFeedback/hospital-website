@@ -27,7 +27,7 @@ const FeedbackDetails = ({ styles, formData, handleInputChange, departments }) =
       <div className={styles.sectionHeader}>
         <h2 className={styles.sectionLabel}>
           <span className={styles.stepNumber}>
-            {formData.feedbackNature === 'recognition' ? 3 : 4}
+            {formData.feedbackNature === 'recognition' ? 4 : 5}
           </span>
           Tell us more details
           <span className={styles.required}>*</span>

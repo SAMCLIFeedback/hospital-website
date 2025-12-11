@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const router = express.Router();
 const Staff = require('../models/staffs');
-const cron = require('node-cron'); // ← NEW
+const cron = require('node-cron'); 
 
 const SibApiV3Sdk = require('@getbrevo/brevo');
 const brevoClient = new SibApiV3Sdk.TransactionalEmailsApi();
@@ -49,7 +49,6 @@ cron.schedule('5 0 1 * *', async () => {
 
 console.log('Monthly reset cron job scheduled: Every 1st of month at 00:05 AM');
 
-// Existing routes below (unchanged)
 router.post('/send-pin', async (req, res) => {
   const { email } = req.body;
   const pins = loadPins();
@@ -134,39 +133,6 @@ router.post('/verify-pin', async (req, res) => {
   res.json({ success: true, token });
 });
 
-router.post('/staff-feedback', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ success: false, message: 'No token provided' });
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const staff = await Staff.findOne({ email: decoded.email });
-    if (!staff) return res.status(404).json({ success: false, message: 'Staff not found' });
-
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    const lastSubmitted = staff.updatedAt;
-
-    if (lastSubmitted) {
-      const lastMonth = lastSubmitted.getMonth();
-      const lastYear = lastSubmitted.getFullYear();
-      if (lastMonth === currentMonth && lastYear === currentYear && staff.hasSubmittedThisMonth) {
-        return res.status(403).json({ 
-          success: false, 
-          message: 'You have already submitted feedback this month.' 
-        });
-      }
-    }
-
-    staff.hasSubmittedThisMonth = true;
-    await staff.save();
-
-    res.json({ success: true, message: 'Feedback submitted successfully' });
-  } catch (err) {
-    console.error('Feedback submission error:', err.message);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
+// ❌ DELETED THE DUPLICATE /staff-feedback ROUTE HERE ❌
 
 module.exports = router;

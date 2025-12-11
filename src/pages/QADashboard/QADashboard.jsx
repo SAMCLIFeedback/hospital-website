@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import { v4 as uuidv4 } from 'uuid';
 import { toast, ToastContainer } from 'react-toastify';
-import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend, Title } from 'chart.js';
 import { handleLogout, handleBroadcastMessageFactory, handleGenerateReportFactory, handleEscalateFactory, handleTagAsSpamFactory, handleRestoreFactory, handleBulkRestoreFactory, handleBulkSpamFactory, handleBulkGenerateReportFactory, handleBulkEscalateFactory, handleViewDetailsFactory, handleViewHistoryFactory } from './QADashboard.handlers';
 import styles from '@assets/css/Dashboard.module.css';
 import io from 'socket.io-client';
@@ -44,7 +44,17 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+ChartJS.register(
+  ArcElement,
+  BarElement,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+  Title
+);
 
 const QADashboard = () => {
   const navigate = useNavigate();
@@ -68,6 +78,7 @@ const QADashboard = () => {
   const [bulkReportDepartment, setBulkReportDepartment] = useState('');
   const broadcastChannelRef = useRef(null);
   const processedEventsRef = useRef(new Set());
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [filters, setFilters] = useState({
     status: 'all',
@@ -156,6 +167,10 @@ const QADashboard = () => {
         setLoading(false);
     }
   };
+
+  const handleScroll = useCallback(() => {
+    setIsHeaderVisible(window.scrollY <= 5); // shows only at the very top
+  }, []);
 
   const handleBroadcastMessage = useCallback(
     handleBroadcastMessageFactory({
@@ -560,6 +575,11 @@ const QADashboard = () => {
   };
 
   useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
     if (user.name.toLowerCase() === 'unknown') {
       toast.info('User not authenticated. Logging out.');
       handleLogout({ sessionId, navigate, setError });
@@ -642,33 +662,81 @@ const QADashboard = () => {
   }
 
   const paginatedFeedback = timeFilteredFeedback.slice((filters.currentPage - 1) * itemsPerPage, filters.currentPage * itemsPerPage);
-  const todayFeedbackCount = feedbackData.filter(f => new Date(f.date).toDateString() === new Date().toDateString()).length;
+
+  // Today's Feedback
+  const todayFeedbackCount = feedbackData.filter(f => 
+    new Date(f.date).toDateString() === new Date().toDateString()
+  ).length;
+  // Total Feedback (all time)
   const totalFeedback = feedbackData.length;
-  const unassignedFeedbackCount = feedbackData.filter(f => f.status === 'unassigned').length;
-  const assignedFeedbackCount = feedbackData.filter(f => f.status === 'assigned').length;
-  const escalateFeebackCount = feedbackData.filter(f => f.status === 'escalated').length;
+  // Current month boundaries
+  const now = new Date();
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const currentMonthName = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+  // Feedback from current month only
+  const monthlyFeedback = feedbackData.filter(f => {
+    const date = new Date(f.date);
+    return date >= currentMonthStart && date < currentMonthEnd;
+  });
+  // Sentiment counts for current month
+  const positiveThisMonth = monthlyFeedback.filter(f => f.sentiment === 'positive').length;
+  const neutralThisMonth  = monthlyFeedback.filter(f => f.sentiment === 'neutral').length;
+  const negativeThisMonth = monthlyFeedback.filter(f => f.sentiment === 'negative').length;
 
   return (
     <div className={styles.dashboardContainer}>
       <ToastContainer position="top-right" autoClose={4000} hideProgressBar={false} />
-      <Header
-        styles={styles}
-        userName={user.name}
-        userRole={user.role}
-        date={new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        onLogout={() => handleLogout({ sessionId, navigate, setError })}
-      />
+      <div className={`${styles.headerWrapper} ${isHeaderVisible ? styles.headerVisible : styles.headerHidden}`}>
+        <Header
+          styles={styles}
+          userName={user.name}
+          userRole={user.role}
+          date={new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}
+          onLogout={() => handleLogout({ sessionId, navigate, setError })}
+        />
+      </div>
       <main className={styles.mainContent}>
         <section className={styles.overviewSection}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionHeading}>Performance Overview</h2>
           </div>
           <div className={styles.metricGrid}>
-            <MetricCard title="Today's Feedback" value={todayFeedbackCount} icon="fas fa-calendar-day" variant="today" />
-            <MetricCard title="Total Feedback" value={totalFeedback} icon="fas fa-comments" variant="primary" />
-            <MetricCard title="Unassigned Feedback" value={unassignedFeedbackCount} icon="fas fa-folder-open" variant="warning" />
-            <MetricCard title="Assigned" value={assignedFeedbackCount} icon="fas fa-check-double" variant="success" />
-            <MetricCard title="Escalated" value={escalateFeebackCount} icon="fas fa-exclamation" variant="orange" />
+            <MetricCard 
+              title="Today's Feedback" 
+              value={todayFeedbackCount} 
+              icon="fas fa-calendar-day" 
+              variant="today" 
+            />
+            <MetricCard 
+              title="Total Feedback" 
+              value={totalFeedback} 
+              icon="fas fa-comments" 
+              variant="primary" 
+            />
+            <MetricCard 
+              title={`Month's Positive`} 
+              value={positiveThisMonth} 
+              icon="fas fa-smile" 
+              variant="success" 
+            />
+            <MetricCard 
+              title={`Month's Neutral`} 
+              value={neutralThisMonth} 
+              icon="fas fa-meh" 
+              variant="warning" 
+            />
+            <MetricCard 
+              title={`Month's Negative`} 
+              value={negativeThisMonth} 
+              icon="fas fa-frown" 
+              variant="orange" 
+            />
           </div>
         </section>
         {error && (
