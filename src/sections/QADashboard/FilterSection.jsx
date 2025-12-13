@@ -18,11 +18,6 @@ const FilterSection = ({
   setCustomEndDate,
   loading,
   departments,
-  selectedFeedbackIds,
-  setSelectedFeedbackIds,
-  handleBulkSpam,
-  handleBulkGenerateReport,
-  handleBulkRestore,
   filteredFeedback,
   prepareRawFeedbackForDisplay,
 }) => {
@@ -98,7 +93,7 @@ const FilterSection = ({
           </button>
         </div>
       </div>
-      
+
       {timeFilter === 'custom' && (
         <div className={styles.customDateRange}>
           <div className={styles.datePickerGroup}>
@@ -138,11 +133,10 @@ const FilterSection = ({
           >
             <option value="all">All Statuses</option>
             <option value="pending">Pending</option>
-            <option value="unassigned">Unassigned</option>
-            <option value="assigned">Assigned</option>
-            <option value="escalated">Escalated</option>
-            <option value="spam">Spam</option>
             <option value="failed">Failed</option>
+            <option value="spam">Spam</option>
+            <option value="not_manage">Not Managed</option>
+            <option value="managed">Managed</option>
           </select>
         </div>
         <div className={styles.filterGroup}>
@@ -259,9 +253,10 @@ const FilterSection = ({
           </select>
         </div>
       </div>
+
       <div className={styles.filterSummary}>
         Active Filters:
-        {filters.status !== 'all' ? ` Status: ${filters.status},` : ''}
+        {filters.status !== 'all' ? ` Status: ${filters.status.replace('_', ' ')},` : ''}
         {filters.sentiment !== 'all' ? ` Sentiment: ${filters.sentiment},` : ''}
         {filters.source !== 'all' ? ` Source: ${filters.source},` : ''}
         {filters.urgent !== 'all' ? ` Urgency: ${filters.urgent},` : ''}
@@ -271,6 +266,7 @@ const FilterSection = ({
         {filters.department !== 'all' ? ` Department: ${filters.department},` : ''}
         {!Object.values(filters).some(f => f !== 'all') ? ' None' : ''}
       </div>
+
       <div className={styles.filterActions}>
         <div className={styles.searchContainer}>
           <i className="fas fa-search"></i>
@@ -283,28 +279,6 @@ const FilterSection = ({
           />
         </div>
         <div className={styles.filterButtons}>
-          {selectedFeedbackIds.length > 0 && (
-            <div className={styles.bulkActions}>
-              <button
-                className={`${styles.actionButton} ${styles.createReportButton}`}
-                onClick={handleBulkGenerateReport}
-              >
-                <i className="fas fa-pen-alt"></i> Create Formal Report ({selectedFeedbackIds.length})
-              </button>
-              <button
-                className={`${styles.actionButton} ${styles.tagSpamButton}`}
-                onClick={handleBulkSpam}
-              >
-                <i className="fas fa-exclamation-circle"></i> Tag as Spam ({selectedFeedbackIds.length})
-              </button>
-              <button
-                className={`${styles.actionButton} ${styles.removeSpamButton}`}
-                onClick={handleBulkRestore}
-              >
-                <i className="fas fa-undo"></i> Restore ({selectedFeedbackIds.length})
-              </button>
-            </div>
-          )}
           {hasActiveFilters && (
             <button className={`${styles.actionButton} ${styles.clearFilterButton}`} onClick={handleClearFilters}>
               <i className="fas fa-times-circle"></i> Clear Filters
@@ -313,7 +287,7 @@ const FilterSection = ({
           <button
             className={`${styles.actionButton} ${styles.refreshButton}`}
             onClick={handleRefresh}
-            disabled={loading} // Disable button during loading
+            disabled={loading}
           >
             {loading ? (
               <>
@@ -326,12 +300,11 @@ const FilterSection = ({
             )}
           </button>
           <ExportPDFButton
-            data={filteredFeedback} // Pass complete dataset
-            initialSelectedIds={selectedFeedbackIds}
+            data={filteredFeedback}
             dashboardType="qa"
             prepareRawFeedbackForDisplay={prepareRawFeedbackForDisplay}
-            variant="primary" // optional: default, primary, secondary, outline
-            size="medium" // optional: small, medium, large
+            variant="primary"
+            size="medium"
           />
         </div>
       </div>
@@ -340,6 +313,7 @@ const FilterSection = ({
 };
 
 FilterSection.propTypes = {
+  styles: PropTypes.object.isRequired,
   filters: PropTypes.shape({
     status: PropTypes.string,
     sentiment: PropTypes.string,
@@ -362,13 +336,8 @@ FilterSection.propTypes = {
   setCustomStartDate: PropTypes.func.isRequired,
   customEndDate: PropTypes.instanceOf(Date),
   setCustomEndDate: PropTypes.func.isRequired,
-  departments: PropTypes.arrayOf(PropTypes.string).isRequired,
-  selectedFeedbackIds: PropTypes.arrayOf(PropTypes.string).isRequired,
-  setSelectedFeedbackIds: PropTypes.func.isRequired,
-  handleBulkSpam: PropTypes.func.isRequired,
-  handleBulkRestore: PropTypes.func.isRequired,
-  handleOpenBulkReportModal: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
+  departments: PropTypes.arrayOf(PropTypes.string).isRequired,
   filteredFeedback: PropTypes.array.isRequired,
   prepareRawFeedbackForDisplay: PropTypes.func.isRequired,
 };

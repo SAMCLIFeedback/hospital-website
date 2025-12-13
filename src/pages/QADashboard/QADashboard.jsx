@@ -1,9 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { toast, ToastContainer } from 'react-toastify';
 import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend, Title } from 'chart.js';
-import { handleLogout, handleBroadcastMessageFactory, handleGenerateReportFactory, handleEscalateFactory, handleTagAsSpamFactory, handleRestoreFactory, handleBulkRestoreFactory, handleBulkSpamFactory, handleBulkGenerateReportFactory, handleBulkEscalateFactory, handleViewDetailsFactory, handleViewHistoryFactory } from './QADashboard.handlers';
+import {
+  handleLogout,
+  handleBroadcastMessageFactory,
+  handleGenerateReportFactory,
+  handleEscalateFactory,
+  handleTagAsSpamFactory,
+  handleRestoreFactory,
+  handleViewDetailsFactory,
+  handleViewHistoryFactory
+} from './QADashboard.handlers';
 import styles from '@assets/css/Dashboard.module.css';
 import io from 'socket.io-client';
 import Header from '@components/QADashboard/Header';
@@ -14,7 +23,6 @@ import AuditTrailModal from '@components/QADashboard/AuditTrailModal';
 import FeedbackTable from '@components/QADashboard/FeedbackTable';
 import FeedbackModal from '@components/QADashboard/FeedbackModal';
 import ReportModal from '@components/QADashboard/ReportModal';
-import BulkReportModal from '@components/QADashboard/BulkReportModal';
 import { departments } from '@data/departments';
 import "react-datepicker/dist/react-datepicker.css";
 import 'react-toastify/dist/ReactToastify.css';
@@ -65,7 +73,6 @@ const QADashboard = () => {
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [isBulkReportModalOpen, setIsBulkReportModalOpen] = useState(false);
   const [isAuditTrailModalOpen, setIsAuditTrailModalOpen] = useState(false);
   const [reportStates, setReportStates] = useState({});
   const [timeFilter, setTimeFilter] = useState('all');
@@ -73,13 +80,11 @@ const QADashboard = () => {
   const [searchId, setSearchId] = useState('');
   const [customStartDate, setCustomStartDate] = useState(null);
   const [customEndDate, setCustomEndDate] = useState(null);
-  const [selectedFeedbackIds, setSelectedFeedbackIds] = useState([]);
-  const [bulkReportContent, setBulkReportContent] = useState('');
-  const [bulkReportDepartment, setBulkReportDepartment] = useState('');
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const broadcastChannelRef = useRef(null);
   const processedEventsRef = useRef(new Set());
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const [filters, setFilters] = useState({
     status: 'all',
     sentiment: 'all',
@@ -103,7 +108,7 @@ const QADashboard = () => {
     reconnectionDelay: 1000,
     autoConnect: false,
   });
-  
+
   const fetchFeedback = async () => {
     try {
       setLoading(true);
@@ -164,12 +169,12 @@ const QADashboard = () => {
       setError(`Failed to load feedback: ${err.message}`);
       toast.error(`Failed to load feedback: ${err.message}`);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
   const handleScroll = useCallback(() => {
-    setIsHeaderVisible(window.scrollY <= 5); // shows only at the very top
+    setIsHeaderVisible(window.scrollY <= 5);
   }, []);
 
   const handleBroadcastMessage = useCallback(
@@ -180,43 +185,22 @@ const QADashboard = () => {
       isModalOpen,
       isReportModalOpen,
       isAuditTrailModalOpen,
-      isBulkReportModalOpen,
-      selectedFeedbackIds,
       setFeedbackData,
-      setSelectedFeedbackIds,
       setIsModalOpen,
       setIsReportModalOpen,
       setIsAuditTrailModalOpen,
       setSelectedFeedback,
-      setIsBulkReportModalOpen,
-      setBulkReportContent,
-      setBulkReportDepartment,
     }),
-    [
-      tabId,
-      selectedFeedback,
-      isModalOpen,
-      isReportModalOpen,
-      isAuditTrailModalOpen,
-      isBulkReportModalOpen,
-      selectedFeedbackIds,
-    ]
+    [tabId, selectedFeedback, isModalOpen, isReportModalOpen, isAuditTrailModalOpen]
   );
 
   const closeReportModal = () => {
     setIsReportModalOpen(false);
   };
 
-  const closeBulkReportModal = () => {
-    setIsBulkReportModalOpen(false);
-    setBulkReportContent('');
-    setBulkReportDepartment('');
-    setSelectedFeedbackIds([]);
-  };
-
   const handleGenerateReport = handleGenerateReportFactory({
     feedbackData,
-    BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    BASE_URL,
     user,
     socket,
     broadcastChannelRef,
@@ -226,136 +210,56 @@ const QADashboard = () => {
 
   const handleEscalate = handleEscalateFactory({
     feedbackData,
-    setFeedbackData,
-    setReportStates,
+    BASE_URL,
+    user,
     socket,
     broadcastChannelRef,
     tabId,
     toast,
-    user,
     closeReportModal,
-    BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    setFeedbackData,
   });
 
   const handleTagAsSpam = handleTagAsSpamFactory({
-    BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    BASE_URL,
     user,
     socket,
     broadcastChannelRef,
     tabId,
+    toast,
+    setFeedbackData,
   });
 
   const handleRestore = handleRestoreFactory({
-    BASE_URL: import.meta.env.VITE_API_BASE_URL,
-    user,
-    socket,
-    broadcastChannelRef,
-    tabId,
-  });
-
-  const handleBulkSpam = handleBulkSpamFactory({
-    feedbackData,
-    selectedFeedbackIds,
-    setSelectedFeedbackIds,
-    setFeedbackData,
-    selectedFeedback,
-    setSelectedFeedback,
-    BASE_URL: import.meta.env.VITE_API_BASE_URL,
-    user,
-    socket,
-    broadcastChannelRef,
-    tabId,
-  });
-
-  const handleBulkRestore = handleBulkRestoreFactory({
-    feedbackData,
-    selectedFeedbackIds,
-    setSelectedFeedbackIds,
-    setFeedbackData,
-    selectedFeedback,
-    setSelectedFeedback,
-    BASE_URL: import.meta.env.VITE_API_BASE_URL,
-    user,
-    socket,
-    broadcastChannelRef,
-    tabId,
-  });
-
-  const handleBulkGenerateReport = handleBulkGenerateReportFactory({
-    feedbackData,
-    selectedFeedbackIds,
-    bulkReportContent,
-    bulkReportDepartment,
+    BASE_URL,
     user,
     socket,
     broadcastChannelRef,
     tabId,
     toast,
-    closeBulkReportModal,
     setFeedbackData,
-    selectedFeedback,
-    setSelectedFeedback,
-    BASE_URL: import.meta.env.VITE_API_BASE_URL,
   });
-
-  const handleBulkEscalate = handleBulkEscalateFactory({
-    feedbackData,
-    selectedFeedbackIds,
-    bulkReportContent,
-    bulkReportDepartment,
-    user,
-    socket,
-    broadcastChannelRef,
-    tabId,
-    toast,
-    closeBulkReportModal,
-    setFeedbackData,
-    BASE_URL
-  });
-  
-  const handleViewGeneratedReport = (feedback) => {
-    setSelectedFeedback(feedback);
-    setIsReportModalOpen(true);
-    setReportViewed(feedback.id, true);
-  };
-
-  const handleCreateReportClick = () => {
-    setIsModalOpen(false);
-    setIsReportModalOpen(true);
-  };
 
   const handleViewDetails = handleViewDetailsFactory({
     setSelectedFeedback,
     setIsModalOpen,
     reportStates,
     setReportStates,
-    departments
+    departmentsForAssignment: departments,
   });
 
   const handleViewHistory = handleViewHistoryFactory({
     BASE_URL,
     toast,
     setSelectedFeedback,
-    setIsAuditTrailModalOpen
+    setIsAuditTrailModalOpen,
   });
 
-  const handleOpenBulkReportModal = () => {
-    if (selectedFeedbackIds.length === 0) {
-      toast.warn('Please select at least one feedback item.');
-      return;
-    }
-    const invalidFeedback = selectedFeedbackIds
-      .map(id => feedbackData.find(f => f.id === id))
-      .filter(f => f && (f.status === 'spam' || f.status === 'assigned'));
-
-    if (invalidFeedback.length > 0) {
-      const errorMsg = invalidFeedback.map(f => `ID ${f.id} (${f.status})`).join(', ');
-      toast.error(`Cannot include items that are already assigned or spam: ${errorMsg}`);
-      return;
-    }
-    setIsBulkReportModalOpen(true);
+  const handleCreateReportClick = () => {
+    setIsModalOpen(false);
+    setIsReportModalOpen(true);
   };
-  
+
   const handlePageChange = page => {
     if (page >= 1 && page <= totalPages) {
       setFilters(prev => ({ ...prev, currentPage: page }));
@@ -365,9 +269,7 @@ const QADashboard = () => {
   const handleRefresh = async () => {
     setLoading(true);
     await fetchFeedback();
-    toast.info('Feedback refreshed.', {
-      autoClose: 1000
-    });
+    toast.info('Feedback refreshed.', { autoClose: 1000 });
     setLoading(false);
   };
 
@@ -387,7 +289,6 @@ const QADashboard = () => {
     setSearchId('');
     setCustomStartDate(null);
     setCustomEndDate(null);
-    setSelectedFeedbackIds([]);
   };
 
   const closeModal = () => {
@@ -520,12 +421,10 @@ const QADashboard = () => {
     switch (status) {
       case 'pending':
         return styles.pendingStatus;
-      case 'unassigned':
+      case 'not_manage':
         return styles.unassignedStatus;
-      case 'assigned':
+      case 'managed':
         return styles.assignedStatus;
-      case 'escalated':
-        return styles.escalatedStatus;
       case 'spam':
         return styles.spamStatus;
       case 'failed':
@@ -533,6 +432,14 @@ const QADashboard = () => {
       default:
         return '';
     }
+  };
+
+  const formatStatusLabel = status => {
+    if (!status) return 'Unknown';
+    if (status === 'not_manage') return 'Not Manage';
+    return status
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
   };
 
   const getSentimentModifierClass = (sentiment, sentiment_status) => {
@@ -591,8 +498,10 @@ const QADashboard = () => {
   }, [filters, timeFilter]);
 
   useEffect(() => {
-    broadcastChannelRef.current = new BroadcastChannel('feedback_updates');
-    broadcastChannelRef.current.onmessage = handleBroadcastMessage;
+    if ('BroadcastChannel' in window) {
+      broadcastChannelRef.current = new BroadcastChannel('feedback_updates');
+      broadcastChannelRef.current.onmessage = handleBroadcastMessage;
+    }
 
     socket.connect();
     socket.on('connect', () => console.log('WebSocket connected:', socket.id));
@@ -609,7 +518,7 @@ const QADashboard = () => {
           ...updatedFeedback,
           date: updatedFeedback.date || new Date().toISOString(),
           reportCreatedAt: updatedFeedback.reportCreatedAt || null,
-          actionHistory: updatedFeedback.actionHistory || [], // Include actionHistory
+          actionHistory: updatedFeedback.actionHistory || [],
         };
 
         const index = prevData.findIndex(f => f.id === normalizedFeedback.id);
@@ -623,8 +532,8 @@ const QADashboard = () => {
 
     socket.on('bulkFeedbackUpdate', () => {
       fetchFeedback();
-      setSelectedFeedbackIds([]);
     });
+
     socket.on('connect_error', (err) => toast.error('Failed to connect to real-time updates. Retrying...'));
     socket.on('disconnect', () => console.log('WebSocket disconnected'));
 
@@ -635,7 +544,7 @@ const QADashboard = () => {
       socket.off('connect_error');
       socket.off('disconnect');
       socket.disconnect();
-      broadcastChannelRef.current?.close();
+      if (broadcastChannelRef.current) broadcastChannelRef.current.close();
       processedEventsRef.current.clear();
     };
   }, [handleBroadcastMessage]);
@@ -653,6 +562,7 @@ const QADashboard = () => {
     
     return matchesStatus && matchesSentiment && matchesSource && matchesUrgent && matchesFeedbackType && matchesRating && matchesImpactSeverity && matchesDepartment && matchesSearchId;
   });
+
   const timeFilteredFeedback = filterByTime(filteredFeedback);
   const itemsPerPage = 50;
   const totalPages = Math.ceil(timeFilteredFeedback.length / itemsPerPage);
@@ -663,23 +573,21 @@ const QADashboard = () => {
 
   const paginatedFeedback = timeFilteredFeedback.slice((filters.currentPage - 1) * itemsPerPage, filters.currentPage * itemsPerPage);
 
-  // Today's Feedback
   const todayFeedbackCount = feedbackData.filter(f => 
     new Date(f.date).toDateString() === new Date().toDateString()
   ).length;
-  // Total Feedback (all time)
+
   const totalFeedback = feedbackData.length;
-  // Current month boundaries
+
   const now = new Date();
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const currentMonthName = now.toLocaleString('default', { month: 'long', year: 'numeric' });
-  // Feedback from current month only
+
   const monthlyFeedback = feedbackData.filter(f => {
     const date = new Date(f.date);
     return date >= currentMonthStart && date < currentMonthEnd;
   });
-  // Sentiment counts for current month
+
   const positiveThisMonth = monthlyFeedback.filter(f => f.sentiment === 'positive').length;
   const neutralThisMonth  = monthlyFeedback.filter(f => f.sentiment === 'neutral').length;
   const negativeThisMonth = monthlyFeedback.filter(f => f.sentiment === 'negative').length;
@@ -762,11 +670,6 @@ const QADashboard = () => {
           setCustomEndDate={setCustomEndDate}
           loading={loading}
           departments={departments}
-          selectedFeedbackIds={selectedFeedbackIds}
-          setSelectedFeedbackIds={setSelectedFeedbackIds}
-          handleBulkSpam={handleBulkSpam}
-          handleBulkRestore={handleBulkRestore}
-          handleBulkGenerateReport={handleOpenBulkReportModal}
           filteredFeedback={feedbackData}
           prepareRawFeedbackForDisplay={prepareRawFeedbackForDisplay}
         />
@@ -776,19 +679,17 @@ const QADashboard = () => {
           handleViewDetails={handleViewDetails}
           getSentimentModifierClass={getSentimentModifierClass}
           getStatusModifierClass={getStatusModifierClass}
+          formatStatusLabel={formatStatusLabel}
           handleTagAsSpam={handleTagAsSpam}
           handleRestore={handleRestore}
           reportStates={reportStates}
           setHasGenerated={setHasGenerated}
           setReportViewed={setReportViewed}
-          handleViewGeneratedReport={handleViewGeneratedReport}
-          selectedFeedbackIds={selectedFeedbackIds}
-          setSelectedFeedbackIds={setSelectedFeedbackIds}
           handleViewHistory={handleViewHistory}
         />
         <div className={styles.tableFooter}>
           <div className={styles.resultsInfo}>
-            Showing {Math.min(filters.currentPage * itemsPerPage, filteredFeedback.length)} of {filteredFeedback.length} feedback
+            Showing {Math.min(filters.currentPage * itemsPerPage, timeFilteredFeedback.length)} of {timeFilteredFeedback.length} feedback
           </div>
           <div className={styles.pagination}>
             <button
@@ -847,19 +748,6 @@ const QADashboard = () => {
             setHasGenerated={setHasGenerated}
           />
         )}
-        {isBulkReportModalOpen && (
-          <BulkReportModal
-            selectedFeedbackIds={selectedFeedbackIds}
-            departments={departments}
-            onClose={closeBulkReportModal}
-            onBulkGenerateReport={handleBulkGenerateReport}
-            onBulkEscalate={handleBulkEscalate}
-            reportContent={bulkReportContent}
-            setReportContent={setBulkReportContent}
-            reportDepartment={bulkReportDepartment}
-            setReportDepartment={setBulkReportDepartment}
-          />
-        )}
         {isAuditTrailModalOpen && selectedFeedback && (
           <AuditTrailModal
             styles={styles}
@@ -874,9 +762,9 @@ const QADashboard = () => {
 };
 
 const QADashboardWithErrorBoundary = () => (
-    <ErrorBoundary>
-        <QADashboard />
-    </ErrorBoundary>
+  <ErrorBoundary>
+    <QADashboard />
+  </ErrorBoundary>
 );
 
 export default QADashboardWithErrorBoundary;

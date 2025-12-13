@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 const FeedbackTable = ({
@@ -12,60 +11,13 @@ const FeedbackTable = ({
   reportStates,
   setHasGenerated,
   setReportViewed,
-  handleViewGeneratedReport,
-  selectedFeedbackIds,
-  setSelectedFeedbackIds,
   handleViewHistory,
 }) => {
-  const selectAllRef = useRef(null);
-
-  const handleSelectFeedback = (id) => {
-    setSelectedFeedbackIds(prev =>
-      prev.includes(id) ? prev.filter(fId => fId !== id) : [...prev, id]
-    );
-  };
-  
-  useEffect(() => {
-    if (selectAllRef.current) {
-      const selectableIds = feedback
-        .filter(f => f.status !== 'assigned' && f.status !== 'escalated')
-        .map(f => f.id);
-
-      const allSelected = selectableIds.length > 0 && selectableIds.every(id => selectedFeedbackIds.includes(id));
-      const noneSelected = selectableIds.every(id => !selectedFeedbackIds.includes(id));
-
-      selectAllRef.current.indeterminate = !allSelected && !noneSelected;
-    }
-  }, [selectedFeedbackIds, feedback]);
-
   return (
     <div className={styles.feedbackTableContainer}>
       <table className={styles.feedbackTable}>
         <thead>
           <tr>
-            <th>
-            <input
-              type="checkbox"
-              ref={selectAllRef}
-              checked={
-                feedback.length > 0 &&
-                feedback
-                  .filter(f => f.status !== 'assigned' && f.status !== 'escalated')
-                  .every(f => selectedFeedbackIds.includes(f.id))
-              }
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setSelectedFeedbackIds(
-                    feedback
-                      .filter(f => f.status !== 'assigned' && f.status !== 'escalated')
-                      .map(f => f.id)
-                  );
-                } else {
-                  setSelectedFeedbackIds([]);
-                }
-              }}
-            />
-            </th>
             <th>ID</th>
             <th>Date</th>
             <th>Source</th>
@@ -101,15 +53,7 @@ const FeedbackTable = ({
             }
 
             return (
-              <tr key={item.id || `temp-${Math.random()}`} className={styles.feedbackRow}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedFeedbackIds.includes(item.id)}
-                    onChange={() => handleSelectFeedback(item.id)}
-                    disabled={isLocked}
-                  />
-                </td>
+              <tr key={item.id} className={styles.feedbackRow}>
                 <td>{item.id?.toUpperCase() || 'N/A'}</td>
                 <td>
                   <div className={styles.dateCell}>
@@ -177,9 +121,13 @@ const FeedbackTable = ({
                 </td>
                 <td>
                   <div className={`${styles.statusTagBase} ${getStatusModifierClass(item.status)}`}>
-                    {typeof item.status === 'string' && item.status
-                      ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
-                      : 'Pending'}
+                    {item.status === 'not_manage'
+                      ? 'Not Manage'
+                      : typeof item.status === 'string' && item.status
+                        ? item.status
+                            .replace(/_/g, ' ')
+                            .replace(/\b\w/g, c => c.toUpperCase())
+                        : 'Pending'}
                   </div>
                 </td>
                 <td>
@@ -196,7 +144,7 @@ const FeedbackTable = ({
                       <button
                         title="Restore"
                         className={`${styles.moreActionsButton} ${styles.removeSpamButton}`}
-                        onClick={() => handleRestore(item)} // Use handleRestore instead of handleTagAsSpam
+                        onClick={() => handleRestore(item)}
                       >
                         <i className="fas fa-undo"></i> Restore
                       </button>
@@ -205,11 +153,7 @@ const FeedbackTable = ({
                         <button
                           title={buttonText}
                           className={buttonClass}
-                          onClick={() =>
-                            hasGenerated && !reportViewed
-                              ? handleViewGeneratedReport(item)
-                              : handleViewDetails(item)
-                          }
+                          onClick={() => handleViewDetails(item)}
                           disabled={isGenerating || isSpam}
                         >
                           {buttonIcon && <i className={`fas ${buttonIcon}`}></i>} {buttonText}
@@ -230,7 +174,7 @@ const FeedbackTable = ({
             );
           }) : (
             <tr>
-              <td colSpan="9" className={styles.noFeedbackMessage}>
+              <td colSpan="8" className={styles.noFeedbackMessage}>
                 <i className="fas fa-ghost"></i>
                 <p>No feedback entries match your current filters or failed to load.</p>
               </td>
@@ -243,6 +187,7 @@ const FeedbackTable = ({
 };
 
 FeedbackTable.propTypes = {
+  styles: PropTypes.object.isRequired,
   feedback: PropTypes.arrayOf(PropTypes.object).isRequired,
   handleViewDetails: PropTypes.func.isRequired,
   getSentimentModifierClass: PropTypes.func.isRequired,
@@ -252,9 +197,6 @@ FeedbackTable.propTypes = {
   reportStates: PropTypes.object.isRequired,
   setHasGenerated: PropTypes.func.isRequired,
   setReportViewed: PropTypes.func.isRequired,
-  handleViewGeneratedReport: PropTypes.func.isRequired,
-  selectedFeedbackIds: PropTypes.arrayOf(PropTypes.string).isRequired,
-  setSelectedFeedbackIds: PropTypes.func.isRequired,
   handleViewHistory: PropTypes.func.isRequired,
 };
 
