@@ -99,7 +99,7 @@ router.post('/feedback', async (req, res) => {
             sentiment_status: 'completed',
             sentiment_attempts: 1,
             sentiment_error: null,
-            status: 'unassigned'
+            status: 'not_manage'
           }
         },
         { new: true }

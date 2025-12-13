@@ -2070,7 +2070,7 @@
   font-weight: 600;
 }
 
-.chartContainer canvas {
+.chartContainer canvas { 
   max-height: 250px !important; /* Restrict chart height */
   width: 100% !important; /* Ensure chart fits container */
 }
@@ -2256,7 +2256,6 @@
   padding: 2rem;
   border-radius: 16px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-  margin: 2rem 0;
   border: 1px solid #eee;
 }
 
