@@ -7,7 +7,6 @@ const FeedbackTable = ({
   getSentimentModifierClass,
   getStatusModifierClass,
   formatStatusLabel,
-  handleViewHistory,
 }) => {
   return (
     <div className={styles.feedbackTableContainer}>
@@ -26,8 +25,6 @@ const FeedbackTable = ({
         </thead>
         <tbody>
           {feedback.length > 0 ? feedback.map((item) => {
-            const isLocked = item.status === 'assigned' || item.status === 'escalated';
-
             return (
               <tr key={item.id} className={styles.feedbackRow}>
                 <td>{item.id?.toUpperCase() || 'N/A'}</td>
@@ -102,23 +99,13 @@ const FeedbackTable = ({
                 </td>
                 <td>
                   <div className={styles.actionsCell}>
-                    {isLocked ? (
-                      <button
-                        title="View History"
-                        className={styles.moreActionsButton}
-                        onClick={() => handleViewHistory(item)}
-                      >
-                        <i className="fas fa-history"></i> History
-                      </button>
-                    ) : (
-                      <button
-                        title="View Details"
-                        className={styles.viewDetailsButton}
-                        onClick={() => handleViewDetails(item)}
-                      >
-                        <i className="fas fa-eye"></i> View
-                      </button>
-                    )}
+                    <button
+                      title="View Details"
+                      className={styles.viewDetailsButton}
+                      onClick={() => handleViewDetails(item)}
+                    >
+                      <i className="fas fa-eye"></i> View
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -144,7 +131,6 @@ FeedbackTable.propTypes = {
   getSentimentModifierClass: PropTypes.func.isRequired,
   getStatusModifierClass: PropTypes.func.isRequired,
   formatStatusLabel: PropTypes.func.isRequired,
-  handleViewHistory: PropTypes.func.isRequired,
 };
 
 export default FeedbackTable;

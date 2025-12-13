@@ -6,8 +6,7 @@ import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, L
 import {
   handleLogout,
   handleBroadcastMessageFactory,
-  handleViewDetailsFactory,
-  handleViewHistoryFactory
+  handleViewDetailsFactory
 } from './QADashboard.handlers';
 import styles from '@assets/css/Dashboard.module.css';
 import io from 'socket.io-client';
@@ -15,7 +14,6 @@ import Header from '@components/QADashboard/Header';
 import MetricCard from '@components/MetricCard';
 import AnalyticsSection from '@sections/QADashboard/AnalyticsSection';
 import FilterSection from '@sections/QADashboard/FilterSection';
-import AuditTrailModal from '@components/QADashboard/AuditTrailModal';
 import FeedbackTable from '@components/QADashboard/FeedbackTable';
 import FeedbackModal from '@components/QADashboard/FeedbackModal';
 import { departments } from '@data/departments';
@@ -67,7 +65,6 @@ const QADashboard = () => {
   const [loading, setLoading] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAuditTrailModalOpen, setIsAuditTrailModalOpen] = useState(false);
   const [timeFilter, setTimeFilter] = useState('all');
   const [error, setError] = useState(null);
   const [searchId, setSearchId] = useState('');
@@ -176,25 +173,16 @@ const QADashboard = () => {
       processedEventsRef,
       selectedFeedback,
       isModalOpen,
-      isAuditTrailModalOpen,
       setFeedbackData,
       setIsModalOpen,
-      setIsAuditTrailModalOpen,
       setSelectedFeedback,
     }),
-    [tabId, selectedFeedback, isModalOpen, isAuditTrailModalOpen]
+    [tabId, selectedFeedback, isModalOpen]
   );
 
   const handleViewDetails = handleViewDetailsFactory({
     setSelectedFeedback,
     setIsModalOpen,
-  });
-
-  const handleViewHistory = handleViewHistoryFactory({
-    BASE_URL,
-    toast,
-    setSelectedFeedback,
-    setIsAuditTrailModalOpen,
   });
 
   const handlePageChange = page => {
@@ -230,11 +218,6 @@ const QADashboard = () => {
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedFeedback(null);
-  };
-
-  const closeAuditTrailModal = () => {
-    setIsAuditTrailModalOpen(false);
     setSelectedFeedback(null);
   };
 
@@ -381,7 +364,6 @@ const QADashboard = () => {
         const normalizedFeedback = {
           ...updatedFeedback,
           date: updatedFeedback.date || new Date().toISOString(),
-          actionHistory: updatedFeedback.actionHistory || [],
         };
 
         const index = prevData.findIndex(f => f.id === normalizedFeedback.id);
@@ -538,7 +520,6 @@ const QADashboard = () => {
           getSentimentModifierClass={getSentimentModifierClass}
           getStatusModifierClass={getStatusModifierClass}
           formatStatusLabel={formatStatusLabel}
-          handleViewHistory={handleViewHistory}
         />
         <div className={styles.tableFooter}>
           <div className={styles.resultsInfo}>
@@ -576,15 +557,6 @@ const QADashboard = () => {
             BASE_URL={BASE_URL}
             feedback={selectedFeedback}
             onClose={closeModal}
-            prepareRawFeedbackForDisplay={prepareRawFeedbackForDisplay}
-            handleViewHistory={handleViewHistory}
-          />
-        )}
-        {isAuditTrailModalOpen && selectedFeedback && (
-          <AuditTrailModal
-            styles={styles}
-            feedback={selectedFeedback}
-            onClose={closeAuditTrailModal}
             prepareRawFeedbackForDisplay={prepareRawFeedbackForDisplay}
           />
         )}

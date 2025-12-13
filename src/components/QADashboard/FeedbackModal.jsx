@@ -5,7 +5,6 @@ const FeedbackModal = ({
   feedback,
   onClose,
   prepareRawFeedbackForDisplay,
-  handleViewHistory
 }) => {
   const feedbackDetails = prepareRawFeedbackForDisplay(feedback);
   delete feedbackDetails['Status'];
@@ -35,16 +34,7 @@ const FeedbackModal = ({
               ))}
             </div>
           </div>
-          <div className={styles.modalActions}>
-            {feedback.status === 'assigned' && (
-              <button
-                className={`${styles.actionButton} ${styles.viewReportButton}`}
-                onClick={() => handleViewHistory(feedback)}
-              >
-                <i className="fas fa-history"></i> View History
-              </button>
-            )}
-          </div>
+          {/* No actions section needed anymore */}
         </div>
       </div>
     </div>
@@ -55,7 +45,6 @@ FeedbackModal.propTypes = {
   feedback: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
   prepareRawFeedbackForDisplay: PropTypes.func.isRequired,
-  handleViewHistory: PropTypes.func.isRequired,
 };
 
 export default FeedbackModal;
