@@ -1,5 +1,4 @@
 import DatePicker from "react-datepicker";
-import ExportPDFButton from '@components/ExportPDFButton';
 import PropTypes from 'prop-types';
 
 const FilterSection = ({
@@ -18,8 +17,6 @@ const FilterSection = ({
   setCustomEndDate,
   loading,
   departments,
-  filteredFeedback,
-  prepareRawFeedbackForDisplay,
 }) => {
   const hasActiveFilters = Object.keys(filters).some(
     key => ['status', 'sentiment', 'source', 'urgent', 'feedbackType', 'rating', 'impactSeverity', 'department'].includes(key) && filters[key] !== 'all'
@@ -134,7 +131,6 @@ const FilterSection = ({
             <option value="all">All Statuses</option>
             <option value="pending">Pending</option>
             <option value="failed">Failed</option>
-            <option value="spam">Spam</option>
             <option value="not_manage">Not Managed</option>
             <option value="managed">Managed</option>
           </select>
@@ -299,13 +295,6 @@ const FilterSection = ({
               </>
             )}
           </button>
-          <ExportPDFButton
-            data={filteredFeedback}
-            dashboardType="qa"
-            prepareRawFeedbackForDisplay={prepareRawFeedbackForDisplay}
-            variant="primary"
-            size="medium"
-          />
         </div>
       </div>
     </section>
@@ -338,8 +327,6 @@ FilterSection.propTypes = {
   setCustomEndDate: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
   departments: PropTypes.arrayOf(PropTypes.string).isRequired,
-  filteredFeedback: PropTypes.array.isRequired,
-  prepareRawFeedbackForDisplay: PropTypes.func.isRequired,
 };
 
 export default FilterSection;

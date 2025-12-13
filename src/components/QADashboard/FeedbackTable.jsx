@@ -6,11 +6,7 @@ const FeedbackTable = ({
   handleViewDetails,
   getSentimentModifierClass,
   getStatusModifierClass,
-  handleTagAsSpam,
-  handleRestore,
-  reportStates,
-  setHasGenerated,
-  setReportViewed,
+  formatStatusLabel,
   handleViewHistory,
 }) => {
   return (
@@ -30,27 +26,7 @@ const FeedbackTable = ({
         </thead>
         <tbody>
           {feedback.length > 0 ? feedback.map((item) => {
-            const isGenerating = reportStates[item.id]?.isGenerating || false;
-            const hasGenerated = reportStates[item.id]?.hasGenerated || false;
-            const reportViewed = reportStates[item.id]?.reportViewed || false;
-            const isSpam = item.status === 'spam';
             const isLocked = item.status === 'assigned' || item.status === 'escalated';
-
-            let buttonClass = styles.viewDetailsButton;
-            let buttonText = 'View';
-            let buttonIcon = 'fa-eye';
-
-            if (!isSpam) {
-              if (isGenerating) {
-                buttonClass = styles.viewGeneratingButton;
-                buttonText = 'Generating...';
-                buttonIcon = 'fa-spinner fa-spin';
-              } else if (hasGenerated && !reportViewed && !isLocked) {
-                buttonClass = styles.viewReportButton;
-                buttonText = 'Generated';
-                buttonIcon = null;
-              }
-            }
 
             return (
               <tr key={item.id} className={styles.feedbackRow}>
@@ -121,13 +97,7 @@ const FeedbackTable = ({
                 </td>
                 <td>
                   <div className={`${styles.statusTagBase} ${getStatusModifierClass(item.status)}`}>
-                    {item.status === 'not_manage'
-                      ? 'Not Manage'
-                      : typeof item.status === 'string' && item.status
-                        ? item.status
-                            .replace(/_/g, ' ')
-                            .replace(/\b\w/g, c => c.toUpperCase())
-                        : 'Pending'}
+                    {formatStatusLabel(item.status)}
                   </div>
                 </td>
                 <td>
@@ -140,33 +110,14 @@ const FeedbackTable = ({
                       >
                         <i className="fas fa-history"></i> History
                       </button>
-                    ) : isSpam ? (
-                      <button
-                        title="Restore"
-                        className={`${styles.moreActionsButton} ${styles.removeSpamButton}`}
-                        onClick={() => handleRestore(item)}
-                      >
-                        <i className="fas fa-undo"></i> Restore
-                      </button>
                     ) : (
-                      <>
-                        <button
-                          title={buttonText}
-                          className={buttonClass}
-                          onClick={() => handleViewDetails(item)}
-                          disabled={isGenerating || isSpam}
-                        >
-                          {buttonIcon && <i className={`fas ${buttonIcon}`}></i>} {buttonText}
-                        </button>
-                        <button
-                          title="Tag as Spam"
-                          className={`${styles.moreActionsButton} ${styles.tagSpamButton}`}
-                          onClick={() => handleTagAsSpam(item)}
-                          disabled={isSpam}
-                        >
-                          <i className="fas fa-exclamation-circle"></i> Spam
-                        </button>
-                      </>
+                      <button
+                        title="View Details"
+                        className={styles.viewDetailsButton}
+                        onClick={() => handleViewDetails(item)}
+                      >
+                        <i className="fas fa-eye"></i> View
+                      </button>
                     )}
                   </div>
                 </td>
@@ -192,11 +143,7 @@ FeedbackTable.propTypes = {
   handleViewDetails: PropTypes.func.isRequired,
   getSentimentModifierClass: PropTypes.func.isRequired,
   getStatusModifierClass: PropTypes.func.isRequired,
-  handleTagAsSpam: PropTypes.func.isRequired,
-  handleRestore: PropTypes.func.isRequired,
-  reportStates: PropTypes.object.isRequired,
-  setHasGenerated: PropTypes.func.isRequired,
-  setReportViewed: PropTypes.func.isRequired,
+  formatStatusLabel: PropTypes.func.isRequired,
   handleViewHistory: PropTypes.func.isRequired,
 };
 

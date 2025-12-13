@@ -6,10 +6,6 @@ import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, L
 import {
   handleLogout,
   handleBroadcastMessageFactory,
-  handleGenerateReportFactory,
-  handleEscalateFactory,
-  handleTagAsSpamFactory,
-  handleRestoreFactory,
   handleViewDetailsFactory,
   handleViewHistoryFactory
 } from './QADashboard.handlers';
@@ -22,7 +18,6 @@ import FilterSection from '@sections/QADashboard/FilterSection';
 import AuditTrailModal from '@components/QADashboard/AuditTrailModal';
 import FeedbackTable from '@components/QADashboard/FeedbackTable';
 import FeedbackModal from '@components/QADashboard/FeedbackModal';
-import ReportModal from '@components/QADashboard/ReportModal';
 import { departments } from '@data/departments';
 import "react-datepicker/dist/react-datepicker.css";
 import 'react-toastify/dist/ReactToastify.css';
@@ -72,9 +67,7 @@ const QADashboard = () => {
   const [loading, setLoading] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isAuditTrailModalOpen, setIsAuditTrailModalOpen] = useState(false);
-  const [reportStates, setReportStates] = useState({});
   const [timeFilter, setTimeFilter] = useState('all');
   const [error, setError] = useState(null);
   const [searchId, setSearchId] = useState('');
@@ -183,69 +176,18 @@ const QADashboard = () => {
       processedEventsRef,
       selectedFeedback,
       isModalOpen,
-      isReportModalOpen,
       isAuditTrailModalOpen,
       setFeedbackData,
       setIsModalOpen,
-      setIsReportModalOpen,
       setIsAuditTrailModalOpen,
       setSelectedFeedback,
     }),
-    [tabId, selectedFeedback, isModalOpen, isReportModalOpen, isAuditTrailModalOpen]
+    [tabId, selectedFeedback, isModalOpen, isAuditTrailModalOpen]
   );
-
-  const closeReportModal = () => {
-    setIsReportModalOpen(false);
-  };
-
-  const handleGenerateReport = handleGenerateReportFactory({
-    feedbackData,
-    BASE_URL,
-    user,
-    socket,
-    broadcastChannelRef,
-    tabId,
-    closeReportModal,
-  });
-
-  const handleEscalate = handleEscalateFactory({
-    feedbackData,
-    BASE_URL,
-    user,
-    socket,
-    broadcastChannelRef,
-    tabId,
-    toast,
-    closeReportModal,
-    setFeedbackData,
-  });
-
-  const handleTagAsSpam = handleTagAsSpamFactory({
-    BASE_URL,
-    user,
-    socket,
-    broadcastChannelRef,
-    tabId,
-    toast,
-    setFeedbackData,
-  });
-
-  const handleRestore = handleRestoreFactory({
-    BASE_URL,
-    user,
-    socket,
-    broadcastChannelRef,
-    tabId,
-    toast,
-    setFeedbackData,
-  });
 
   const handleViewDetails = handleViewDetailsFactory({
     setSelectedFeedback,
     setIsModalOpen,
-    reportStates,
-    setReportStates,
-    departmentsForAssignment: departments,
   });
 
   const handleViewHistory = handleViewHistoryFactory({
@@ -254,11 +196,6 @@ const QADashboard = () => {
     setSelectedFeedback,
     setIsAuditTrailModalOpen,
   });
-
-  const handleCreateReportClick = () => {
-    setIsModalOpen(false);
-    setIsReportModalOpen(true);
-  };
 
   const handlePageChange = page => {
     if (page >= 1 && page <= totalPages) {
@@ -299,77 +236,6 @@ const QADashboard = () => {
   const closeAuditTrailModal = () => {
     setIsAuditTrailModalOpen(false);
     setSelectedFeedback(null);
-  };
-
-  const setReportContent = (feedbackId, content) => {
-    setReportStates(prev => ({
-      ...prev,
-      [feedbackId]: {
-        ...prev[feedbackId],
-        reportContent: content,
-      },
-    }));
-  };
-
-  const setReportDepartment = (feedbackId, department) => {
-    setReportStates(prev => ({
-      ...prev,
-      [feedbackId]: {
-        ...prev[feedbackId],
-        reportDepartment: department,
-      },
-    }));
-  };
-
-  const setIsGenerating = (feedbackId, value, controller = null) => {
-    setReportStates(prev => ({
-      ...prev,
-      [feedbackId]: {
-        ...prev[feedbackId],
-        isGenerating: value,
-        ...(controller ? { abortController: controller } : {}),
-      },
-    }));
-  };
-
-  const setHasGenerated = (feedbackId, value) => {
-    setReportStates(prev => ({
-      ...prev,
-      [feedbackId]: {
-        ...prev[feedbackId],
-        hasGenerated: value,
-        reportViewed: value ? false : prev[feedbackId]?.reportViewed,
-      },
-    }));
-  };
-
-  const setReportViewed = (feedbackId, value) => {
-    setReportStates(prev => ({
-      ...prev,
-      [feedbackId]: {
-        ...prev[feedbackId],
-        reportViewed: value,
-      },
-    }));
-  };
-
-  const updateSentiment = (id, newSentiment) => {
-    setFeedbackData(prevData =>
-      prevData.map(f =>
-        f.id === id ? {
-          ...f,
-          sentiment: newSentiment,
-          sentiment_status: 'completed',
-        } : f
-      )
-    );
-    if (selectedFeedback?.id === id) {
-      setSelectedFeedback({
-        ...selectedFeedback,
-        sentiment: newSentiment,
-        sentiment_status: 'completed',
-      });
-    }
   };
 
   const prepareRawFeedbackForDisplay = feedback => {
@@ -425,8 +291,6 @@ const QADashboard = () => {
         return styles.unassignedStatus;
       case 'managed':
         return styles.assignedStatus;
-      case 'spam':
-        return styles.spamStatus;
       case 'failed':
         return styles.failedStatus;
       default:
@@ -517,7 +381,6 @@ const QADashboard = () => {
         const normalizedFeedback = {
           ...updatedFeedback,
           date: updatedFeedback.date || new Date().toISOString(),
-          reportCreatedAt: updatedFeedback.reportCreatedAt || null,
           actionHistory: updatedFeedback.actionHistory || [],
         };
 
@@ -530,17 +393,12 @@ const QADashboard = () => {
       });
     });
 
-    socket.on('bulkFeedbackUpdate', () => {
-      fetchFeedback();
-    });
-
     socket.on('connect_error', (err) => toast.error('Failed to connect to real-time updates. Retrying...'));
     socket.on('disconnect', () => console.log('WebSocket disconnected'));
 
     return () => {
       socket.off('connect');
       socket.off('feedbackUpdate');
-      socket.off('bulkFeedbackUpdate');
       socket.off('connect_error');
       socket.off('disconnect');
       socket.disconnect();
@@ -680,11 +538,6 @@ const QADashboard = () => {
           getSentimentModifierClass={getSentimentModifierClass}
           getStatusModifierClass={getStatusModifierClass}
           formatStatusLabel={formatStatusLabel}
-          handleTagAsSpam={handleTagAsSpam}
-          handleRestore={handleRestore}
-          reportStates={reportStates}
-          setHasGenerated={setHasGenerated}
-          setReportViewed={setReportViewed}
           handleViewHistory={handleViewHistory}
         />
         <div className={styles.tableFooter}>
@@ -723,29 +576,8 @@ const QADashboard = () => {
             BASE_URL={BASE_URL}
             feedback={selectedFeedback}
             onClose={closeModal}
-            onCreateReport={handleCreateReportClick}
             prepareRawFeedbackForDisplay={prepareRawFeedbackForDisplay}
-            updateSentiment={updateSentiment}
             handleViewHistory={handleViewHistory}
-          />
-        )}
-        {isReportModalOpen && selectedFeedback && (
-          <ReportModal
-            BASE_URL={BASE_URL}
-            feedback={selectedFeedback}
-            departments={departments}
-            onClose={closeReportModal}
-            onGenerateReport={handleGenerateReport}
-            onEscalate={handleEscalate}
-            reportContent={reportStates[selectedFeedback.id]?.reportContent || ''}
-            setReportContent={setReportContent}
-            reportDepartment={reportStates[selectedFeedback.id]?.reportDepartment || ''}
-            setReportDepartment={setReportDepartment}
-            prepareRawFeedbackForDisplay={prepareRawFeedbackForDisplay}
-            isGenerating={reportStates}
-            setIsGenerating={setIsGenerating}
-            hasGenerated={reportStates}
-            setHasGenerated={setHasGenerated}
           />
         )}
         {isAuditTrailModalOpen && selectedFeedback && (
