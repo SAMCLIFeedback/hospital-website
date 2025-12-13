@@ -540,38 +540,6 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
             </div>
           )}
 
-          {/* Average Star Rating by Department */}
-          {ratingByDeptStats.length > 0 && (
-            <div className={styles.chartContainerFull}>
-              <h3>Average Star Rating by Department (Patient/Visitor/Family)</h3>
-              <div style={{ height: '620px', margin: '2rem 0' }}>
-                <Bar
-                  data={{
-                    labels: ratingByDeptStats.map(d => d.department),
-                    datasets: [{
-                      label: 'Average Rating',
-                      data: ratingByDeptStats.map(d => d.averageRating),
-                      backgroundColor: '#fbbf24',
-                    }],
-                  }}
-                  options={{
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      tooltip: { callbacks: { label: ctx => `★ ${ctx.raw} / 5.00` } },
-                      legend: { display: false },
-                    },
-                    scales: {
-                      x: { min: 0, max: 5, ticks: { stepSize: 0.5, callback: v => `★ ${v.toFixed(1)}` } },
-                      y: { ticks: { autoSkip: false } },
-                    },
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
           {/* Impact Severity % by Department */}
           {impactSeverityStats.length > 0 && (
             <div className={styles.chartContainerFull}>
@@ -632,6 +600,38 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
                     scales: {
                       x: { stacked: true, max: 100, ticks: { callback: v => `${v}%` } },
                       y: { stacked: true, ticks: { autoSkip: false } },
+                    },
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Average Star Rating by Department */}
+          {ratingByDeptStats.length > 0 && (
+            <div className={styles.chartContainerFull}>
+              <h3>Average Star Rating by Department (Patient/Visitor/Family)</h3>
+              <div style={{ height: '620px', margin: '2rem 0' }}>
+                <Bar
+                  data={{
+                    labels: ratingByDeptStats.map(d => d.department),
+                    datasets: [{
+                      label: 'Average Rating',
+                      data: ratingByDeptStats.map(d => d.averageRating),
+                      backgroundColor: '#fbbf24',
+                    }],
+                  }}
+                  options={{
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      tooltip: { callbacks: { label: ctx => `★ ${ctx.raw} / 5.00` } },
+                      legend: { display: false },
+                    },
+                    scales: {
+                      x: { min: 0, max: 5, ticks: { stepSize: 0.5, callback: v => `★ ${v.toFixed(1)}` } },
+                      y: { ticks: { autoSkip: false } },
                     },
                   }}
                 />
