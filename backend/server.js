@@ -56,7 +56,6 @@ app.use(express.json());
 const feedbackRoutes = require('./routes/externalFeedback');
 const verificationRoutes = require('./routes/staffVerification');
 const staffFeedbackRoutes = require('./routes/internalFeedback');
-const sentimentFeedbackRoutes = require('./routes/feedbackRoutes');
 const runRetrySentiment = require('./utils/retrySentimentWorker');
 const QALoginRoutes = require('./routes/qaLogin');
 const submissionCountRoute = require('./routes/submissionCounts')
@@ -79,7 +78,6 @@ app.get('/api/retry-sentiment', async (req, res) => {
 });
 
 
-app.use('/api', sentimentFeedbackRoutes);
 
 app.get('/api/feedback/all', async (req, res) => {
     try {

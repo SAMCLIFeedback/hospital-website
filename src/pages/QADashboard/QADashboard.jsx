@@ -270,10 +270,8 @@ const QADashboard = () => {
     switch (status) {
       case 'pending':
         return styles.pendingStatus;
-      case 'not_manage':
+      case 'done':
         return styles.unassignedStatus;
-      case 'managed':
-        return styles.assignedStatus;
       case 'failed':
         return styles.failedStatus;
       default:
@@ -283,7 +281,7 @@ const QADashboard = () => {
 
   const formatStatusLabel = status => {
     if (!status) return 'Unknown';
-    if (status === 'not_manage') return 'Not Manage';
+    if (status === 'done') return 'Done';
     return status
       .replace(/_/g, ' ')
       .replace(/\b\w/g, c => c.toUpperCase());
