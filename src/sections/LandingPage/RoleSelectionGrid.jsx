@@ -28,7 +28,7 @@ const RoleSelectionGrid = ({roleCards, setIsNavigating, styles}) => {
       transition={{ duration: 0.8, ease: "easeOut" }} >
       <div className={styles.container}>
         <div className={styles.feedbackRoles}>
-          <h2 className={styles.sectionHeading}>Provide Feedback</h2>
+          <h2 className={styles.sectionHeading}>Staff Feedback Form</h2>
           <div className={styles.feedbackGrid}>
             {/* Displaying roles with type 'feedback' */}
             {roleCards.filter(role => role.type === 'feedback').map((role, index) => (
