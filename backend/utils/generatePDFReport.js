@@ -62,20 +62,24 @@ export async function generatePDFReport({
   filterSummary,
   chartList
 }) {
-  const analyticsSection = document.querySelector('[class*="analyticsSection"]');
-  const toggleButton = analyticsSection?.querySelector('[class*="toggleButton"]');
-  const analyticsContent = analyticsSection?.querySelector('[class*="analyticsContent"]');
-
-  let wasCollapsed = false;
-  if (analyticsContent && analyticsContent.offsetParent === null) {
-    wasCollapsed = true;
-    if (toggleButton) toggleButton.click();
-    await new Promise(resolve => setTimeout(resolve, 800));
+  // CRITICAL: Look for charts in the REPORT MODAL, not the dashboard
+  // Charts in the report modal have the class 'report-chart-container'
+  const reportModal = document.querySelector('[class*="reportModal"]');
+  let chartContainers;
+  
+  if (reportModal) {
+    // Get charts from the report modal
+    chartContainers = reportModal.querySelectorAll('.report-chart-container.chart-for-pdf');
+    console.log(`Found ${chartContainers.length} charts in report modal`);
+  } else {
+    // Fallback to dashboard charts if modal not found
+    console.warn('Report modal not found, falling back to dashboard charts');
+    chartContainers = document.querySelectorAll('.chart-for-pdf');
   }
 
-  const chartContainers = document.querySelectorAll('.chart-for-pdf');
   const chartImages = [];
 
+  // Capture charts
   for (let i = 0; i < Math.min(chartList.length, chartContainers.length); i++) {
     const imageInfo = await captureChartDirect(chartContainers[i], chartList[i].title);
     if (imageInfo) {
@@ -88,9 +92,7 @@ export async function generatePDFReport({
     await new Promise(resolve => setTimeout(resolve, 100));
   }
 
-  if (wasCollapsed && toggleButton) {
-    toggleButton.click();
-  }
+  console.log(`Captured ${chartImages.length} chart images for PDF`);
 
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -299,7 +301,7 @@ export async function generatePDFReport({
   const boxHeight = 20;
   const boxSpacing = 6;
   const totalBoxHeight = detailBoxes.length * boxHeight + (detailBoxes.length - 1) * boxSpacing;
-  const startY = (pageHeight - totalBoxHeight) / 2 + 20; // Center vertically with offset
+  const startY = (pageHeight - totalBoxHeight) / 2 + 20;
 
   detailBoxes.forEach((box, idx) => {
     const boxY = startY + (idx * (boxHeight + boxSpacing));
@@ -341,7 +343,6 @@ export async function generatePDFReport({
     pdf.setFillColor(...colors.primary);
     pdf.rect(0, 0, pageWidth, 50, 'F');
     
-    // Accent element
     pdf.setFillColor(...colors.accent);
     pdf.circle(pageWidth - 10, 25, 40, 'F');
 
@@ -364,7 +365,6 @@ export async function generatePDFReport({
         pdf.addPage();
         yPos = 25;
         
-        // Continuation header
         pdf.setFillColor(...colors.lightGray);
         pdf.rect(0, 0, pageWidth, 15, 'F');
         pdf.setTextColor(...colors.primary);
@@ -374,12 +374,10 @@ export async function generatePDFReport({
         pdf.setTextColor(...colors.dark);
       }
 
-      // Bullet point with icon
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(10);
       pdf.setTextColor(...colors.primaryLight);
       
-      // Draw icon based on type
       if (sec.icon === 'circle') {
         pdf.setFillColor(...colors.primaryLight);
         pdf.circle(22, yPos - 2, 2, 'F');
@@ -394,7 +392,6 @@ export async function generatePDFReport({
         pdf.triangle(20, yPos - 3, 20, yPos + 1, 24, yPos - 1, 'F');
       }
 
-      // Content
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(11);
       pdf.setTextColor(...colors.dark);
@@ -412,12 +409,10 @@ export async function generatePDFReport({
     const isLandscape = !isPie;
 
     if (isLandscape) {
-      // Create landscape page for bar/line charts
       pdf.addPage('a4', 'landscape');
       const landscapeWidth = pdf.internal.pageSize.getWidth();
       const landscapeHeight = pdf.internal.pageSize.getHeight();
 
-      // Header
       pdf.setFillColor(...colors.primary);
       pdf.rect(0, 0, landscapeWidth, 35, 'F');
       
@@ -433,7 +428,6 @@ export async function generatePDFReport({
       pdf.setFontSize(14);
       pdf.text(chart.title, 15, 25);
 
-      // Chart image - maximize size and center
       yPos = 45;
       const maxChartWidth = landscapeWidth - 30;
       const maxChartHeight = landscapeHeight - yPos - 40;
@@ -450,7 +444,6 @@ export async function generatePDFReport({
       const imgY = yPos + (maxChartHeight - imgH) / 2;
       pdf.addImage(chart.data, 'PNG', imgX, imgY, imgW, imgH);
 
-      // Description at bottom
       if (chart.description) {
         const descY = landscapeHeight - 25;
         pdf.setFontSize(10);
@@ -459,10 +452,8 @@ export async function generatePDFReport({
         addWrappedText(pdf, chart.description, 15, descY, landscapeWidth - 30, 5);
       }
     } else {
-      // Portrait page for pie/donut charts
       pdf.addPage('a4', 'portrait');
 
-      // Header
       pdf.setFillColor(...colors.primary);
       pdf.rect(0, 0, pageWidth, 40, 'F');
       
@@ -478,10 +469,9 @@ export async function generatePDFReport({
       pdf.setFontSize(14);
       pdf.text(chart.title, 15, 30);
 
-      // Chart image - centered both horizontally and vertically
       yPos = 55;
       const maxWidth = pageWidth - 40;
-      const maxHeight = pageHeight - yPos - 80; // Leave space for description
+      const maxHeight = pageHeight - yPos - 80;
       
       let imgW = maxWidth;
       let imgH = imgW * chart.aspectRatio;
@@ -495,7 +485,6 @@ export async function generatePDFReport({
       const imgY = yPos + (maxHeight - imgH) / 2;
       pdf.addImage(chart.data, 'PNG', imgX, imgY, imgW, imgH);
 
-      // Description at bottom
       if (chart.description) {
         const descY = pageHeight - 35;
         pdf.setFontSize(11);
@@ -516,12 +505,10 @@ export async function generatePDFReport({
     if (p > 1) {
       const currentHeight = pdf.internal.pageSize.getHeight();
       
-      // Footer separator line
       pdf.setDrawColor(...colors.lightGray);
       pdf.setLineWidth(0.3);
       pdf.line(15, currentHeight - 18, pdf.internal.pageSize.getWidth() - 15, currentHeight - 18);
 
-      // Page number
       pdf.setFontSize(9);
       pdf.setTextColor(...colors.gray);
       pdf.setFont('helvetica', 'normal');
@@ -532,7 +519,6 @@ export async function generatePDFReport({
         { align: 'center' }
       );
 
-      // Date
       pdf.text(
         format(new Date(), 'MMM d, yyyy'),
         pdf.internal.pageSize.getWidth() - 15,

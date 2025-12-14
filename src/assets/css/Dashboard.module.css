@@ -2294,3 +2294,407 @@
 .negativeRow {
   display: none !important;
 }
+
+/* Add these styles to Dashboard.module.css */
+
+/* ============================================
+   REPORT MODAL STYLES
+   ============================================ */
+
+.reportModal {
+  background: var(--bg-card);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow-y: auto;
+  backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--border-light);
+  animation: slideInUp 0.4s ease;
+  max-height: 90vh;
+  transition: max-width 0.3s ease, max-height 0.3s ease;
+}
+
+.reportModal .modalHeader {
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+  color: var(--text-light);
+  padding: 1.5rem 2rem;
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--accent-teal);
+}
+
+.reportModal .modalHeader h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--text-light);
+}
+
+.reportModal .closeBtn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: var(--text-light);
+  font-size: 1.75rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.reportModal .closeBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.reportModal .modalBody {
+  padding: 2rem;
+  max-height: calc(90vh - 200px);
+  overflow-y: auto;
+}
+
+.reportInfo {
+  background: linear-gradient(135deg, rgba(26, 115, 232, 0.1), rgba(98, 0, 234, 0.1));
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius-md);
+  border-left: 4px solid var(--primary-blue);
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  color: var(--text-dark);
+}
+
+.reportInfo strong {
+  color: var(--primary-blue);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.previewSummary {
+  background: var(--bg-input);
+  padding: 1.25rem;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-light);
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+  color: var(--text-dark);
+}
+
+.previewSummary strong {
+  color: var(--primary-blue);
+  font-weight: 700;
+  display: inline-block;
+  min-width: 100px;
+}
+
+/* Time Filter Container in Modal */
+.reportModal .timeFilterContainer {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.reportModal .timeFilter {
+  display: flex;
+  gap: 0.5rem;
+  background-color: var(--bg-card);
+  padding: 0.5rem;
+  border-radius: var(--border-radius-md);
+  backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--border-light);
+  flex-wrap: wrap;
+}
+
+.reportModal .timeFilterTab {
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: var(--transition-ease);
+  font-size: 0.9rem;
+  color: var(--text-medium);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.reportModal .timeFilterTab:hover {
+  background-color: var(--bg-card-hover);
+  color: var(--text-dark);
+  transform: scale(1.05);
+}
+
+.reportModal .timeFilterTab.activeFilter {
+  background: linear-gradient(90deg, var(--primary-blue), var(--accent-purple));
+  color: var(--text-light);
+}
+
+/* Filters Grid in Modal */
+.reportModal .filtersContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  background: var(--bg-card);
+  padding: 1.25rem;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--border-light);
+}
+
+.reportModal .filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reportModal .filterGroup label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-left: 0.2rem;
+}
+
+.reportModal .filterGroup select {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  background: var(--bg-input);
+  transition: var(--transition-ease);
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%235f6368" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 12px;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+.reportModal .filterGroup select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Chart Preview Section */
+.chartPreviewSection {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.chartPreviewToggle {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--accent-purple), var(--primary-blue));
+  color: var(--text-light);
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: var(--transition-ease);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.chartPreviewToggle:hover {
+  background: linear-gradient(135deg, #4a00b2, var(--primary-blue-dark));
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+.chartPreviewToggle i {
+  font-size: 1rem;
+}
+
+.chartPreviewContainer {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--border-light);
+}
+
+.chartPreviewHeader {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.chartPreviewHeader h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary-blue);
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chartPreviewHeader h3 i {
+  font-size: 1.25rem;
+}
+
+.chartPreviewHeader p {
+  color: var(--text-medium);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Individual Chart Containers */
+.reportChartContainer {
+  background: #f9fafb;
+  padding: 1.5rem;
+  border-radius: var(--border-radius-md);
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-xs);
+  transition: var(--transition-ease);
+}
+
+.reportChartContainer:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.reportChartContainer h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--primary-blue);
+}
+
+.reportChartGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Modal Footer */
+.reportModal .modalFooter {
+  background: var(--bg-card);
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--border-light);
+  border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.reportModal .cancelBtn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(45deg, var(--text-medium), #888);
+  color: var(--text-light);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: var(--transition-ease);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reportModal .cancelBtn:hover {
+  background: linear-gradient(45deg, #666, #555);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow);
+}
+
+.reportModal .generateBtn {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, var(--accent-lime), #2e7d32);
+  color: var(--text-light);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: var(--transition-ease);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.reportModal .generateBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+.reportModal .generateBtn:disabled {
+  background: var(--text-medium);
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.reportModal .generateBtn i {
+  font-size: 1.1rem;
+}
+
+/* Loading State */
+.reportModal .generateBtn.generating {
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .reportModal {
+    max-width: 95vw !important;
+  }
+
+  .reportChartGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .reportModal .filtersContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .reportModal .modalHeader {
+    padding: 1rem;
+  }
+
+  .reportModal .modalHeader h2 {
+    font-size: 1.25rem;
+  }
+
+  .reportModal .modalBody {
+    padding: 1rem;
+  }
+
+  .reportModal .modalFooter {
+    padding: 1rem;
+    flex-direction: column;
+  }
+
+  .reportModal .cancelBtn,
+  .reportModal .generateBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .reportModal .timeFilterContainer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reportModal .timeFilter {
+    justify-content: center;
+  }
+}
