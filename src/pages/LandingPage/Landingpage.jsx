@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import styles from '@assets/css/LandingPage.module.css';
 import Loader from '@components/Loader.jsx';
-
 import testimonials from './testimonials.js';
 import roleCards from './roleCards.js';
-
 import HeroSection from '@sections/LandingPage/HeroSection.jsx';
 import RoleSelectionGrid from '@sections/LandingPage/RoleSelectionGrid.jsx';
 import Testimonials from '@sections/LandingPage/Testimonials.jsx';
