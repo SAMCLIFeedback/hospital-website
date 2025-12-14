@@ -1,34 +1,48 @@
 // @sections/QADashboard/AnalyticsSection.jsx
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Bar, Pie } from 'react-chartjs-2';
 import PropTypes from 'prop-types';
 
 const AnalyticsSection = ({ styles, feedbackData = [] }) => {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  // Start EXPANDED (false) so charts are available for PDF generation
+  // Users expect to see analytics when viewing the dashboard
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const safeFeedbackData = Array.isArray(feedbackData) ? feedbackData : [];
+  const safeFeedbackData = useMemo(() => Array.isArray(feedbackData) ? feedbackData : [], [feedbackData]);
+
+  const now = useMemo(() => new Date('2025-12-14'), []); // Fixed to current date for consistency
 
   // ──────────────────────────────────────────────────────────────
-  // 1. Feedback Volume Over Time
+  // 1. Feedback Volume Over Time (Fixed: No date mutation)
   // ──────────────────────────────────────────────────────────────
-  const feedbackVolumeData = {
-    labels: ['Today', 'Week', 'Month', 'Quarter'],
-    datasets: [{
-      label: 'Feedback Volume',
-      data: [
-        safeFeedbackData.filter(f => new Date(f.date).toDateString() === new Date().toDateString()).length,
-        safeFeedbackData.filter(f => new Date(f.date) >= new Date(new Date().setDate(new Date().getDate() - 7))).length,
-        safeFeedbackData.filter(f => new Date(f.date) >= new Date(new Date().setMonth(new Date().getMonth() - 1))).length,
-        safeFeedbackData.filter(f => new Date(f.date) >= new Date(new Date().setMonth(new Date().getMonth() - 3))).length,
-      ],
-      backgroundColor: 'rgba(26, 115, 232, 0.6)',
-    }],
-  };
+  const feedbackVolumeData = useMemo(() => {
+    const todayStr = now.toDateString();
+    const weekAgo = new Date(now);
+    weekAgo.setDate(now.getDate() - 7);
+    const monthAgo = new Date(now);
+    monthAgo.setMonth(now.getMonth() - 1);
+    const quarterAgo = new Date(now);
+    quarterAgo.setMonth(now.getMonth() - 3);
+
+    return {
+      labels: ['Today', 'Week', 'Month', 'Quarter'],
+      datasets: [{
+        label: 'Feedback Volume',
+        data: [
+          safeFeedbackData.filter(f => new Date(f.date).toDateString() === todayStr).length,
+          safeFeedbackData.filter(f => new Date(f.date) >= weekAgo).length,
+          safeFeedbackData.filter(f => new Date(f.date) >= monthAgo).length,
+          safeFeedbackData.filter(f => new Date(f.date) >= quarterAgo).length,
+        ],
+        backgroundColor: 'rgba(26, 115, 232, 0.6)',
+      }],
+    };
+  }, [safeFeedbackData, now]);
 
   // ──────────────────────────────────────────────────────────────
   // 2. Overall Sentiment + Source (Pie Charts)
   // ──────────────────────────────────────────────────────────────
-  const sentimentData = {
+  const sentimentData = useMemo(() => ({
     labels: ['Positive', 'Neutral', 'Negative', 'Pending'],
     datasets: [{
       data: [
@@ -39,9 +53,9 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       ],
       backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#1a73e8'],
     }],
-  };
+  }), [safeFeedbackData]);
 
-  const sourceData = {
+  const sourceData = useMemo(() => ({
     labels: ['Staff', 'Patient', 'Visitor/Family'],
     datasets: [{
       data: [
@@ -51,19 +65,19 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       ],
       backgroundColor: ['#00b7eb', '#ff6b6b', '#4caf50'],
     }],
-  };
+  }), [safeFeedbackData]);
 
   // ──────────────────────────────────────────────────────────────
   // 3. Internal & External Feedback Type Distribution (Global Pies)
   // ──────────────────────────────────────────────────────────────
-  const internalFeedback = safeFeedbackData.filter(f => f.source === 'staff');
-  const internalTypeCounts = internalFeedback.reduce((acc, f) => {
+  const internalFeedback = useMemo(() => safeFeedbackData.filter(f => f.source === 'staff'), [safeFeedbackData]);
+  const internalTypeCounts = useMemo(() => internalFeedback.reduce((acc, f) => {
     const type = f.feedbackType || 'other';
     acc[type] = (acc[type] || 0) + 1;
     return acc;
-  }, {});
+  }, {}), [internalFeedback]);
 
-  const internalPieData = {
+  const internalPieData = useMemo(() => ({
     labels: ['Operational', 'Safety', 'Improvement', 'Recognition', 'Complaint', 'Other'],
     datasets: [{
       data: [
@@ -76,16 +90,16 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       ],
       backgroundColor: ['#3b82f6', '#ef4444', '#8b5cf6', '#10b981', '#dc2626', '#6b7280'],
     }],
-  };
+  }), [internalTypeCounts]);
 
-  const externalFeedback = safeFeedbackData.filter(f => ['patient', 'visitor', 'family'].includes(f.source));
-  const externalTypeCounts = externalFeedback.reduce((acc, f) => {
+  const externalFeedback = useMemo(() => safeFeedbackData.filter(f => ['patient', 'visitor', 'family'].includes(f.source)), [safeFeedbackData]);
+  const externalTypeCounts = useMemo(() => externalFeedback.reduce((acc, f) => {
     const type = f.feedbackType || 'other';
     acc[type] = (acc[type] || 0) + 1;
     return acc;
-  }, {});
+  }, {}), [externalFeedback]);
 
-  const externalPieData = {
+  const externalPieData = useMemo(() => ({
     labels: ['Complaint', 'Suggestion', 'Compliment', 'Other'],
     datasets: [{
       data: [
@@ -96,33 +110,33 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       ],
       backgroundColor: ['#ef4444', '#8b5cf6', '#10b981', '#6b7280'],
     }],
-  };
+  }), [externalTypeCounts]);
 
   // ──────────────────────────────────────────────────────────────
   // 4. Department Volume
   // ──────────────────────────────────────────────────────────────
-  const departmentCounts = safeFeedbackData.reduce((acc, f) => {
+  const departmentCounts = useMemo(() => safeFeedbackData.reduce((acc, f) => {
     const dept = f.department || 'Unknown';
     acc[dept] = (acc[dept] || 0) + 1;
     return acc;
-  }, {});
+  }, {}), [safeFeedbackData]);
 
-  const sortedDepts = Object.keys(departmentCounts)
-    .sort((a, b) => departmentCounts[b] - departmentCounts[a]);
+  const sortedDepts = useMemo(() => Object.keys(departmentCounts)
+    .sort((a, b) => departmentCounts[b] - departmentCounts[a]), [departmentCounts]);
 
-  const departmentData = {
+  const departmentData = useMemo(() => ({
     labels: sortedDepts,
     datasets: [{
       label: 'Feedback by Department',
       data: sortedDepts.map(d => departmentCounts[d]),
       backgroundColor: 'rgba(98, 0, 234, 0.6)',
     }],
-  };
+  }), [sortedDepts, departmentCounts]);
 
   // ──────────────────────────────────────────────────────────────
   // 5. Department Sentiment Percentage (Stabilized)
   // ──────────────────────────────────────────────────────────────
-  const getDepartmentSentimentStats = () => {
+  const getDepartmentSentimentStats = useMemo(() => () => {
     const POSITIVE_PRIOR = 1;
     const NEUTRAL_PRIOR = 1;
     const NEGATIVE_PRIOR = 1;
@@ -157,14 +171,14 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       })
       .filter(d => d.total > 0)
       .sort((a, b) => b.total - a.total);
-  };
+  }, [safeFeedbackData]);
 
-  const allDeptStats = getDepartmentSentimentStats();
+  const allDeptStats = useMemo(() => getDepartmentSentimentStats(), [getDepartmentSentimentStats]);
 
   // ──────────────────────────────────────────────────────────────
   // 6. Internal Feedback Type % by Department (Stabilized)
   // ──────────────────────────────────────────────────────────────
-  const getInternalTypeByDeptStats = () => {
+  const getInternalTypeByDeptStats = useMemo(() => () => {
     const OPERATIONAL_PRIOR = 1;
     const SAFETY_PRIOR = 1;
     const IMPROVEMENT_PRIOR = 1;
@@ -208,14 +222,14 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       })
       .filter(d => d.total > 0)
       .sort((a, b) => b.total - a.total);
-  };
+  }, [safeFeedbackData]);
 
-  const internalTypeByDeptStats = getInternalTypeByDeptStats();
+  const internalTypeByDeptStats = useMemo(() => getInternalTypeByDeptStats(), [getInternalTypeByDeptStats]);
 
   // ──────────────────────────────────────────────────────────────
   // 7. External Feedback Type % by Department (Stabilized)
   // ──────────────────────────────────────────────────────────────
-  const getExternalTypeByDeptStats = () => {
+  const getExternalTypeByDeptStats = useMemo(() => () => {
     const COMPLAINT_PRIOR = 1;
     const SUGGESTION_PRIOR = 1;
     const COMPLIMENT_PRIOR = 1;
@@ -252,14 +266,14 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       })
       .filter(d => d.total > 0)
       .sort((a, b) => b.total - a.total);
-  };
+  }, [safeFeedbackData]);
 
-  const externalTypeByDeptStats = getExternalTypeByDeptStats();
+  const externalTypeByDeptStats = useMemo(() => getExternalTypeByDeptStats(), [getExternalTypeByDeptStats]);
 
   // ──────────────────────────────────────────────────────────────
   // 8. Average Star Rating by Department (External only)
   // ──────────────────────────────────────────────────────────────
-  const getDepartmentRatingStats = () => {
+  const getDepartmentRatingStats = useMemo(() => () => {
     const RATING_PRIOR_COUNT = 5;
     const RATING_PRIOR_SUM = 3.0 * RATING_PRIOR_COUNT;
 
@@ -291,14 +305,14 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       })
       .filter(d => d.total > 0)
       .sort((a, b) => b.total - a.total);
-  };
+  }, [externalFeedback]);
 
-  const ratingByDeptStats = getDepartmentRatingStats();
+  const ratingByDeptStats = useMemo(() => getDepartmentRatingStats(), [getDepartmentRatingStats]);
 
   // ──────────────────────────────────────────────────────────────
   // 9. Impact Severity % by Department (Staff only)
   // ──────────────────────────────────────────────────────────────
-  const getImpactSeverityStats = () => {
+  const getImpactSeverityStats = useMemo(() => () => {
     const MINOR_PRIOR = 1;
     const MODERATE_PRIOR = 1;
     const CRITICAL_PRIOR = 1;
@@ -337,14 +351,14 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       })
       .filter(d => d.total > 0)
       .sort((a, b) => b.total - a.total);
-  };
+  }, [safeFeedbackData]);
 
-  const impactSeverityStats = getImpactSeverityStats();
+  const impactSeverityStats = useMemo(() => getImpactSeverityStats(), [getImpactSeverityStats]);
 
   // ──────────────────────────────────────────────────────────────
-  // 10. NEW: Hospital-wide Urgency Distribution (Pie)
+  // 10. Hospital-wide Urgency Distribution (Pie)
   // ──────────────────────────────────────────────────────────────
-  const urgencyData = {
+  const urgencyData = useMemo(() => ({
     labels: ['Urgent', 'Non-Urgent'],
     datasets: [{
       data: [
@@ -353,12 +367,12 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       ],
       backgroundColor: ['#dc2626', '#94a3b8'],
     }],
-  };
+  }), [safeFeedbackData]);
 
   // ──────────────────────────────────────────────────────────────
-  // 11. NEW: Urgency Percentage by Department (Stabilized)
+  // 11. Urgency Percentage by Department (Stabilized)
   // ──────────────────────────────────────────────────────────────
-  const getUrgencyByDeptStats = () => {
+  const getUrgencyByDeptStats = useMemo(() => () => {
     const URGENT_PRIOR = 1;
     const NON_URGENT_PRIOR = 1;
     const URGENCY_PRIOR_TOTAL = 2;
@@ -388,9 +402,102 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       })
       .filter(d => d.total > 0)
       .sort((a, b) => b.total - a.total);
-  };
+  }, [safeFeedbackData]);
 
-  const urgencyByDeptStats = getUrgencyByDeptStats();
+  const urgencyByDeptStats = useMemo(() => getUrgencyByDeptStats(), [getUrgencyByDeptStats]);
+
+  // ──────────────────────────────────────────────────────────────
+  // CRITICAL: EXPOSE CHART LIST TO WINDOW FOR PDF GENERATION
+  // This allows the report generation system to know which charts
+  // are rendered and their metadata (title, description)
+  // ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const chartMetadata = [
+      {
+        title: 'Feedback Volume Over Time',
+        description: 'Distribution of feedback across Today, Last Week, Last Month, and Last Quarter periods.'
+      },
+      {
+        title: 'Feedback Volume by Department',
+        description: 'Total count of feedback items received per department, sorted by volume.'
+      },
+      {
+        title: 'Sentiment Distribution',
+        description: 'Overall breakdown of feedback sentiment: Positive, Neutral, Negative, and Pending analysis.'
+      },
+      {
+        title: 'Source Distribution',
+        description: 'Proportion of feedback from Staff (internal), Patients, and Visitors/Family (external).'
+      },
+      {
+        title: 'Internal Feedback Type Distribution',
+        description: 'Categories of staff feedback: Operational issues, Safety concerns, Improvement suggestions, Recognition, Complaints, and Other.'
+      },
+      {
+        title: 'External Feedback Type Distribution',
+        description: 'Categories of patient/visitor feedback: Complaints, Suggestions, Compliments, and Other.'
+      },
+      {
+        title: 'Overall Urgency Distribution',
+        description: 'Hospital-wide ratio of feedback marked as Urgent versus Non-Urgent.'
+      },
+      {
+        title: 'Department Sentiment Percentage (Stabilized)',
+        description: 'Normalized percentage breakdown of Positive, Neutral, and Negative sentiment by department using Bayesian smoothing.'
+      },
+    ];
+
+    // Add conditional charts only if they have data
+    if (internalTypeByDeptStats.length > 0) {
+      chartMetadata.push({
+        title: 'Internal Feedback Type Distribution by Department (%) (Stabilized)',
+        description: 'Percentage distribution of staff feedback categories across departments with Bayesian stabilization.'
+      });
+    }
+
+    if (externalTypeByDeptStats.length > 0) {
+      chartMetadata.push({
+        title: 'External Feedback Type Distribution by Department (%) (Stabilized)',
+        description: 'Percentage distribution of patient/visitor feedback categories across departments with Bayesian stabilization.'
+      });
+    }
+
+    if (impactSeverityStats.length > 0) {
+      chartMetadata.push({
+        title: 'Impact Severity Distribution by Department (%) – Staff Feedback (Stabilized)',
+        description: 'Percentage breakdown of Minor, Moderate, and Critical severity levels reported by staff across departments.'
+      });
+    }
+
+    if (urgencyByDeptStats.length > 0) {
+      chartMetadata.push({
+        title: 'Urgent Feedback Percentage by Department (Stabilized)',
+        description: 'Percentage of feedback marked as urgent within each department, with Bayesian smoothing applied.'
+      });
+    }
+
+    if (ratingByDeptStats.length > 0) {
+      chartMetadata.push({
+        title: 'Average Star Rating by Department (Patient/Visitor/Family)',
+        description: 'Average satisfaction ratings (1-5 stars) given by patients, visitors, and family members for each department.'
+      });
+    }
+
+    // Expose to window for PDF generation
+    window.currentChartList = chartMetadata;
+
+    // Cleanup on unmount
+    return () => {
+      window.currentChartList = [];
+    };
+  }, [
+    safeFeedbackData.length,
+    internalTypeByDeptStats.length,
+    externalTypeByDeptStats.length,
+    impactSeverityStats.length,
+    urgencyByDeptStats.length,
+    ratingByDeptStats.length
+  ]);
 
   // ──────────────────────────────────────────────────────────────
   // Render
@@ -410,46 +517,226 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
       {!isCollapsed && (
         <div className={styles.analyticsContent}>
 
-          {/* Original Charts */}
-          <div className={styles.chartContainer}>
+          {/* Chart 1: Feedback Volume Over Time */}
+          <div className={`${styles.chartContainer} chart-for-pdf`}>
             <h3>Feedback Volume Over Time</h3>
-            <Bar data={feedbackVolumeData} options={{ responsive: true }} />
+            {safeFeedbackData.length === 0 ? (
+              <div style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                <p>No data available – apply filters to view trends.</p>
+              </div>
+            ) : (
+              <Bar 
+                data={feedbackVolumeData} 
+                options={{
+                  responsive: true,
+                  plugins: {
+                    datalabels: {
+                      display: true,
+                      color: '#fff',
+                      font: { weight: 'bold', size: 14 },
+                      formatter: (value) => value
+                    }
+                  }
+                }} 
+              />
+            )}
           </div>
 
-          <div className={styles.chartContainer}>
+          {/* Chart 2: Feedback Volume by Department */}
+          <div className={`${styles.chartContainer} chart-for-pdf`}>
             <h3>Feedback Volume by Department</h3>
-            <Bar data={departmentData} options={{ responsive: true }} />
+            {safeFeedbackData.length === 0 ? (
+              <div style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                <p>No data available – apply filters to view department breakdown.</p>
+              </div>
+            ) : (
+              <Bar 
+                data={departmentData} 
+                options={{
+                  responsive: true,
+                  plugins: {
+                    datalabels: {
+                      display: true,
+                      color: '#fff',
+                      font: { weight: 'bold', size: 14 },
+                      formatter: (value) => value
+                    }
+                  }
+                }} 
+              />
+            )}
           </div>
 
+          {/* Charts 3 & 4: Sentiment and Source Distribution */}
           <div className={styles.distributionRow}>
-            <div className={styles.chartContainer}>
+            <div className={`${styles.chartContainer} chart-for-pdf`}>
               <h3>Sentiment Distribution</h3>
-              <Pie data={sentimentData} options={{ responsive: true }} />
+              {safeFeedbackData.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                  <p>No sentiment data yet.</p>
+                </div>
+              ) : (
+                <Pie 
+                  data={sentimentData} 
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      datalabels: {
+                        display: true,
+                        color: '#fff',
+                        backgroundColor: 'rgba(0,0,0,0.6)',
+                        borderRadius: 4,
+                        padding: 6,
+                        font: { weight: 'bold', size: 13 },
+                        formatter: (value, ctx) => {
+                          if (value === 0) return '';
+                          const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                          const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                          return `${value}\n(${percentage}%)`;
+                        }
+                      }
+                    }
+                  }} 
+                />
+              )}
             </div>
-            <div className={styles.chartContainer}>
+            <div className={`${styles.chartContainer} chart-for-pdf`}>
               <h3>Source Distribution</h3>
-              <Pie data={sourceData} options={{ responsive: true }} />
+              {safeFeedbackData.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                  <p>No source data yet.</p>
+                </div>
+              ) : (
+                <Pie 
+                  data={sourceData} 
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      datalabels: {
+                        display: true,
+                        color: '#fff',
+                        backgroundColor: 'rgba(0,0,0,0.6)',
+                        borderRadius: 4,
+                        padding: 6,
+                        font: { weight: 'bold', size: 13 },
+                        formatter: (value, ctx) => {
+                          if (value === 0) return '';
+                          const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                          const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                          return `${value}\n(${percentage}%)`;
+                        }
+                      }
+                    }
+                  }} 
+                />
+              )}
             </div>
           </div>
 
+          {/* Charts 5 & 6: Internal and External Feedback Types */}
           <div className={styles.distributionRow}>
-            <div className={styles.chartContainer}>
+            <div className={`${styles.chartContainer} chart-for-pdf`}>
               <h3>Internal Feedback Type Distribution</h3>
-              <Pie data={internalPieData} options={{ responsive: true }} />
+              {internalFeedback.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                  <p>No internal feedback yet.</p>
+                </div>
+              ) : (
+                <Pie 
+                  data={internalPieData} 
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      datalabels: {
+                        display: true,
+                        color: '#fff',
+                        backgroundColor: 'rgba(0,0,0,0.6)',
+                        borderRadius: 4,
+                        padding: 6,
+                        font: { weight: 'bold', size: 13 },
+                        formatter: (value, ctx) => {
+                          if (value === 0) return '';
+                          const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                          const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                          return `${value}\n(${percentage}%)`;
+                        }
+                      }
+                    }
+                  }} 
+                />
+              )}
             </div>
-            <div className={styles.chartContainer}>
+            <div className={`${styles.chartContainer} chart-for-pdf`}>
               <h3>External Feedback Type Distribution</h3>
-              <Pie data={externalPieData} options={{ responsive: true }} />
+              {externalFeedback.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                  <p>No external feedback yet.</p>
+                </div>
+              ) : (
+                <Pie 
+                  data={externalPieData} 
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      datalabels: {
+                        display: true,
+                        color: '#fff',
+                        backgroundColor: 'rgba(0,0,0,0.6)',
+                        borderRadius: 4,
+                        padding: 6,
+                        font: { weight: 'bold', size: 13 },
+                        formatter: (value, ctx) => {
+                          if (value === 0) return '';
+                          const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                          const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                          return `${value}\n(${percentage}%)`;
+                        }
+                      }
+                    }
+                  }} 
+                />
+              )}
             </div>
           </div>
 
-          <div className={styles.chartContainer}>
-            <h3>Overall Urgency Distribution</h3>
-            <Pie data={urgencyData} options={{ responsive: true }} />
+          {/* Chart 7: Overall Urgency Distribution */}
+          <div style={{width: '717px', margin: 'auto'}}>
+            <div className={`${styles.chartContainer} chart-for-pdf`}>
+              <h3>Overall Urgency Distribution</h3>
+              {safeFeedbackData.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#999', padding: '2rem'}}>
+                  <p>No urgency data yet.</p>
+                </div>
+              ) : (
+                <Pie 
+                  data={urgencyData} 
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      datalabels: {
+                        display: true,
+                        color: '#fff',
+                        backgroundColor: 'rgba(0,0,0,0.6)',
+                        borderRadius: 4,
+                        padding: 6,
+                        font: { weight: 'bold', size: 13 },
+                        formatter: (value, ctx) => {
+                          if (value === 0) return '';
+                          const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                          const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                          return `${value}\n(${percentage}%)`;
+                        }
+                      }
+                    }
+                  }} 
+                />
+              )}
+            </div>            
           </div>
 
-          {/* Department Sentiment */}
-          <div className={styles.chartContainerFull}>
+
+          {/* Chart 8: Department Sentiment Percentage */}
+          <div className={`${styles.chartContainerFull} chart-for-pdf`}>
             <h3>Department Sentiment Percentage (Stabilized)</h3>
             {safeFeedbackData.length === 0 ? (
               <p style={{ textAlign: 'center', color: '#666', padding: '4rem' }}>
@@ -473,6 +760,12 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
                     plugins: {
                       tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}%` } },
                       legend: { position: 'top', labels: { font: { size: 14 }, padding: 20 } },
+                      datalabels: {
+                        display: true,
+                        color: '#fff',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value) => value > 0 ? `${value}%` : ''
+                      }
                     },
                     scales: {
                       x: { stacked: true, max: 100, ticks: { callback: v => `${v}%` }, title: { display: true, text: 'Sentiment Distribution (%)' } },
@@ -484,9 +777,9 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
             )}
           </div>
 
-          {/* Internal Feedback Type % by Department */}
+          {/* Chart 9: Internal Feedback Type % by Department (Conditional) */}
           {internalTypeByDeptStats.length > 0 && (
-            <div className={styles.chartContainerFull}>
+            <div className={`${styles.chartContainerFull} chart-for-pdf`}>
               <h3>Internal Feedback Type Distribution by Department (%) (Stabilized)</h3>
               <div style={{ height: '620px', margin: '2rem 0' }}>
                 <Bar
@@ -505,7 +798,15 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}%` } } },
+                    plugins: {
+                      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}%` } },
+                      datalabels: {
+                        display: true,
+                        color: '#fff',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value) => value > 0 ? `${value}%` : ''
+                      }
+                    },
                     scales: { x: { stacked: true, max: 100, ticks: { callback: v => `${v}%` } }, y: { stacked: true } },
                   }}
                 />
@@ -513,9 +814,9 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
             </div>
           )}
 
-          {/* External Feedback Type % by Department */}
+          {/* Chart 10: External Feedback Type % by Department (Conditional) */}
           {externalTypeByDeptStats.length > 0 && (
-            <div className={styles.chartContainerFull}>
+            <div className={`${styles.chartContainerFull} chart-for-pdf`}>
               <h3>External Feedback Type Distribution by Department (%) (Stabilized)</h3>
               <div style={{ height: '580px', margin: '2rem 0' }}>
                 <Bar
@@ -532,7 +833,15 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}%` } } },
+                    plugins: {
+                      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}%` } },
+                      datalabels: {
+                        display: true,
+                        color: '#fff',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value) => value > 0 ? `${value}%` : ''
+                      }
+                    },
                     scales: { x: { stacked: true, max: 100, ticks: { callback: v => `${v}%` } }, y: { stacked: true } },
                   }}
                 />
@@ -540,9 +849,9 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
             </div>
           )}
 
-          {/* Impact Severity % by Department */}
+          {/* Chart 11: Impact Severity % by Department (Conditional) */}
           {impactSeverityStats.length > 0 && (
-            <div className={styles.chartContainerFull}>
+            <div className={`${styles.chartContainerFull} chart-for-pdf`}>
               <h3>Impact Severity Distribution by Department (%) – Staff Feedback (Stabilized)</h3>
               <div style={{ height: '620px', margin: '2rem 0' }}>
                 <Bar
@@ -561,6 +870,12 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
                     plugins: {
                       tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}%` } },
                       legend: { position: 'top' },
+                      datalabels: {
+                        display: true,
+                        color: '#fff',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value) => value > 0 ? `${value}%` : ''
+                      }
                     },
                     scales: {
                       x: { stacked: true, max: 100, ticks: { callback: v => `${v}%` } },
@@ -572,9 +887,9 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
             </div>
           )}
 
-          {/* NEW: Urgency % by Department */}
+          {/* Chart 12: Urgency % by Department (Conditional) */}
           {urgencyByDeptStats.length > 0 && (
-            <div className={styles.chartContainerFull}>
+            <div className={`${styles.chartContainerFull} chart-for-pdf`}>
               <h3>Urgent Feedback Percentage by Department (Stabilized)</h3>
               <div style={{ height: '620px', margin: '2rem 0' }}>
                 <Bar
@@ -596,6 +911,12 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
                         }
                       },
                       legend: { position: 'top' },
+                      datalabels: {
+                        display: true,
+                        color: '#fff',
+                        font: { weight: 'bold', size: 12 },
+                        formatter: (value) => value > 0 ? `${value}%` : ''
+                      }
                     },
                     scales: {
                       x: { stacked: true, max: 100, ticks: { callback: v => `${v}%` } },
@@ -607,9 +928,9 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
             </div>
           )}
 
-          {/* Average Star Rating by Department */}
+          {/* Chart 13: Average Star Rating by Department (Conditional) */}
           {ratingByDeptStats.length > 0 && (
-            <div className={styles.chartContainerFull}>
+            <div className={`${styles.chartContainerFull} chart-for-pdf`}>
               <h3>Average Star Rating by Department (Patient/Visitor/Family)</h3>
               <div style={{ height: '620px', margin: '2rem 0' }}>
                 <Bar
@@ -626,8 +947,17 @@ const AnalyticsSection = ({ styles, feedbackData = [] }) => {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                      tooltip: { callbacks: { label: ctx => `★ ${ctx.raw} / 5.00` } },
+                      tooltip: { callbacks: { label: ctx => `★ ${ctx.raw}` } },
                       legend: { display: false },
+                      datalabels: {
+                        display: true,
+                        color: '#1f2937',
+                        font: { weight: 'bold', size: 14 },
+                        anchor: 'end',
+                        align: 'end',
+                        offset: 10,
+                        formatter: (value) => `★ ${value.toFixed(2)}`
+                      }
                     },
                     scales: {
                       x: { min: 0, max: 5, ticks: { stepSize: 0.5, callback: v => `★ ${v.toFixed(1)}` } },

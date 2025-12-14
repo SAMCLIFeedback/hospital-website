@@ -13,6 +13,7 @@ export default defineConfig(({ command }) => {
         '@pages': path.resolve(__dirname, './src/pages'),
         '@sections': path.resolve(__dirname, './src/sections'),
         '@data': path.resolve(__dirname, './src/data'),
+        '@utils': path.resolve(__dirname, './backend/utils'),
       },
     },
   };

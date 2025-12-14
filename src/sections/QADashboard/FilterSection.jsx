@@ -17,6 +17,7 @@ const FilterSection = ({
   setCustomEndDate,
   loading,
   departments,
+  handleOpenReportModal, // NEW PROP
 }) => {
   const hasActiveFilters = Object.keys(filters).some(
     key => ['status', 'sentiment', 'source', 'urgent', 'feedbackType', 'rating', 'impactSeverity', 'department'].includes(key) && filters[key] !== 'all'
@@ -295,6 +296,19 @@ const FilterSection = ({
               </>
             )}
           </button>
+
+          {/* NEW: Create Report Button */}
+          <button
+            className={`${styles.actionButton} ${styles.reportButton}`}
+            onClick={handleOpenReportModal}
+            style={{
+              backgroundColor: '#1e40af',
+              color: 'white',
+              marginLeft: '10px'
+            }}
+          >
+            <i className="fas fa-file-pdf"></i> Create Report
+          </button>
         </div>
       </div>
     </section>
@@ -327,6 +341,7 @@ FilterSection.propTypes = {
   setCustomEndDate: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
   departments: PropTypes.arrayOf(PropTypes.string).isRequired,
+  handleOpenReportModal: PropTypes.func.isRequired, // NEW PROP TYPE
 };
 
 export default FilterSection;

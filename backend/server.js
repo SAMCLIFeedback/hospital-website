@@ -63,6 +63,7 @@ const validateTokenRoute = require('./routes/validateToken');
 const markTokenUsedRouter = require('./routes/markTokenUsed');
 const checkStaffEmailRoute = require('./routes/checkStaffEmail');
 const staffRoutes = require('./routes/modalLock');
+const reportRoutes = require('./routes/routes');
 
 const ExternalFeedback = require('./models/ExternalFeedback');
 const InternalFeedback = require('./models/InternalFeedback');
@@ -173,6 +174,7 @@ app.use('/api', verificationRoutes);
 app.use('/api', staffFeedbackRoutes);
 app.use('/api', QALoginRoutes);
 app.use('/api', submissionCountRoute);
+app.use('/api/report', reportRoutes);
 
 cron.schedule('*/10 * * * *', async () => {
   console.log('Running sentiment retry job...');

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { toast, ToastContainer } from 'react-toastify';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend, Title } from 'chart.js';
 import {
   handleLogout,
@@ -17,6 +18,9 @@ import FilterSection from '@sections/QADashboard/FilterSection';
 import FeedbackTable from '@components/QADashboard/FeedbackTable';
 import FeedbackModal from '@components/QADashboard/FeedbackModal';
 import { departments } from '@data/departments';
+import { generatePDFReport } from '@utils/generatePDFReport';
+import { format } from 'date-fns';
+import ReportModal from '@components/ReportModal';
 import "react-datepicker/dist/react-datepicker.css";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -54,7 +58,8 @@ ChartJS.register(
   LinearScale,
   Tooltip,
   Legend,
-  Title
+  Title,
+  ChartDataLabels  
 );
 
 const QADashboard = () => {
@@ -74,6 +79,10 @@ const QADashboard = () => {
   const broadcastChannelRef = useRef(null);
   const processedEventsRef = useRef(new Set());
   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  // Report modal states
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [generatingReport, setGeneratingReport] = useState(false);
 
   const [filters, setFilters] = useState({
     status: 'all',
@@ -215,6 +224,62 @@ const QADashboard = () => {
     setCustomStartDate(null);
     setCustomEndDate(null);
   };
+
+  // ═══════════════════════════════════════════════════════════════
+  // REPORT GENERATION HANDLERS
+  // ═══════════════════════════════════════════════════════════════
+  
+  const handleOpenReportModal = () => {
+    setIsReportModalOpen(true);
+  };
+
+const handleGenerateReport = async ({ filteredData, filterSummary, chartList }) => {
+  if (!filteredData?.length) {
+    toast.error('No data to generate report.');
+    return;
+  }
+
+  setGeneratingReport(true);
+
+  try {
+    const safeFilterSummary = filterSummary || {
+      dateRange: 'All Time',
+      source: 'Mixed',
+      filtersText: 'None'
+    };
+
+    const safeChartList = chartList || [];
+
+    const res = await fetch(`${BASE_URL}/api/report/summary`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filteredFeedback: filteredData,
+        filterSummary: safeFilterSummary,
+        chartList: safeChartList,
+      }),
+    });
+
+    if (!res.ok) throw new Error('Failed to generate summary');
+
+    const { summary: aiSummary } = await res.json();
+
+    await generatePDFReport({
+      filteredData,
+      aiSummary,
+      filterSummary: safeFilterSummary,
+      chartList: safeChartList,
+    });
+
+    toast.success('Report generated successfully!');
+  } catch (err) {
+    console.error(err);
+    toast.error('Failed to generate report.');
+  } finally {
+    setGeneratingReport(false);
+    setIsReportModalOpen(false);
+  }
+};
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -491,7 +556,11 @@ const QADashboard = () => {
             <p>{error}</p>
           </div>
         )}
-        <AnalyticsSection styles={styles} feedbackData={timeFilteredFeedback} />
+        <AnalyticsSection 
+          styles={styles} 
+          feedbackData={timeFilteredFeedback} 
+          currentFilters={filters}
+        />
         <FilterSection
           styles={styles}
           filters={filters}
@@ -508,8 +577,7 @@ const QADashboard = () => {
           setCustomEndDate={setCustomEndDate}
           loading={loading}
           departments={departments}
-          filteredFeedback={feedbackData}
-          prepareRawFeedbackForDisplay={prepareRawFeedbackForDisplay}
+          handleOpenReportModal={handleOpenReportModal}
         />
         <FeedbackTable
           styles={styles}
@@ -556,6 +624,22 @@ const QADashboard = () => {
             feedback={selectedFeedback}
             onClose={closeModal}
             prepareRawFeedbackForDisplay={prepareRawFeedbackForDisplay}
+          />
+        )}
+
+        {/* Report Modal */}
+        {isReportModalOpen && (
+          <ReportModal
+            isOpen={isReportModalOpen}
+            onClose={() => setIsReportModalOpen(false)}
+            currentFilters={filters}
+            currentTimeFilter={timeFilter}
+            currentCustomStart={customStartDate}
+            currentCustomEnd={customEndDate}
+            allFeedbackData={feedbackData}
+            onGenerate={handleGenerateReport}
+            generating={generatingReport}
+            styles={styles}
           />
         )}
       </main>
