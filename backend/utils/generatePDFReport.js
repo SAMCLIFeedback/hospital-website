@@ -28,23 +28,92 @@ function isPieChart(aspectRatio) {
   return aspectRatio > 0.7 && aspectRatio < 1.3;
 }
 
-function parseAISummary(aiSummary) {
+/**
+ * Enhanced parser that preserves hierarchical structure from AI summary
+ */
+function parseAISummaryEnhanced(aiSummary) {
   const sections = {
-    keyTakeaway: [],
-    problemAreas: [],
-    successes: [],
-    actions: []
+    executiveOverview: { title: 'EXECUTIVE OVERVIEW', content: [] },
+    problemAreas: { title: 'CRITICAL PROBLEM AREAS', content: [] },
+    opportunities: { title: 'OPERATIONAL EXCELLENCE OPPORTUNITIES', content: [] },
+    strengths: { title: 'STRENGTHS AND POSITIVE PERFORMANCE', content: [] },
+    recommendations: { title: 'STRATEGIC RECOMMENDATIONS', content: [] }
   };
 
   const lines = aiSummary.split('\n').map(l => l.trim()).filter(Boolean);
-  let current = null;
+  let currentSection = null;
+  let currentItem = null;
 
-  for (const line of lines) {
-    if (/^I\./i.test(line)) current = 'keyTakeaway';
-    else if (/^II\./i.test(line)) current = 'problemAreas';
-    else if (/^III\./i.test(line)) current = 'successes';
-    else if (/^IV\./i.test(line)) current = 'actions';
-    else if (current) sections[current].push(line.replace(/^[%•*-]\s*/, '').trim());
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    // Section headers (I., II., III., IV., V.)
+    if (/^I\.\s*EXECUTIVE OVERVIEW/i.test(line)) {
+      currentSection = 'executiveOverview';
+      currentItem = null;
+      continue;
+    } else if (/^II\.\s*CRITICAL PROBLEM AREAS/i.test(line)) {
+      currentSection = 'problemAreas';
+      currentItem = null;
+      continue;
+    } else if (/^III\.\s*OPERATIONAL EXCELLENCE/i.test(line)) {
+      currentSection = 'opportunities';
+      currentItem = null;
+      continue;
+    } else if (/^IV\.\s*STRENGTHS/i.test(line)) {
+      currentSection = 'strengths';
+      currentItem = null;
+      continue;
+    } else if (/^V\.\s*STRATEGIC RECOMMENDATIONS/i.test(line)) {
+      currentSection = 'recommendations';
+      currentItem = null;
+      continue;
+    }
+
+    if (!currentSection) continue;
+
+    // Main bullet items (• at start)
+    if (line.startsWith('•')) {
+      const itemTitle = line.replace(/^•\s*/, '').trim();
+      currentItem = {
+        title: itemTitle,
+        subsections: []
+      };
+      sections[currentSection].content.push(currentItem);
+      continue;
+    }
+
+    // Sub-sections (Overview:, Impact & Frequency:, etc.)
+    const subSectionMatch = line.match(/^(Overview|Impact & Frequency|Patient\/Staff Voice|Root Cause Indicators|Data Support|Current State|Stakeholder Impact|Improvement Potential|Evidence|Performance Summary|Stakeholder Feedback|Success Factors|Replication Opportunity|Action Required|Responsible Party|Expected Outcomes|Evidence Base|Timeline|Resource Implications):\s*(.+)/i);
+    
+    if (subSectionMatch && currentItem) {
+      const [, label, content] = subSectionMatch;
+      currentItem.subsections.push({
+        label: label.trim(),
+        content: content.trim()
+      });
+      continue;
+    }
+
+    // Regular paragraph content
+    if (currentSection === 'executiveOverview') {
+      // Executive overview is just paragraphs
+      sections[currentSection].content.push({
+        type: 'paragraph',
+        text: line
+      });
+    } else if (currentItem && currentItem.subsections.length > 0) {
+      // Continue previous subsection
+      const lastSubsection = currentItem.subsections[currentItem.subsections.length - 1];
+      lastSubsection.content += ' ' + line;
+    } else if (currentItem) {
+      // Content before any subsection label
+      if (!currentItem.description) {
+        currentItem.description = line;
+      } else {
+        currentItem.description += ' ' + line;
+      }
+    }
   }
 
   return sections;
@@ -62,17 +131,14 @@ export async function generatePDFReport({
   filterSummary,
   chartList
 }) {
-  // CRITICAL: Look for charts in the REPORT MODAL, not the dashboard
-  // Charts in the report modal have the class 'report-chart-container'
+  // CRITICAL: Look for charts in the REPORT MODAL
   const reportModal = document.querySelector('[class*="reportModal"]');
   let chartContainers;
   
   if (reportModal) {
-    // Get charts from the report modal
     chartContainers = reportModal.querySelectorAll('.report-chart-container.chart-for-pdf');
     console.log(`Found ${chartContainers.length} charts in report modal`);
   } else {
-    // Fallback to dashboard charts if modal not found
     console.warn('Report modal not found, falling back to dashboard charts');
     chartContainers = document.querySelectorAll('.chart-for-pdf');
   }
@@ -114,21 +180,18 @@ export async function generatePDFReport({
   };
 
   // ============================================
-  // COVER PAGE - Modern, Bold, Professional
+  // COVER PAGE
   // ============================================
   
-  // Gradient-like effect with overlapping rectangles
   pdf.setFillColor(...colors.primary);
   pdf.rect(0, 0, pageWidth, pageHeight, 'F');
   
-  // Accent geometric elements
   pdf.setFillColor(...colors.accent);
   pdf.circle(pageWidth * 0.85, 40, 60, 'F');
   
   pdf.setFillColor(...colors.primaryLight);
   pdf.circle(-20, pageHeight * 0.75, 80, 'F');
   
-  // Diagonal accent stripe
   pdf.setFillColor(37, 99, 235, 0.3);
   pdf.triangle(
     pageWidth, 0,
@@ -137,7 +200,6 @@ export async function generatePDFReport({
     'F'
   );
 
-  // Main title
   pdf.setTextColor(...colors.white);
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(42);
@@ -145,18 +207,15 @@ export async function generatePDFReport({
   pdf.setFontSize(38);
   pdf.text('FEEDBACK REPORT', pageWidth / 2, 100, { align: 'center' });
 
-  // Accent line
   pdf.setDrawColor(...colors.accent);
   pdf.setLineWidth(1.5);
   pdf.line(pageWidth / 2 - 40, 108, pageWidth / 2 + 40, 108);
 
-  // Subtitle
   pdf.setFontSize(16);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(...colors.accentLight);
   pdf.text('Executive Summary & Analytics', pageWidth / 2, 120, { align: 'center' });
 
-  // Stats cards at bottom
   const cardY = 160;
   const cardWidth = (pageWidth - 30) / 3;
   const cardX = [15, 15 + cardWidth, 15 + cardWidth * 2];
@@ -166,13 +225,11 @@ export async function generatePDFReport({
   const neuCount = filteredData.filter(f => f.sentiment === 'neutral').length;
   const negCount = filteredData.filter(f => f.sentiment === 'negative').length;
 
-  // Card backgrounds
   pdf.setFillColor(255, 255, 255, 0.1);
   cardX.forEach(x => {
     pdf.roundedRect(x, cardY, cardWidth - 5, 35, 3, 3, 'F');
   });
 
-  // Card 1 - Total Feedback
   pdf.setFontSize(32);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(...colors.white);
@@ -181,7 +238,6 @@ export async function generatePDFReport({
   pdf.setFont('helvetica', 'normal');
   pdf.text('Total Feedback', cardX[0] + cardWidth / 2 - 2.5, cardY + 27, { align: 'center' });
 
-  // Card 2 - Positive %
   const posPercent = Math.round((posCount / total) * 100);
   pdf.setFontSize(32);
   pdf.setFont('helvetica', 'bold');
@@ -192,7 +248,6 @@ export async function generatePDFReport({
   pdf.setTextColor(...colors.white);
   pdf.text('Positive', cardX[1] + cardWidth / 2 - 2.5, cardY + 27, { align: 'center' });
 
-  // Card 3 - Period
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'bold');
   pdf.setTextColor(...colors.white);
@@ -202,7 +257,6 @@ export async function generatePDFReport({
   pdf.setFont('helvetica', 'normal');
   pdf.text('Report Period', cardX[2] + cardWidth / 2 - 2.5, cardY + 27, { align: 'center' });
 
-  // Footer info
   pdf.setFontSize(9);
   pdf.setTextColor(200, 200, 200);
   pdf.text(`Generated on ${format(new Date(), 'MMMM d, yyyy')} at ${format(new Date(), 'h:mm a')}`, pageWidth / 2, pageHeight - 15, { align: 'center' });
@@ -213,7 +267,6 @@ export async function generatePDFReport({
   pdf.addPage();
   yPos = 0;
 
-  // Header with gradient effect
   pdf.setFillColor(...colors.primary);
   pdf.rect(0, 0, pageWidth, 45, 'F');
   
@@ -227,36 +280,29 @@ export async function generatePDFReport({
 
   yPos = 55;
 
-  // Large sentiment visualization
   pdf.setFillColor(...colors.lightGray);
   pdf.roundedRect(15, yPos, pageWidth - 30, 55, 4, 4, 'F');
 
-  // Sentiment bars
   const barY = yPos + 12;
   const barHeight = 18;
   const barWidth = pageWidth - 50;
   const barX = 25;
 
-  // Positive bar
   pdf.setFillColor(...colors.success);
   const posWidth = barWidth * (posCount / total);
   pdf.roundedRect(barX, barY, posWidth, barHeight, 2, 2, 'F');
   
-  // Neutral bar
   pdf.setFillColor(...colors.warning);
   const neuWidth = barWidth * (neuCount / total);
   pdf.rect(barX + posWidth, barY, neuWidth, barHeight, 'F');
   
-  // Negative bar
   pdf.setFillColor(...colors.danger);
   const negWidth = barWidth * (negCount / total);
   pdf.roundedRect(barX + posWidth + neuWidth, barY, negWidth, barHeight, 2, 2, 'F');
 
-  // Legend with percentages
   yPos = barY + barHeight + 12;
   const legendX = [barX, barX + barWidth / 3, barX + (barWidth * 2) / 3];
 
-  // Positive
   pdf.setFillColor(...colors.success);
   pdf.circle(legendX[0] + 3, yPos - 2, 3, 'F');
   pdf.setTextColor(...colors.dark);
@@ -267,7 +313,6 @@ export async function generatePDFReport({
   pdf.setFontSize(10);
   pdf.text(`(${posCount} responses)`, legendX[0] + 10, yPos + 6);
 
-  // Neutral
   const neuPercent = Math.round((neuCount / total) * 100);
   pdf.setFillColor(...colors.warning);
   pdf.circle(legendX[1] + 3, yPos - 2, 3, 'F');
@@ -278,7 +323,6 @@ export async function generatePDFReport({
   pdf.setFontSize(10);
   pdf.text(`(${neuCount} responses)`, legendX[1] + 10, yPos + 6);
 
-  // Negative
   const negPercent = Math.round((negCount / total) * 100);
   pdf.setFillColor(...colors.danger);
   pdf.circle(legendX[2] + 3, yPos - 2, 3, 'F');
@@ -291,7 +335,6 @@ export async function generatePDFReport({
 
   yPos = 125;
 
-  // Report details in boxes with light gray background
   const detailBoxes = [
     { label: 'Source', value: filterSummary.source || 'Mixed Sources' },
     { label: 'Department', value: filterSummary.department || 'All Departments' },
@@ -323,85 +366,150 @@ export async function generatePDFReport({
   });
 
   // ============================================
-  // EXECUTIVE SUMMARY PAGES
+  // EXECUTIVE SUMMARY PAGES - ENHANCED STYLING
   // ============================================
-  const sections = parseAISummary(aiSummary);
-  const sectionData = [
-    { title: 'KEY TAKEAWAY', subtitle: 'Overall Situation Assessment', lines: sections.keyTakeaway, icon: 'circle' },
-    { title: 'PROBLEM AREAS', subtitle: 'Critical Issues Identified', lines: sections.problemAreas, icon: 'triangle' },
-    { title: 'POSITIVE HIGHLIGHTS', subtitle: 'Successes & Strengths', lines: sections.successes, icon: 'star' },
-    { title: 'RECOMMENDED ACTIONS', subtitle: 'Next Steps', lines: sections.actions, icon: 'arrow' }
-  ];
+  const sections = parseAISummaryEnhanced(aiSummary);
 
-  for (const sec of sectionData) {
-    if (sec.lines.length === 0) continue;
-
+  // Section I: Executive Overview (Paragraphs only)
+  if (sections.executiveOverview.content.length > 0) {
     pdf.addPage();
     yPos = 0;
 
-    // Section header
+    // Header
     pdf.setFillColor(...colors.primary);
     pdf.rect(0, 0, pageWidth, 50, 'F');
-    
     pdf.setFillColor(...colors.accent);
     pdf.circle(pageWidth - 10, 25, 40, 'F');
 
     pdf.setTextColor(...colors.white);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(24);
-    pdf.text(sec.title, 15, 23);
-    
+    pdf.text('EXECUTIVE OVERVIEW', 15, 23);
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(12);
     pdf.setTextColor(...colors.accentLight);
-    pdf.text(sec.subtitle, 15, 35);
+    pdf.text('Comprehensive Analysis & Key Findings', 15, 35);
 
     yPos = 65;
     pdf.setTextColor(...colors.dark);
 
-    // Content
-    sec.lines.forEach((line, idx) => {
-      if (yPos > pageHeight - 40) {
+    sections.executiveOverview.content.forEach(item => {
+      if (yPos > pageHeight - 30) {
+        pdf.addPage();
+        yPos = 20;
+      }
+
+      if (item.type === 'paragraph') {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(11);
+        yPos = addWrappedText(pdf, item.text, 20, yPos, pageWidth - 40, 6);
+        yPos += 8;
+      }
+    });
+  }
+
+  // Sections II-V: Structured items with subsections
+  const structuredSections = [
+    { key: 'problemAreas', color: colors.danger, icon: 'alert' },
+    { key: 'opportunities', color: colors.warning, icon: 'lightbulb' },
+    { key: 'strengths', color: colors.success, icon: 'star' },
+    { key: 'recommendations', color: colors.accent, icon: 'check' }
+  ];
+
+  structuredSections.forEach(({ key, color, icon }) => {
+    const section = sections[key];
+    if (section.content.length === 0) return;
+
+    pdf.addPage();
+    yPos = 0;
+
+    // Section Header
+    pdf.setFillColor(...colors.primary);
+    pdf.rect(0, 0, pageWidth, 50, 'F');
+    pdf.setFillColor(color[0], color[1], color[2]);
+    pdf.circle(pageWidth - 10, 25, 40, 'F');
+
+    pdf.setTextColor(...colors.white);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(24);
+    pdf.text(section.title, 15, 28);
+
+    yPos = 65;
+    pdf.setTextColor(...colors.dark);
+
+    section.content.forEach((item, itemIdx) => {
+      // Check if we need a new page
+      if (yPos > pageHeight - 60) {
         pdf.addPage();
         yPos = 25;
         
+        // Continuation header
         pdf.setFillColor(...colors.lightGray);
         pdf.rect(0, 0, pageWidth, 15, 'F');
         pdf.setTextColor(...colors.primary);
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(11);
-        pdf.text(`${sec.title} (continued)`, 15, 10);
+        pdf.text(`${section.title} (continued)`, 15, 10);
         pdf.setTextColor(...colors.dark);
       }
 
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(10);
-      pdf.setTextColor(...colors.primaryLight);
+      // Item Title (bold, larger, with icon/number)
+      pdf.setFillColor(color[0], color[1], color[2]);
+      pdf.circle(18, yPos - 2, 2.5, 'F');
       
-      if (sec.icon === 'circle') {
-        pdf.setFillColor(...colors.primaryLight);
-        pdf.circle(22, yPos - 2, 2, 'F');
-      } else if (sec.icon === 'triangle') {
-        pdf.setFillColor(...colors.danger);
-        pdf.triangle(20, yPos - 1, 24, yPos - 1, 22, yPos - 5, 'F');
-      } else if (sec.icon === 'star') {
-        pdf.setFillColor(...colors.success);
-        pdf.circle(22, yPos - 2, 2, 'F');
-      } else if (sec.icon === 'arrow') {
-        pdf.setFillColor(...colors.accent);
-        pdf.triangle(20, yPos - 3, 20, yPos + 1, 24, yPos - 1, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(13);
+      pdf.setTextColor(color[0], color[1], color[2]);
+      yPos = addWrappedText(pdf, item.title, 25, yPos, pageWidth - 35, 6);
+      yPos += 6;
+
+      pdf.setTextColor(...colors.dark);
+
+      // Item description (if exists, before subsections)
+      if (item.description) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        yPos = addWrappedText(pdf, item.description, 25, yPos, pageWidth - 35, 5.5);
+        yPos += 4;
       }
 
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(11);
-      pdf.setTextColor(...colors.dark);
-      yPos = addWrappedText(pdf, line, 30, yPos, pageWidth - 45, 5.5);
-      yPos += 8;
+      // Subsections
+      item.subsections?.forEach(sub => {
+        if (yPos > pageHeight - 40) {
+          pdf.addPage();
+          yPos = 25;
+          
+          pdf.setFillColor(...colors.lightGray);
+          pdf.rect(0, 0, pageWidth, 15, 'F');
+          pdf.setTextColor(...colors.primary);
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(11);
+          pdf.text(`${section.title} (continued)`, 15, 10);
+          pdf.setTextColor(...colors.dark);
+        }
+
+        // Subsection label (bold, indented)
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(10);
+        pdf.setTextColor(...colors.gray);
+        pdf.text(`${sub.label}:`, 30, yPos);
+        yPos += 5;
+
+        // Subsection content (normal, indented more)
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        pdf.setTextColor(...colors.dark);
+        yPos = addWrappedText(pdf, sub.content, 30, yPos, pageWidth - 45, 5.5);
+        yPos += 6;
+      });
+
+      // Spacing between items
+      yPos += 6;
     });
-  }
+  });
 
   // ============================================
-  // CHARTS SECTION - ONE PER PAGE
+  // CHARTS SECTION
   // ============================================
   for (let i = 0; i < chartImages.length; i++) {
     const chart = chartImages[i];
@@ -422,7 +530,7 @@ export async function generatePDFReport({
       pdf.setTextColor(...colors.white);
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(20);
-      pdf.text(`Chart ${i + 1}`, 15, 15);
+      pdf.text(`Figure ${i + 1}`, 15, 15);
       
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(14);
@@ -463,7 +571,7 @@ export async function generatePDFReport({
       pdf.setTextColor(...colors.white);
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(22);
-      pdf.text(`Chart ${i + 1}`, 15, 18);
+      pdf.text(`Figure ${i + 1}`, 15, 18);
       
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(14);
