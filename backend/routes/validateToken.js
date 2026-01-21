@@ -1,7 +1,7 @@
 // routes/validateToken.js
 const express = require('express');
 const router = express.Router();
-const PatientToken = require('../models/PatientToken');
+const PatientToken = require('../models/Token');
 
 router.get('/:token', async (req, res) => {
   const { token } = req.params;

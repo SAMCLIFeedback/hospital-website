@@ -1,7 +1,7 @@
 // generate_qr.js
 const QRCode = require('qrcode');
 const connectDB = require('./db');
-const PatientToken = require('./models/PatientToken');
+const Token = require('./models/Token');
 const fs = require('fs');
 const path = require('path');
 
@@ -9,7 +9,7 @@ async function generateQRCodes() {
   try {
     await connectDB();
 
-    const tokens = await PatientToken.find({ used: false, type: { $in: ['patient', 'visitor'] } });
+    const tokens = await Token.find({ used: false, type: { $in: ['patient', 'visitor'] } });
 
     if (!tokens.length) {
       console.log("No unused patient/visitor tokens found.");

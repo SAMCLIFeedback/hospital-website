@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const PatientToken = require('../models/PatientToken'); // adjust path if needed
+const PatientToken = require('../models/Token'); 
 
 // POST /api/mark-token-used/:token
 router.post('/:token', async (req, res) => {
