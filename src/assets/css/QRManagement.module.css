@@ -72,6 +72,35 @@
   gap: 0.75rem;
 }
 
+/* New Export Button Style */
+.exportBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  color: var(--text-dark);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-ease);
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.exportBtn:hover:not(:disabled) {
+  border-color: var(--primary-blue);
+  color: var(--primary-blue);
+  transform: translateY(-1px);
+}
+
+.exportBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .generateBtn {
   display: inline-flex;
   align-items: center;
@@ -457,7 +486,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   LIGHTBOX
+   LIGHTBOX & MODALS
    ══════════════════════════════════════════════════════════════ */
 
 /* dark backdrop */
@@ -638,6 +667,78 @@
   background: var(--bg-card-hover);
   border-color: var(--text-medium);
   color: var(--text-dark);
+}
+
+/* ── Modal Specific Styles (Export) ────────────────────── */
+.modalHeader {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.modalTitle {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin: 0 0 0.3rem 0;
+}
+
+.modalSubtitle {
+  font-size: 0.9rem;
+  color: var(--text-medium);
+  margin: 0;
+}
+
+.modalBody {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.selectWrapper {
+  position: relative;
+}
+
+.selectInput {
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-light);
+  background: var(--bg-input);
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  appearance: none; /* remove default arrow */
+}
+
+.selectWrapper::after {
+  content: '▼';
+  font-size: 0.7rem;
+  color: var(--text-medium);
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.helperText {
+  font-size: 0.8rem;
+  color: var(--text-medium);
+  margin: 0;
 }
 
 /* ── animations ──────────────────────────────────────────── */
