@@ -9,11 +9,12 @@ import InternalFeedback from '@pages/InternalFeedback/InternalFeedback.jsx';
 import QADashboard from '@pages/QADashboard/QADashboard.jsx';
 import QALogin from '@pages/LoginPages/QALogin.jsx';
 import ProtectedRoute from '@components/ProtectRoute.jsx';
+import QRManagement from '@pages/QADashboard/QRManagement.jsx';
 
 const App = () => {
   return (
     //<Router basename="/hospital-website">
-    <Router basename="/hospital-website">
+    <Router basename="/">
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -30,6 +31,7 @@ const App = () => {
           }
         />
         <Route path="/QA-dashboard" element={<QADashboard />} />
+        <Route path="/QA-dashboard/qr-management" element={<QRManagement />} />
         <Route path="/QALogin" element={<QALogin/>} />
       </Routes>
     </Router>

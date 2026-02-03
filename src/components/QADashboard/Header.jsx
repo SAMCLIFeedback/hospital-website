@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Loader from '../Loader';
 import Logo from '@assets/logo.png';
 import PropTypes from 'prop-types';
 
-const Header = ({ userName, userRole, date, onLogout, styles}) => {
+const Header = ({ userName, userRole, date, onLogout, styles }) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogoutClick = async () => {
     setIsLoggingOut(true);
@@ -22,7 +24,7 @@ const Header = ({ userName, userRole, date, onLogout, styles}) => {
             </div>
             <div className={styles.titleContainer}>
               <h1 className={styles.mainTitle}>Quality Assurance Dashboard</h1>
-              <p className={styles.subTitle}>Patient & Staff Feedback Analysis</p>
+              <p className={styles.subTitle}>Patient &amp; Staff Feedback Analysis</p>
             </div>
           </div>
           <div className={styles.headerRight}>
@@ -36,6 +38,15 @@ const Header = ({ userName, userRole, date, onLogout, styles}) => {
               </div>
             </div>
             <div className={styles.headerActions}>
+              {/* ── QR Manager button ── */}
+              <button
+                className={styles.headerButton}
+                onClick={() => navigate('/QA-dashboard/qr-management')}
+              >
+                <i className="fas fa-qrcode"></i> QR Manager
+              </button>
+
+              {/* ── Logout button ── */}
               <button
                 className={`${styles.headerButton} ${styles.logoutButton}`}
                 onClick={handleLogoutClick}
@@ -64,10 +75,11 @@ const Header = ({ userName, userRole, date, onLogout, styles}) => {
 };
 
 Header.propTypes = {
-  userName: PropTypes.string.isRequired,
-  userRole: PropTypes.string.isRequired,
-  date: PropTypes.string.isRequired,
-  onLogout: PropTypes.func.isRequired,
+  userName:  PropTypes.string.isRequired,
+  userRole:  PropTypes.string.isRequired,
+  date:      PropTypes.string.isRequired,
+  onLogout:  PropTypes.func.isRequired,
+  styles:    PropTypes.object.isRequired,
 };
 
 export default Header;

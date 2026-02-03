@@ -6,6 +6,10 @@ const mongoose = require('mongoose');
 const http = require('http');
 const { Server } = require('socket.io');
 const cron = require('node-cron');
+const path = require('path');                              
+
+// Import the Token model to watch for changes
+const PatientToken = require('./models/Token');
 
 dotenv.config();
 const app = express();
@@ -16,6 +20,7 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [process.env.FRONTEND_URL]
   : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'];
 
+// Initialize Socket.io
 const io = new Server(server, {
   cors: {
     origin: function (origin, callback) {
@@ -30,14 +35,40 @@ const io = new Server(server, {
   },
 });
 
+// [IMPORTANT] Make io accessible in routes (e.g. tokens.js)
 global.io = io;
 
-io.on('connection', () => {});
+io.on('connection', (socket) => {
+  console.log('Socket client connected:', socket.id);
+  socket.on('disconnect', () => {
+    console.log('Socket client disconnected:', socket.id);
+  });
+});
 
 connectDB().then(() => {
   console.log('MongoDB connected to database:', mongoose.connection.db.databaseName);
-  console.log('ExternalFeedback collection name:', ExternalFeedback.collection.collectionName);
-  console.log('InternalFeedback collection name:', InternalFeedback.collection.collectionName);
+  try {
+      console.log('ExternalFeedback collection name:', ExternalFeedback.collection.collectionName);
+      console.log('InternalFeedback collection name:', InternalFeedback.collection.collectionName);
+
+      // ─────────────────────────────────────────────────────────────────────────────
+      // [UPDATED] MongoDB Change Stream
+      // Listens for ANY change in the database (manual edits, Compass, CLI, or API)
+      // and triggers a live update on the frontend.
+      // ─────────────────────────────────────────────────────────────────────────────
+      const tokenChangeStream = PatientToken.watch();
+      
+      tokenChangeStream.on('change', (change) => {
+        console.log('🔄 DB Change Detected (Tokens):', change.operationType);
+        // Emit event to all connected clients
+        io.emit('tokens_updated');
+      });
+
+      console.log('✅ Live Database Listening Active on PatientToken collection');
+
+  } catch(e) { 
+      console.log('⚠️ Change Streams error (requires MongoDB Replica Set):', e.message); 
+  }
 });
 
 // Configure CORS for Express
@@ -53,6 +84,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Serve generated QR code images as static files
+app.use('/api/qr-codes', express.static(path.join(__dirname, 'qr_codes'))); 
+
 const feedbackRoutes = require('./routes/externalFeedback');
 const verificationRoutes = require('./routes/staffVerification');
 const staffFeedbackRoutes = require('./routes/internalFeedback');
@@ -64,6 +98,7 @@ const markTokenUsedRouter = require('./routes/markTokenUsed');
 const checkStaffEmailRoute = require('./routes/checkStaffEmail');
 const staffRoutes = require('./routes/modalLock');
 const reportRoutes = require('./routes/routes');
+const tokensRoutes = require('./routes/tokens');
 
 const ExternalFeedback = require('./models/ExternalFeedback');
 const InternalFeedback = require('./models/InternalFeedback');
@@ -77,8 +112,6 @@ app.get('/api/retry-sentiment', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
 
 app.get('/api/feedback/all', async (req, res) => {
     try {
@@ -105,7 +138,7 @@ app.get('/api/feedback/all', async (req, res) => {
 
         if (!source || source === 'all' || source === 'staff') {
             const internalFilters = { ...filters };
-            delete internalFilters.source; // 'source' field is specific to ExternalFeedback
+            delete internalFilters.source; 
             internal = await InternalFeedback.find(internalFilters).lean();
         }
 
@@ -175,6 +208,7 @@ app.use('/api', staffFeedbackRoutes);
 app.use('/api', QALoginRoutes);
 app.use('/api', submissionCountRoute);
 app.use('/api/report', reportRoutes);
+app.use('/api/tokens', tokensRoutes);
 
 cron.schedule('*/10 * * * *', async () => {
   console.log('Running sentiment retry job...');

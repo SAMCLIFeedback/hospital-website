@@ -30,6 +30,14 @@ router.post('/:token', async (req, res) => {
     tokenDoc.usedAt = new Date();
     await tokenDoc.save();
 
+    // ─────────────────────────────────────────────────────────────────────────────
+    // [UPDATED] Trigger Live Update
+    // This tells QRManagement.jsx to re-fetch the data immediately without refreshing
+    // ─────────────────────────────────────────────────────────────────────────────
+    if (global.io) {
+      global.io.emit('tokens_updated');
+    }
+
     return res.json({ success: true, message: 'Token marked as used' });
   } catch (err) {
     console.error('Error marking token as used:', err);
