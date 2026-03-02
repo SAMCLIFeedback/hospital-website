@@ -27,40 +27,6 @@ function preprocessText(text) {
   return text.replace(SLANG_REGEX, match => SLANG_MAP[match.toLowerCase()]);
 }
 
-function buildPrompt({ text, rating, impactSeverity, feedbackType, source = 'external' }) {
-  let context = `This feedback was submitted by a ${source === 'internal' ? 'hospital staff member' : 'patient or visitor'}.`;
-
-  if (feedbackType) {
-    context += ` The feedback type is "${feedbackType}".`;
-  }
-  if (rating) {
-    context += ` The user gave a rating of ${rating} out of 5 stars.`;
-  }
-  if (source === 'internal' && impactSeverity) {
-    context += ` The staff reported the impact on operations as "${impactSeverity}".`;
-  }
-
-  if (rating >= 4 && /sucks|bagal|grabe|not good|worst|disappointed|nakakainis|horrible/i.test(text)) {
-    context += ` Be alert for sarcasm — the rating is high but the wording may suggest frustration.`;
-  }
-
-  if (feedbackType?.toLowerCase() === 'complaint') {
-    context += ` Treat this as negative even if it uses polite or softened language.`;
-  }
-
-  return `
-    Analyze the true emotional tone of the following hospital feedback.
-    You are given contextual information, but the user's actual written description is the most important signal.
-    The feedback may be in English, Tagalog, or a mix of both.
-    If the text expresses strong dissatisfaction, classify it as negative — even if the rating or type is positive.
-    Respond with exactly one word only: "positive", "neutral", or "negative".
-
-    Context: ${context}
-    Feedback: "${text}"
-    Sentiment:
-  `.trim();
-}
-
 async function analyzeSentiment({ text, rating, impactSeverity, feedbackType, source = 'external' }) {
   const apiUrl = process.env.OLLAMA_API_URL;
   const apiKey = process.env.GROQ_API_KEY;
@@ -70,14 +36,19 @@ async function analyzeSentiment({ text, rating, impactSeverity, feedbackType, so
   }
 
   try {
+    // Process local slang
     const processedText = preprocessText(text);
-    const prompt = buildPrompt({
-      text: processedText,
-      rating,
-      impactSeverity,
-      feedbackType,
-      source
-    });
+    
+    // NEW PROMPT: 100% based on text description only
+    const prompt = `
+      Analyze the true emotional tone of the following feedback text.
+      Base your decision 100% on the words provided below. Ignore any other assumptions.
+      The feedback may be in English, Tagalog, or a mix of both.
+      Respond with exactly one word only: "positive", "neutral", or "negative".
+
+      Feedback: "${processedText}"
+      Sentiment:
+    `.trim();
 
     const payload = {
       model: "llama-3.3-70b-versatile",

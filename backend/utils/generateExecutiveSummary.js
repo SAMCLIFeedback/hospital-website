@@ -69,17 +69,53 @@ FEEDBACK DESCRIPTIONS (actual patient/staff comments):
 ${descriptions.join('\n\n')}
 """
 
-CRITICAL INSTRUCTIONS:
-1. Base ALL claims on the actual feedback descriptions above
-2. Use direct, evidence-based language only
-3. NEVER use vague words: "suggests", "indicates", "may", "possibly", "appears"
-4. DO use strong phrases: "Patients repeatedly report", "Staff consistently state", "As shown in Figure X"
-5. Reference specific Figure numbers when discussing trends
-6. Identify ALL significant themes, not just 2-3
-7. Be specific about departments, processes, and timing when mentioned in feedback
-8. If feedback mentions specific staff names or individuals, anonymize them
-9. Quantify claims when possible (e.g., "mentioned in 15+ feedback items")
-10. Write COMPREHENSIVE sections with multiple subsections and detailed analysis
+CRITICAL INSTRUCTIONS - STRICT EVIDENCE MODE:
+
+You are operating in STRICT EVIDENCE MODE.
+
+NON-NEGOTIABLE RULES:
+1. Use ONLY the data explicitly provided in this prompt:
+   - The feedback descriptions
+   - The sentiment statistics
+   - The department list
+   - The figures listed
+   - The computed totals and percentages
+
+2. DO NOT:
+   - Invent trends
+   - Assume historical comparisons unless explicitly provided
+   - Fabricate percentages
+   - Estimate counts unless they are directly computable from the provided data
+   - Create fictional departments, staff, timeframes, or operational details
+   - Refer to figures that are not listed
+   - Reference data not present in this prompt
+
+3. If something is not explicitly present in the data:
+   - State: "The available feedback does not provide sufficient evidence to determine this."
+   - Do NOT speculate.
+   - Do NOT generalize beyond the provided comments.
+
+4. Every major claim must be traceable to:
+   - A specific percentage provided above, OR
+   - A clearly observable recurring pattern in the feedback descriptions, OR
+   - A listed figure number.
+
+5. If a section (e.g., Strengths, Opportunities, Stakeholder differences) lacks sufficient supporting evidence in the feedback, explicitly state that evidence is limited instead of inventing content.
+
+6. Never fabricate:
+   - Exact wait times
+   - Equipment types
+   - Process failures
+   - Staff behavior patterns
+   - Quantities such as “15+ reports” unless directly counted from the given descriptions
+
+7. Do not introduce any external healthcare standards, benchmarks, or assumed best practices unless explicitly mentioned in the provided feedback.
+
+8. Do not perform hypothetical historical trend analysis unless historical comparison data is explicitly provided in this prompt.
+
+9. If feedback volume is insufficient to support 5-8 problem areas or 3-6 strengths, reduce the number accordingly rather than fabricating additional items.
+
+10. Accuracy is more important than completeness. If evidence is limited, acknowledge limitations clearly.
 
 REQUIRED STRUCTURE:
 
@@ -317,4 +353,50 @@ V. STRATEGIC RECOMMENDATIONS
   }
 }
 
-module.exports = { generateExecutiveSummary };
+/**
+ * Generate interpretations for each chart sequentially
+ */
+
+async function generateChartInterpretations(chartList) {
+  // Map over the charts and create an array of promises
+  const interpretationPromises = chartList.map(async (chart) => {
+    if (!chart.dataSummary) {
+      return "No data available to interpret.";
+    }
+
+    const prompt = `
+      You are a Quality Assurance analyst for a hospital.
+      Analyze the following data for a chart titled "${chart.title}".
+      Description: ${chart.description}
+      Data: ${chart.dataSummary}
+
+      Write a concise, 1-2 paragraph professional interpretation of what this data means. Point out the most significant finding. Do not mention "The chart shows" or "Based on the data". Get straight to the insights.
+    `;
+
+    try {
+      const response = await axios.post(
+        API_URL,
+        {
+          model: "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.2,
+          max_tokens: 300,
+        },
+        { 
+          headers: { Authorization: `Bearer ${API_KEY}` },
+          timeout: 30000 // 30-second timeout per chart
+        }
+      );
+      
+      return response.data.choices[0].message.content.trim();
+    } catch (error) {
+      console.error(`Error interpreting chart ${chart.title}:`, error.message);
+      return "Data interpretation unavailable due to service error.";
+    }
+  });
+
+  // Wait for all charts to be interpreted simultaneously
+  return Promise.all(interpretationPromises);
+}
+
+module.exports = { generateExecutiveSummary, generateChartInterpretations };

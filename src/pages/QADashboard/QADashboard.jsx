@@ -108,6 +108,51 @@ const QADashboard = () => {
     autoConnect: false,
   });
 
+// ====================================================================
+  // HELPER: Fix contradictions before charts or tables see them
+  // ====================================================================
+  const sanitizeFeedback = (item) => {
+    let cleanedItem = { ...item, date: item.date || new Date().toISOString() };
+
+    // 1. If AI says it's POSITIVE, but user clicked Negative buttons
+    if (cleanedItem.sentiment === 'positive') {
+      // Fix Rating
+      if (cleanedItem.rating !== null && cleanedItem.rating <= 3) {
+        cleanedItem.rating = 5; 
+      }
+      // Fix External Category
+      if (cleanedItem.feedbackType === 'complaint' && cleanedItem.source !== 'staff') {
+        cleanedItem.feedbackType = 'compliment';
+      }
+      // Fix Internal Category
+      if (cleanedItem.feedbackType === 'complaint' && cleanedItem.source === 'staff') {
+        cleanedItem.feedbackType = 'recognition';
+      }
+      // Fix Staff Impact Severity
+      if (cleanedItem.impactSeverity === 'critical' || cleanedItem.impactSeverity === 'moderate') {
+        cleanedItem.impactSeverity = 'minor'; 
+      }
+    } 
+    
+    // 2. If AI says it's NEGATIVE, but user clicked Positive buttons
+    else if (cleanedItem.sentiment === 'negative') {
+      // Fix Rating
+      if (cleanedItem.rating !== null && cleanedItem.rating >= 4) {
+        cleanedItem.rating = 1; 
+      }
+      // Fix External Category
+      if (cleanedItem.feedbackType === 'compliment') {
+        cleanedItem.feedbackType = 'complaint';
+      }
+      // Fix Internal Category
+      if (cleanedItem.feedbackType === 'recognition') {
+        cleanedItem.feedbackType = 'complaint';
+      }
+    }
+
+    return cleanedItem;
+  };
+
   const fetchFeedback = async () => {
     try {
       setLoading(true);
@@ -158,8 +203,9 @@ const QADashboard = () => {
         throw new Error('Received invalid feedback data');
       }
 
+      // Map through the data and apply the sanitization helper to every item
       const sortedData = data
-        .map(item => ({ ...item, date: item.date || new Date().toISOString() }))
+        .map(item => sanitizeFeedback(item))
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
       setFeedbackData(sortedData);
@@ -233,53 +279,55 @@ const QADashboard = () => {
     setIsReportModalOpen(true);
   };
 
-const handleGenerateReport = async ({ filteredData, filterSummary, chartList }) => {
-  if (!filteredData?.length) {
-    toast.error('No data to generate report.');
-    return;
-  }
+  const handleGenerateReport = async ({ filteredData, filterSummary, chartList }) => {
+    if (!filteredData?.length) {
+      toast.error('No data to generate report.');
+      return;
+    }
 
-  setGeneratingReport(true);
+    setGeneratingReport(true);
 
-  try {
-    const safeFilterSummary = filterSummary || {
-      dateRange: 'All Time',
-      source: 'Mixed',
-      filtersText: 'None'
-    };
+    try {
+      const safeFilterSummary = filterSummary || {
+        dateRange: 'All Time',
+        source: 'Mixed',
+        filtersText: 'None'
+      };
 
-    const safeChartList = chartList || [];
+      const safeChartList = chartList || [];
 
-    const res = await fetch(`${BASE_URL}/api/report/summary`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        filteredFeedback: filteredData,
+      const res = await fetch(`${BASE_URL}/api/report/summary`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filteredFeedback: filteredData,
+          filterSummary: safeFilterSummary,
+          chartList: safeChartList,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to generate summary');
+
+      // NEW: Extract chartInterpretations from the backend response
+      const { summary: aiSummary, chartInterpretations } = await res.json();
+
+      await generatePDFReport({
+        filteredData,
+        aiSummary,
         filterSummary: safeFilterSummary,
         chartList: safeChartList,
-      }),
-    });
+        chartInterpretations, // NEW: Pass the interpretations to the PDF generator
+      });
 
-    if (!res.ok) throw new Error('Failed to generate summary');
-
-    const { summary: aiSummary } = await res.json();
-
-    await generatePDFReport({
-      filteredData,
-      aiSummary,
-      filterSummary: safeFilterSummary,
-      chartList: safeChartList,
-    });
-
-    toast.success('Report generated successfully!');
-  } catch (err) {
-    console.error(err);
-    toast.error('Failed to generate report.');
-  } finally {
-    setGeneratingReport(false);
-    setIsReportModalOpen(false);
-  }
-};
+      toast.success('Report generated successfully!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to generate report.');
+    } finally {
+      setGeneratingReport(false);
+      setIsReportModalOpen(false);
+    }
+  };
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -424,9 +472,14 @@ const handleGenerateReport = async ({ filteredData, filterSummary, chartList }) 
       }
 
       setFeedbackData(prevData => {
+        // =========================================================
+        // NEW: Clean the LIVE incoming feedback before the charts see it!
+        // =========================================================
+        const cleanedLiveFeedback = sanitizeFeedback(updatedFeedback);
+
         const normalizedFeedback = {
-          ...updatedFeedback,
-          date: updatedFeedback.date || new Date().toISOString(),
+          ...cleanedLiveFeedback,
+          date: cleanedLiveFeedback.date || new Date().toISOString(),
         };
 
         const index = prevData.findIndex(f => f.id === normalizedFeedback.id);

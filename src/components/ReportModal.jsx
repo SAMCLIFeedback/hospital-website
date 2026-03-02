@@ -567,84 +567,105 @@ const ReportModal = ({
   // =================================================================================
   // GENERATE CHART METADATA FOR PDF
   // =================================================================================
-  const chartList = useMemo(() => {
+const chartList = useMemo(() => {
     const charts = [
       {
         title: 'Feedback Volume Over Time',
-        description: 'Distribution of feedback across Today, Last Week, Last Month, and Last Quarter periods.'
+        description: 'Distribution of feedback across Today, Last Week, Last Month, and Last Quarter periods.',
+        dataSummary: `Today: ${feedbackVolumeData.datasets[0].data[0]}, Week: ${feedbackVolumeData.datasets[0].data[1]}, Month: ${feedbackVolumeData.datasets[0].data[2]}, Quarter: ${feedbackVolumeData.datasets[0].data[3]}`
       },
       {
         title: 'Feedback Volume by Department',
-        description: 'Total count of feedback items received per department, sorted by volume.'
+        description: 'Total count of feedback items received per department, sorted by volume.',
+        dataSummary: departmentData.labels.map((label, index) => `${label}: ${departmentData.datasets[0].data[index]}`).join('; ')
       },
       {
         title: 'Sentiment Distribution',
-        description: 'Overall breakdown of feedback sentiment: Positive, Neutral, Negative, and Pending analysis.'
+        description: 'Overall breakdown of feedback sentiment: Positive, Neutral, Negative, and Pending analysis.',
+        dataSummary: `Positive: ${sentimentData.datasets[0].data[0]}, Neutral: ${sentimentData.datasets[0].data[1]}, Negative: ${sentimentData.datasets[0].data[2]}, Pending: ${sentimentData.datasets[0].data[3]}`
       },
       {
         title: 'Source Distribution',
-        description: 'Proportion of feedback from Staff (internal), Patients, and Visitors/Family (external).'
+        description: 'Proportion of feedback from Staff (internal), Patients, and Visitors/Family (external).',
+        dataSummary: `Staff: ${sourceData.datasets[0].data[0]}, Patient: ${sourceData.datasets[0].data[1]}, Visitor/Family: ${sourceData.datasets[0].data[2]}`
       },
       {
         title: 'Internal Feedback Type Distribution',
-        description: 'Categories of staff feedback: Operational issues, Safety concerns, Improvement suggestions, Recognition, Complaints, and Other.'
+        description: 'Categories of staff feedback: Operational issues, Safety concerns, Improvement suggestions, Recognition, Complaints, and Other.',
+        dataSummary: `Operational: ${internalPieData.datasets[0].data[0]}, Safety: ${internalPieData.datasets[0].data[1]}, Improvement: ${internalPieData.datasets[0].data[2]}, Recognition: ${internalPieData.datasets[0].data[3]}, Complaint: ${internalPieData.datasets[0].data[4]}, Other: ${internalPieData.datasets[0].data[5]}`
       },
       {
         title: 'External Feedback Type Distribution',
-        description: 'Categories of patient/visitor feedback: Complaints, Suggestions, Compliments, and Other.'
+        description: 'Categories of patient/visitor feedback: Complaints, Suggestions, Compliments, and Other.',
+        dataSummary: `Complaint: ${externalPieData.datasets[0].data[0]}, Suggestion: ${externalPieData.datasets[0].data[1]}, Compliment: ${externalPieData.datasets[0].data[2]}, Other: ${externalPieData.datasets[0].data[3]}`
       },
       {
         title: 'Overall Urgency Distribution',
-        description: 'Hospital-wide ratio of feedback marked as Urgent versus Non-Urgent.'
+        description: 'Hospital-wide ratio of feedback marked as Urgent versus Non-Urgent.',
+        dataSummary: `Urgent: ${urgencyData.datasets[0].data[0]}, Non-Urgent: ${urgencyData.datasets[0].data[1]}`
       },
       {
         title: 'Department Sentiment Percentage (Stabilized)',
-        description: 'Normalized percentage breakdown of Positive, Neutral, and Negative sentiment by department using Bayesian smoothing.'
+        description: 'Normalized percentage breakdown of Positive, Neutral, and Negative sentiment by department using Bayesian smoothing.',
+        dataSummary: allDeptStats.map(d => `${d.department} (Positive: ${d.positive}%, Neutral: ${d.neutral}%, Negative: ${d.negative}%)`).join('; ')
       },
     ];
 
     if (internalTypeByDeptStats.length > 0) {
       charts.push({
         title: 'Internal Feedback Type Distribution by Department (%) (Stabilized)',
-        description: 'Percentage distribution of staff feedback categories across departments with Bayesian stabilization.'
+        description: 'Percentage distribution of staff feedback categories across departments with Bayesian stabilization.',
+        dataSummary: internalTypeByDeptStats.map(d => `${d.department} (Operational: ${d.operational}%, Safety: ${d.safety}%, Improvement: ${d.improvement}%, Recognition: ${d.recognition}%, Complaint: ${d.complaint}%, Other: ${d.other}%)`).join('; ')
       });
     }
 
     if (externalTypeByDeptStats.length > 0) {
       charts.push({
         title: 'External Feedback Type Distribution by Department (%) (Stabilized)',
-        description: 'Percentage distribution of patient/visitor feedback categories across departments with Bayesian stabilization.'
+        description: 'Percentage distribution of patient/visitor feedback categories across departments with Bayesian stabilization.',
+        dataSummary: externalTypeByDeptStats.map(d => `${d.department} (Complaint: ${d.complaint}%, Suggestion: ${d.suggestion}%, Compliment: ${d.compliment}%, Other: ${d.other}%)`).join('; ')
       });
     }
 
     if (impactSeverityStats.length > 0) {
       charts.push({
         title: 'Impact Severity Distribution by Department (%) – Staff Feedback (Stabilized)',
-        description: 'Percentage breakdown of Minor, Moderate, and Critical severity levels reported by staff across departments.'
+        description: 'Percentage breakdown of Minor, Moderate, and Critical severity levels reported by staff across departments.',
+        dataSummary: impactSeverityStats.map(d => `${d.department} (Minor: ${d.minor}%, Moderate: ${d.moderate}%, Critical: ${d.critical}%)`).join('; ')
       });
     }
 
     if (urgencyByDeptStats.length > 0) {
       charts.push({
         title: 'Urgent Feedback Percentage by Department (Stabilized)',
-        description: 'Percentage of feedback marked as urgent within each department, with Bayesian smoothing applied.'
+        description: 'Percentage of feedback marked as urgent within each department, with Bayesian smoothing applied.',
+        dataSummary: urgencyByDeptStats.map(d => `${d.department} (Urgent: ${d.urgent}%, Non-Urgent: ${d.nonUrgent}%)`).join('; ')
       });
     }
 
     if (ratingByDeptStats.length > 0) {
       charts.push({
         title: 'Average Star Rating by Department (Patient/Visitor/Family)',
-        description: 'Average satisfaction ratings (1-5 stars) given by patients, visitors, and family members for each department.'
+        description: 'Average satisfaction ratings (1-5 stars) given by patients, visitors, and family members for each department.',
+        dataSummary: ratingByDeptStats.map(d => `${d.department}: ${d.averageRating} stars`).join('; ')
       });
     }
 
     return charts;
   }, [
-    internalTypeByDeptStats.length,
-    externalTypeByDeptStats.length,
-    impactSeverityStats.length,
-    urgencyByDeptStats.length,
-    ratingByDeptStats.length
+    feedbackVolumeData,
+    departmentData,
+    sentimentData,
+    sourceData,
+    internalPieData,
+    externalPieData,
+    urgencyData,
+    allDeptStats,
+    internalTypeByDeptStats,
+    externalTypeByDeptStats,
+    impactSeverityStats,
+    urgencyByDeptStats,
+    ratingByDeptStats
   ]);
 
   const departmentOptions = [

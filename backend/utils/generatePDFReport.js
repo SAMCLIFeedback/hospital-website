@@ -129,7 +129,8 @@ export async function generatePDFReport({
   filteredData,
   aiSummary,
   filterSummary,
-  chartList
+  chartList,
+  chartInterpretations = []
 }) {
   // CRITICAL: Look for charts in the REPORT MODAL
   const reportModal = document.querySelector('[class*="reportModal"]');
@@ -513,94 +514,61 @@ export async function generatePDFReport({
   // ============================================
   for (let i = 0; i < chartImages.length; i++) {
     const chart = chartImages[i];
-    const isPie = isPieChart(chart.aspectRatio);
-    const isLandscape = !isPie;
+    // Safely grab the interpretation or fallback
+    const interpretationText = chartInterpretations[i] || "No interpretation generated.";
+    
+    // Always add a new portrait page for each chart
+    pdf.addPage('a4', 'portrait');
+    let yPos = 0; // Ensure yPos resets properly
 
-    if (isLandscape) {
-      pdf.addPage('a4', 'landscape');
-      const landscapeWidth = pdf.internal.pageSize.getWidth();
-      const landscapeHeight = pdf.internal.pageSize.getHeight();
+    // Header for the page
+    pdf.setFillColor(...colors.primary);
+    pdf.rect(0, 0, pageWidth, 40, 'F');
+    pdf.setFillColor(...colors.accent);
+    pdf.circle(pageWidth - 10, 20, 30, 'F');
 
-      pdf.setFillColor(...colors.primary);
-      pdf.rect(0, 0, landscapeWidth, 35, 'F');
-      
-      pdf.setFillColor(...colors.accent);
-      pdf.circle(landscapeWidth - 10, 17.5, 25, 'F');
+    pdf.setTextColor(...colors.white);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(22);
+    pdf.text(`Figure ${i + 1}`, 15, 18);
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(14);
+    pdf.text(chart.title, 15, 30);
 
-      pdf.setTextColor(...colors.white);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(20);
-      pdf.text(`Figure ${i + 1}`, 15, 15);
-      
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(14);
-      pdf.text(chart.title, 15, 25);
-
-      yPos = 45;
-      const maxChartWidth = landscapeWidth - 30;
-      const maxChartHeight = landscapeHeight - yPos - 40;
-      
-      let imgW = maxChartWidth;
-      let imgH = imgW * chart.aspectRatio;
-      
-      if (imgH > maxChartHeight) {
-        imgH = maxChartHeight;
-        imgW = imgH / chart.aspectRatio;
-      }
-
-      const imgX = (landscapeWidth - imgW) / 2;
-      const imgY = yPos + (maxChartHeight - imgH) / 2;
-      pdf.addImage(chart.data, 'PNG', imgX, imgY, imgW, imgH);
-
-      if (chart.description) {
-        const descY = landscapeHeight - 25;
-        pdf.setFontSize(10);
-        pdf.setTextColor(...colors.gray);
-        pdf.setFont('helvetica', 'italic');
-        addWrappedText(pdf, chart.description, 15, descY, landscapeWidth - 30, 5);
-      }
-    } else {
-      pdf.addPage('a4', 'portrait');
-
-      pdf.setFillColor(...colors.primary);
-      pdf.rect(0, 0, pageWidth, 40, 'F');
-      
-      pdf.setFillColor(...colors.accent);
-      pdf.circle(pageWidth - 10, 20, 30, 'F');
-
-      pdf.setTextColor(...colors.white);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(22);
-      pdf.text(`Figure ${i + 1}`, 15, 18);
-      
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(14);
-      pdf.text(chart.title, 15, 30);
-
-      yPos = 55;
-      const maxWidth = pageWidth - 40;
-      const maxHeight = pageHeight - yPos - 80;
-      
-      let imgW = maxWidth;
-      let imgH = imgW * chart.aspectRatio;
-      
-      if (imgH > maxHeight) {
-        imgH = maxHeight;
-        imgW = imgH / chart.aspectRatio;
-      }
-
-      const imgX = (pageWidth - imgW) / 2;
-      const imgY = yPos + (maxHeight - imgH) / 2;
-      pdf.addImage(chart.data, 'PNG', imgX, imgY, imgW, imgH);
-
-      if (chart.description) {
-        const descY = pageHeight - 35;
-        pdf.setFontSize(11);
-        pdf.setTextColor(...colors.gray);
-        pdf.setFont('helvetica', 'italic');
-        addWrappedText(pdf, chart.description, 20, descY, pageWidth - 40, 5.5);
-      }
+    // --- DRAW THE CHART SCREENSHOT ---
+    yPos = 50; 
+    const maxWidth = pageWidth - 30;
+    const maxHeight = 130; // Restrict height so text fits below
+    
+    let imgW = maxWidth;
+    let imgH = imgW * chart.aspectRatio;
+    
+    if (imgH > maxHeight) {
+      imgH = maxHeight;
+      imgW = imgH / chart.aspectRatio;
     }
+
+    const imgX = (pageWidth - imgW) / 2;
+    pdf.addImage(chart.data, 'PNG', imgX, yPos, imgW, imgH);
+
+    // --- DRAW THE AI INTERPRETATION ---
+    yPos = yPos + imgH + 20;
+
+    // Sub-header for interpretation
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(14);
+    pdf.setTextColor(...colors.primary);
+    pdf.text("AI Interpretation", 15, yPos);
+    yPos += 8;
+
+    // The AI generated text
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    pdf.setTextColor(...colors.dark);
+    
+    // addWrappedText handles line breaks
+    addWrappedText(pdf, interpretationText, 15, yPos, pageWidth - 30, 6);
   }
 
   // ============================================

@@ -1,11 +1,11 @@
 // backend/routes/report.js
 const express = require('express');
 const router = express.Router();
-const { generateExecutiveSummary } = require('../utils/generateExecutiveSummary');
+const { generateExecutiveSummary, generateChartInterpretations } = require('../utils/generateExecutiveSummary');
 
 /**
  * POST /api/report/summary
- * Generate executive summary from filtered feedback
+ * Generate executive summary and chart interpretations from filtered feedback
  */
 router.post('/summary', async (req, res) => {
   try {
@@ -21,7 +21,8 @@ router.post('/summary', async (req, res) => {
     if (filteredFeedback.length === 0) {
       return res.status(400).json({ 
         error: 'No feedback data provided',
-        summary: 'No feedback available for the selected filters.' 
+        summary: 'No feedback available for the selected filters.',
+        chartInterpretations: [] // Fallback
       });
     }
 
@@ -31,23 +32,29 @@ router.post('/summary', async (req, res) => {
       });
     }
 
-    console.log(`Generating summary for ${filteredFeedback.length} feedback items`);
+    const safeChartList = Array.isArray(chartList) ? chartList : [];
+    console.log(`Generating summary and interpretations for ${filteredFeedback.length} feedback items and ${safeChartList.length} charts`);
 
-    // Generate the summary
+    // 1. Generate the main executive summary
     const summary = await generateExecutiveSummary({
       filteredFeedback,
       filterSummary,
-      chartList: Array.isArray(chartList) ? chartList : []
+      chartList: safeChartList
     });
 
+    // 2. Generate the individual chart interpretations sequentially
+    console.log(`Generating individual interpretations for ${safeChartList.length} charts...`);
+    const chartInterpretations = await generateChartInterpretations(safeChartList);
+
     // Log successful generation
-    console.log(`Summary generated successfully (${summary.length} characters)`);
+    console.log(`Summary generated successfully (${summary.length} characters) and ${chartInterpretations.length} charts interpreted`);
 
     res.json({ 
       summary,
+      chartInterpretations, // <-- NEW: Array of interpretations sent back to frontend
       metadata: {
         feedbackCount: filteredFeedback.length,
-        chartCount: chartList?.length || 0,
+        chartCount: safeChartList.length,
         generatedAt: new Date().toISOString()
       }
     });
@@ -59,8 +66,9 @@ router.post('/summary', async (req, res) => {
     res.status(500).json({ 
       error: 'Failed to generate summary',
       details: error.message,
-      // Provide fallback summary
-      summary: 'Unable to generate AI-powered summary due to a service error. Please review the charts and data manually.'
+      // Provide fallback summary and interpretations
+      summary: 'Unable to generate AI-powered summary due to a service error. Please review the charts and data manually.',
+      chartInterpretations: [] // Fallback
     });
   }
 });
