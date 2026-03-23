@@ -1,6 +1,7 @@
 const axios = require('axios');
 require('dotenv').config();
 
+// Note: If using Ollama locally, ensure it is routed through the OpenAI compatibility endpoint (/v1/chat/completions)
 const API_URL = process.env.GROQ_API_URL || process.env.OLLAMA_API_URL;
 const API_KEY = process.env.GROQ_API_KEY;
 
@@ -14,11 +15,19 @@ async function generateExecutiveSummary({ filteredFeedback, filterSummary, chart
     return "No feedback available for the selected filters.";
   }
 
-  // Extract feedback descriptions (increased sample for better analysis)
-  const descriptions = filteredFeedback
+  // Extract and randomize feedback descriptions to prevent chronological or departmental bias
+  const validDescriptions = filteredFeedback
     .map(f => f.description || '')
-    .filter(desc => desc.trim().length > 0)
-    .slice(0, 300);
+    .filter(desc => desc.trim().length > 0);
+
+  // Simple Fisher-Yates shuffle for true randomization of the sample
+  for (let i = validDescriptions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [validDescriptions[i], validDescriptions[j]] = [validDescriptions[j], validDescriptions[i]];
+  }
+
+  // Slice after shuffling
+  const descriptions = validDescriptions.slice(0, 300);
 
   // Calculate sentiment statistics
   const positive = filteredFeedback.filter(f => f.sentiment === 'positive').length;
@@ -74,191 +83,91 @@ CRITICAL INSTRUCTIONS - STRICT EVIDENCE MODE:
 You are operating in STRICT EVIDENCE MODE.
 
 NON-NEGOTIABLE RULES:
-1. Use ONLY the data explicitly provided in this prompt:
-   - The feedback descriptions
-   - The sentiment statistics
-   - The department list
-   - The figures listed
-   - The computed totals and percentages
-
-2. DO NOT:
-   - Invent trends
-   - Assume historical comparisons unless explicitly provided
-   - Fabricate percentages
-   - Estimate counts unless they are directly computable from the provided data
-   - Create fictional departments, staff, timeframes, or operational details
-   - Refer to figures that are not listed
-   - Reference data not present in this prompt
-
-3. If something is not explicitly present in the data:
-   - State: "The available feedback does not provide sufficient evidence to determine this."
-   - Do NOT speculate.
-   - Do NOT generalize beyond the provided comments.
-
-4. Every major claim must be traceable to:
-   - A specific percentage provided above, OR
-   - A clearly observable recurring pattern in the feedback descriptions, OR
-   - A listed figure number.
-
-5. If a section (e.g., Strengths, Opportunities, Stakeholder differences) lacks sufficient supporting evidence in the feedback, explicitly state that evidence is limited instead of inventing content.
-
-6. Never fabricate:
-   - Exact wait times
-   - Equipment types
-   - Process failures
-   - Staff behavior patterns
-   - Quantities such as “15+ reports” unless directly counted from the given descriptions
-
-7. Do not introduce any external healthcare standards, benchmarks, or assumed best practices unless explicitly mentioned in the provided feedback.
-
-8. Do not perform hypothetical historical trend analysis unless historical comparison data is explicitly provided in this prompt.
-
-9. If feedback volume is insufficient to support 5-8 problem areas or 3-6 strengths, reduce the number accordingly rather than fabricating additional items.
-
-10. Accuracy is more important than completeness. If evidence is limited, acknowledge limitations clearly.
+1. Use ONLY the data explicitly provided in this prompt.
+2. DO NOT invent trends, assume historical comparisons, fabricate percentages, or estimate counts unless they are directly computable from the provided data.
+3. If something is not explicitly present in the data, state: "The available feedback does not provide sufficient evidence to determine this."
+4. Every major claim must be traceable to a specific percentage, observable recurring pattern, or listed figure number.
+5. If a section lacks sufficient supporting evidence, explicitly state that evidence is limited instead of inventing content.
+6. Never fabricate exact wait times, equipment types, process failures, or staff behavior patterns.
+7. Do not introduce any external healthcare standards, benchmarks, or assumed best practices.
+8. Accuracy is more important than completeness.
+9. If feedback volume is genuinely insufficient to support the requested number of items, reduce the number accordingly rather than fabricating.
+10. DIVERSIFICATION: Where the data supports it, spread analysis across at least 4-6 departments. If fewer departments have sufficient evidence, explicitly state that evidence is concentrated in a smaller number of departments instead of forcing weak claims.
+11. DEPTH & LENGTH: Write in-depth, multi-sentence paragraphs for every subsection (Overview, Impact, Voice, etc.) rather than brief single sentences. Expand on the context, implications, and specifics.
 
 REQUIRED STRUCTURE:
 
 I. EXECUTIVE OVERVIEW
-Write 4-6 comprehensive paragraphs addressing:
-
-A. Critical Findings Summary
-- What are the 3-5 most critical findings from this feedback?
-- Prioritize findings by severity and frequency
-- Reference specific figures and quantify the impact
-
-B. Overall Satisfaction Trajectory
-- Is overall satisfaction improving, stable, or declining?
-- What trends appear when comparing to historical patterns?
-- Reference sentiment distribution (Figure 3) and volume trends (Figure 1)
-- Cite specific percentage changes if evident
-
-C. Dominant Themes
-- What 2-3 themes dominate the feedback period?
-- How do these themes interconnect across departments?
-- Which departments are most affected?
-- Include direct paraphrases from multiple feedback items
-
-D. Stakeholder Impact
-- How are different stakeholder groups (patients, visitors, staff) experiencing the hospital?
-- Are there differences in concerns between internal and external feedback?
-- Reference source distribution (Figure 4)
-
-Example format:
-"Analysis of ${total} feedback items reveals three critical systemic issues requiring immediate attention. First, patients across multiple departments repeatedly describe extended wait times, with Emergency Department patients specifically stating they waited between 90 minutes and 4 hours for initial assessment. Second, equipment reliability concerns appear in approximately ${Math.round(total * 0.15)} feedback items, concentrated primarily in the Operating Room and ICU. Third, communication gaps between clinical staff and patients create recurring frustration, particularly during handoffs and discharge processes. As shown in Figure 2, these issues concentrate in five departments accounting for the majority of total feedback volume.
-
-The overall satisfaction trajectory shows concerning decline, with negative sentiment comprising ${negPct}% of all feedback. Figure 3's sentiment distribution confirms this trend, revealing a significant imbalance between positive and negative experiences. Positive feedback, representing only ${posPct}% of total responses, concentrates primarily in specific departments where patients consistently praise staff professionalism and service efficiency..."
+Write 4-6 comprehensive, detailed paragraphs addressing:
+A. Critical Findings Summary (Prioritize findings, reference specific figures and quantify the impact)
+B. Overall Satisfaction Profile (What is the current state of overall satisfaction? Reference sentiment distribution and volume trends. Cite specific percentages without assuming historical movement unless explicitly provided in the data.)
+C. Dominant Themes (How themes interconnect across MULTIPLE departments)
+D. Stakeholder Impact (Differences in concerns between internal and external feedback)
 
 II. CRITICAL PROBLEM AREAS
-Identify 5-8 MAJOR problems with comprehensive sub-analysis. For each:
+Identify 3-5 MAJOR problems covering MULTIPLE DIFFERENT departments. Write detailed, multi-sentence paragraphs for each subsection:
 
 Structure each problem as:
 • [Problem Title - Department Focus]
-  Overview: [2-3 sentence description of the core issue]
+  Overview: [Provide a detailed, 3-5 sentence description of the core issue, context, and immediate consequences.]
   
-  Impact & Frequency: [Specific data on how many reports, which departments, severity level]
+  Impact & Frequency: [Provide specific data on how many reports mention this, which departments are affected, and the severity level. Explain the ripple effect on hospital operations.]
   
-  Patient/Staff Voice: [2-3 paraphrased examples from actual feedback showing the problem]
+  Patient/Staff Voice: [Provide 3-4 paraphrased examples from actual feedback showing the problem in detail.]
   
-  Root Cause Indicators: [What the feedback suggests about underlying causes]
+  Root Cause Indicators: [Analyze what the feedback suggests about underlying systemic causes in depth.]
   
-  Data Support: [Reference specific figures and percentages]
-
-Example:
-• Emergency Department Wait Times - Critical Access Issue
-  Overview: Patients consistently report excessive and unexplained wait times in the Emergency Department, particularly during evening and weekend hours. The issue affects both critical and non-critical cases, with patients describing waits ranging from 2 to 6 hours before initial physician contact.
-  
-  Impact & Frequency: This concern appears in numerous feedback items, making it one of the most frequently mentioned problems. The issue affects the ED primarily but also impacts other services due to downstream scheduling conflicts.
-  
-  Patient/Staff Voice: Patients describe arriving with urgent symptoms but experiencing extended waiting periods with minimal updates. Others report significant discrepancies between estimated and actual wait times. Staff feedback corroborates this, noting capacity challenges during peak hours and lack of clear communication protocols.
-  
-  Root Cause Indicators: The feedback points to contributing factors including staffing levels during peak hours, absence of patient communication protocols, and inefficient triage processes. Several staff reports mention equipment delays and handoff challenges as exacerbating factors.
-  
-  Data Support: Figure 2 shows the department receives substantial feedback volume. Figure 8 reveals predominantly negative sentiment in this area. Figure 12 indicates a high proportion of urgent-flagged feedback originates from this department.
+  Data Support: [Reference specific figures and percentages and explain how they prove this problem.]
 
 III. OPERATIONAL EXCELLENCE OPPORTUNITIES
-Identify 3-5 significant operational challenges requiring attention:
+Identify 2-4 significant operational challenges spanning MULTIPLE departments. Write detailed, multi-sentence paragraphs:
 
 Structure each as:
 • [Opportunity Title]
-  Current State: [What feedback reveals about current operations]
+  Current State: [Provide an in-depth explanation of what feedback reveals about current operations and workflows.]
   
-  Stakeholder Impact: [Who is affected and how]
+  Stakeholder Impact: [Explain in detail who is affected (staff vs patients) and exactly how it impacts their day-to-day experience.]
   
-  Improvement Potential: [What could be achieved by addressing this]
+  Improvement Potential: [Explain deeply what could be achieved by addressing this, including long-term benefits.]
   
-  Evidence: [Specific feedback examples and figure references]
-
-Example:
-• Equipment Reliability and Maintenance Systems
-  Current State: Staff across multiple clinical areas report recurring equipment failures and maintenance delays. Issues range from minor inconveniences to critical safety concerns. Maintenance requests reportedly take extended periods to address, even for critical equipment.
-  
-  Stakeholder Impact: Clinical staff experience workflow disruptions and increased stress when essential equipment fails. Patients face delayed procedures and extended stay times. Critical departments have experienced service interruptions due to equipment unavailability.
-  
-  Improvement Potential: Implementing predictive maintenance schedules and rapid-response protocols for critical equipment could significantly reduce downtime. This would improve staff satisfaction, enhance patient safety, and prevent service interruptions.
-  
-  Evidence: Equipment concerns appear across multiple departments in the feedback. Staff mention specific instances of equipment failures affecting patient care. Figure data shows equipment-related complaints constitute a notable portion of internal feedback.
+  Evidence: [Reference specific feedback examples and figure data.]
 
 IV. STRENGTHS AND POSITIVE PERFORMANCE
-Identify 3-6 areas of excellence (if evidence exists):
+*CRITICAL: THIS SECTION IS MANDATORY. DO NOT SKIP THIS HEADER.*
+Identify 2-4 areas of excellence highlighting DIFFERENT departments. Write detailed, multi-sentence paragraphs:
 
-Structure each as:
+If you found positive feedback, structure each as:
 • [Strength Title - Department/Team]
-  Performance Summary: [What the data shows]
+  Performance Summary: [Provide a detailed, 3-5 sentence explanation of what the positive data shows for this specific department.]
   
-  Stakeholder Feedback: [Specific positive comments paraphrased]
+  Stakeholder Feedback: [Provide multiple specific positive comments paraphrased in detail.]
   
-  Success Factors: [What appears to be working well]
+  Success Factors: [Analyze deeply what workflows, attitudes, or processes appear to be working exceptionally well here.]
   
-  Replication Opportunity: [How this could be scaled to other areas]
+  Replication Opportunity: [Explain specifically how this department's success could be scaled to struggling areas of the hospital.]
   
-  Evidence: [Figure references and data points]
+  Evidence: [Cite specific figures, star ratings, and data points that prove this strength.]
 
-Example:
-• Radiology Excellence - Patient-Centered Service Model
-  Performance Summary: Radiology consistently receives highly positive feedback, with strong positive sentiment and above-average ratings. Patients praise both technical competence and interpersonal care.
-  
-  Stakeholder Feedback: Patients repeatedly describe staff as professional and caring, noting clear explanations and comfortable experiences. Others mention efficient scheduling and minimal wait times. Even patients with concerns elsewhere specifically exclude this department from criticism.
-  
-  Success Factors: The feedback indicates effective appointment scheduling, strong patient communication training, and consistent quality standards. The department demonstrates strong leadership and team cohesion.
-  
-  Replication Opportunity: This service model—particularly patient communication protocols and scheduling efficiency—should be studied and adapted for high-volume departments. The approach to setting and managing patient expectations could serve as a hospital-wide template.
-  
-  Evidence: Figure 13 shows strong average ratings. Figure 8 confirms predominantly positive sentiment. The majority of feedback items contain positive comments focused on service quality rather than facilities.
-
-If fewer than 3 strong positives exist, include this note:
-"Limited positive themes emerged during this period. While individual staff members receive occasional praise, no department demonstrated consistently strong positive performance across multiple feedback items. This absence of positive feedback is significant and suggests systemic issues requiring comprehensive intervention."
+If there is little to no positive feedback, you MUST include the "IV. STRENGTHS AND POSITIVE PERFORMANCE" header and output ONLY this exact structure underneath it:
+• [No Distinct Strengths Identified - Hospital Wide]
+  Performance Summary: Limited positive themes emerged during this period. While individual staff members receive occasional praise, no department demonstrated consistently strong positive performance across multiple feedback items. This absence of positive feedback is significant and suggests systemic issues requiring comprehensive intervention.
 
 V. STRATEGIC RECOMMENDATIONS
-Provide 6-10 specific, prioritized, actionable recommendations:
+Provide 6-10 specific, prioritized, actionable recommendations targeting MULTIPLE departments:
 
 Structure each as:
 • [Recommendation Title] - Priority: [High/Medium]
-  Action Required: [Specific steps to take]
+  Action Required: [Provide a highly detailed, multi-step explanation of the specific actions to take.]
   
-  Responsible Party: [Which department/role should own this]
+  Responsible Party: [List specific departments/roles that should own this.]
   
-  Expected Outcomes: [What success looks like]
+  Expected Outcomes: [Detail the exact metrics, workflows, or satisfaction scores that will improve.]
   
-  Evidence Base: [Which problems/figures support this recommendation]
+  Evidence Base: [Tie this deeply back to the specific problems and figures mentioned earlier in the report.]
   
-  Timeline: [Suggested implementation timeframe]
+  Timeline: [Suggested multi-phase implementation timeframe.]
   
-  Resource Implications: [What resources are needed]
-
-Example:
-• Implement Comprehensive Patient Flow Redesign - Priority: HIGH
-  Action Required: Establish a multidisciplinary task force to redesign patient flow systems, including: (1) real-time capacity monitoring, (2) revised triage protocols, (3) dedicated patient communication role during peak hours, (4) fast-track system for appropriate cases, and (5) improved handoff procedures.
-  
-  Responsible Party: Department Medical Director and Nursing Director, with support from IT (for monitoring system), Hospital Administration (for staffing), and Quality Assurance (for protocol development and monitoring).
-  
-  Expected Outcomes: Reduce average wait times significantly within 6 months. Decrease patient complaints related to access. Improve staff satisfaction scores. Increase patient satisfaction ratings to target levels. Reduce patients who leave without being seen.
-  
-  Evidence Base: Wait time concerns dominate feedback. Figure 2 shows high feedback volume in affected areas. Figure 8 reveals predominantly negative sentiment. Figure 12 shows substantial urgent-flagged feedback. Multiple patient reports describe extended waits and lack of communication.
-  
-  Timeline: Task force formation: 2 weeks. Assessment phase: 4 weeks. Pilot program: 8-12 weeks. Full implementation: 6 months. Ongoing monitoring: continuous.
-  
-  Resource Implications: Requires: (1) IT investment in monitoring systems, (2) additional staff for patient communication role during peak hours, (3) staff time for task force participation, (4) potential external consultation for best practices review.
+  Resource Implications: [Detail the specific staffing, IT, or financial resources needed.]
 
 FORMATTING REQUIREMENTS:
 - Use the exact section headers above (I., II., III., IV., V.)
@@ -267,11 +176,7 @@ FORMATTING REQUIREMENTS:
 - No markdown formatting (no **, no ##, no ---)
 - Reference figures by number: "Figure 1", "Figure 2", etc.
 - Write in active voice
-- Use present tense for current issues
-- Be specific with numbers, percentages, and timeframes
-- Each major section should be substantial and comprehensive
-
-OUTPUT ONLY THE EXECUTIVE SUMMARY TEXT. No preamble, no meta-commentary, no explanations of what you're doing.
+- OUTPUT ONLY THE EXECUTIVE SUMMARY TEXT. No preamble.
 `.trim();
 
   try {
@@ -282,12 +187,12 @@ OUTPUT ONLY THE EXECUTIVE SUMMARY TEXT. No preamble, no meta-commentary, no expl
         messages: [
           { 
             role: "system", 
-            content: "You are an expert hospital quality assurance director writing comprehensive executive summaries. Output only the requested summary text with no additional commentary. Write detailed, evidence-based analyses." 
+            content: "You are an expert hospital quality assurance director writing comprehensive executive summaries. Output only the requested summary text with no additional commentary. Write detailed, multi-sentence, evidence-based analyses covering multiple departments." 
           },
           { role: "user", content: prompt }
         ],
-        temperature: 0.2,
-        max_tokens: 4000, // Increased for longer output
+        temperature: 0.3,
+        max_tokens: 5000,
       },
       {
         headers: {
@@ -311,7 +216,7 @@ OUTPUT ONLY THE EXECUTIVE SUMMARY TEXT. No preamble, no meta-commentary, no expl
   } catch (error) {
     console.error("AI summary generation error:", error.response?.data || error.message);
     
-    // Provide a fallback summary
+    // Provide a fallback summary (now properly aligned with the PDF parser's requirements)
     return `EXECUTIVE SUMMARY
 
 I. EXECUTIVE OVERVIEW
@@ -320,43 +225,62 @@ Analysis of ${total} feedback items reveals significant opportunities for servic
 The sentiment distribution shows ${negPct}% negative, ${neuPct}% neutral, and ${posPct}% positive responses during the ${filterSummary.dateRange || 'analysis period'}. This data, combined with the detailed charts provided, offers critical insights into patient and staff experiences.
 
 II. CRITICAL PROBLEM AREAS
-• Manual Review Recommended
+• [Manual Review Recommended - Hospital Wide]
   Overview: Due to the AI service interruption, leadership should examine Figure 1 and subsequent charts to identify the primary areas of concern in the feedback data.
   
   Impact & Frequency: Please analyze the departmental breakdown in Figure 2 and sentiment distribution in Figure 3 to understand the scope and severity of issues.
   
+  Patient/Staff Voice: Specific voice references are unavailable in this auto-generated fallback.
+  
+  Root Cause Indicators: Root causes must be determined via manual review of the attached charts.
+  
   Data Support: All figures provided below contain essential data for understanding current challenges.
 
 III. OPERATIONAL EXCELLENCE OPPORTUNITIES
-• Data Analysis Required
+• [Data Analysis Required - Hospital Wide]
   Current State: The detailed charts and statistics sections provide comprehensive data on operational performance across departments.
+  
+  Stakeholder Impact: Impact must be assessed manually.
+  
+  Improvement Potential: Reviewing the charts will highlight areas for significant operational improvement.
   
   Evidence: Review Figures 8-12 for department-specific performance metrics and trend analysis.
 
 IV. STRENGTHS AND POSITIVE PERFORMANCE
-${positive > 0 ? `• Positive Feedback Present\n  Performance Summary: ${posPct}% of responses were positive. Review the sentiment distribution charts and department-specific data for details on areas of strength.` : '• Limited positive feedback could be automatically identified. Manual review recommended.'}
+${positive > 0 ? `• [Positive Feedback Present - Various Departments]\n  Performance Summary: ${posPct}% of responses were positive. Review the sentiment distribution charts and department-specific data for details on areas of strength.\n  \n  Stakeholder Feedback: Positive themes are present but require manual review.\n  \n  Success Factors: To be determined via manual analysis.\n  \n  Replication Opportunity: To be determined via manual analysis.\n  \n  Evidence: Figure 3 and departmental charts.` : '• [No Distinct Strengths Identified - Hospital Wide]\n  Performance Summary: Limited positive themes emerged during this period. While individual staff members receive occasional praise, no department demonstrated consistently strong positive performance across multiple feedback items. This absence of positive feedback is significant and suggests systemic issues requiring comprehensive intervention.'}
 
 V. STRATEGIC RECOMMENDATIONS
-• Re-generate Report - Priority: HIGH
+• [Re-generate Report] - Priority: HIGH
   Action Required: Attempt to regenerate this report when the AI service is restored for comprehensive strategic analysis.
   
   Responsible Party: Quality Assurance Department
   
-  Timeline: As soon as service is available
+  Expected Outcomes: A fully realized, data-driven executive summary.
+  
+  Evidence Base: AI service interruption.
+  
+  Timeline: As soon as service is available.
+  
+  Resource Implications: Minimal.
 
-• Conduct Manual Analysis - Priority: HIGH
+• [Conduct Manual Analysis] - Priority: HIGH
   Action Required: Leadership should manually review the detailed charts and feedback descriptions to formulate specific action items based on the ${total} feedback items analyzed.
   
   Responsible Party: Department Directors and QA Team
   
-  Timeline: Within 1 week`;
+  Expected Outcomes: Actionable insights derived manually from the attached data.
+  
+  Evidence Base: The comprehensive chart suite provided below.
+  
+  Timeline: Within 1 week.
+  
+  Resource Implications: Requires dedicated administrative time.`;
   }
 }
 
 /**
- * Generate interpretations for each chart sequentially
+ * Generate interpretations for all charts in parallel
  */
-
 async function generateChartInterpretations(chartList) {
   // Map over the charts and create an array of promises
   const interpretationPromises = chartList.map(async (chart) => {
