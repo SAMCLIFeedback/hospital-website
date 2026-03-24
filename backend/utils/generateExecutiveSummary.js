@@ -224,17 +224,19 @@ Analysis of ${total} feedback items reveals significant opportunities for servic
 
 The sentiment distribution shows ${negPct}% negative, ${neuPct}% neutral, and ${posPct}% positive responses during the ${filterSummary.dateRange || 'analysis period'}. This data, combined with the detailed charts provided, offers critical insights into patient and staff experiences.
 
-II. CRITICAL PROBLEM AREAS
-• [Manual Review Recommended - Hospital Wide]
-  Overview: Due to the AI service interruption, leadership should examine Figure 1 and subsequent charts to identify the primary areas of concern in the feedback data.
-  
-  Impact & Frequency: Please analyze the departmental breakdown in Figure 2 and sentiment distribution in Figure 3 to understand the scope and severity of issues.
-  
-  Patient/Staff Voice: Specific voice references are unavailable in this auto-generated fallback.
-  
-  Root Cause Indicators: Root causes must be determined via manual review of the attached charts.
-  
-  Data Support: All figures provided below contain essential data for understanding current challenges.
+II. KEY WEAKNESSES IDENTIFIED
+• [Manual Review Required - Overall Dataset]
+  Overview: Due to the AI service interruption, leadership should review the full set of feedback to identify recurring weaknesses across the entire dataset. The analysis should focus on patterns that appear consistently in the feedback rather than isolating issues by department.
+
+  Evidence Across Feedback: Review all available feedback descriptions and charts to identify commonly reported concerns. Focus on repeated issues mentioned across multiple entries to determine the most significant weaknesses.
+
+  Stakeholder Voice: Specific patient or staff voice examples are unavailable in this auto-generated fallback and must be derived from direct review of the feedback comments.
+
+  Operational Impact: The impact of identified weaknesses should be evaluated based on how frequently they appear and how they affect patient experience, staff workflow, and service delivery across the organization.
+
+  Department Context: Departments should only be referenced if the feedback clearly shows repeated patterns associated with them, but weaknesses should be interpreted as organization-wide trends where applicable.
+
+  Data Support: Refer to Figure 1 and subsequent charts, including sentiment distribution and frequency breakdowns, to validate recurring negative patterns.
 
 III. OPERATIONAL EXCELLENCE OPPORTUNITIES
 • [Data Analysis Required - Hospital Wide]
@@ -246,9 +248,21 @@ III. OPERATIONAL EXCELLENCE OPPORTUNITIES
   
   Evidence: Review Figures 8-12 for department-specific performance metrics and trend analysis.
 
-IV. STRENGTHS AND POSITIVE PERFORMANCE
-${positive > 0 ? `• [Positive Feedback Present - Various Departments]\n  Performance Summary: ${posPct}% of responses were positive. Review the sentiment distribution charts and department-specific data for details on areas of strength.\n  \n  Stakeholder Feedback: Positive themes are present but require manual review.\n  \n  Success Factors: To be determined via manual analysis.\n  \n  Replication Opportunity: To be determined via manual analysis.\n  \n  Evidence: Figure 3 and departmental charts.` : '• [No Distinct Strengths Identified - Hospital Wide]\n  Performance Summary: Limited positive themes emerged during this period. While individual staff members receive occasional praise, no department demonstrated consistently strong positive performance across multiple feedback items. This absence of positive feedback is significant and suggests systemic issues requiring comprehensive intervention.'}
+IV. KEY STRENGTHS IDENTIFIED
+${positive > 0 ? `• [Recurring Positive Patterns Identified - Overall]
+  Performance Summary: ${posPct}% of responses were positive, indicating that certain aspects of service delivery are consistently meeting expectations across the dataset. Leadership should review feedback to identify patterns of positive experiences that occur repeatedly rather than isolated instances.
 
+  Evidence Across Feedback: Positive feedback should be assessed collectively to determine which strengths appear across multiple responses. Focus on repeated mentions of good service, staff behavior, or processes that contribute to positive experiences.
+
+  Stakeholder Voice: Specific positive examples are not included in this fallback and should be extracted directly from feedback comments during manual review.
+
+  Contributing Factors: Factors contributing to positive performance should be inferred only where patterns are clearly supported by repeated feedback, avoiding assumptions not grounded in the data.
+
+  Department Context: Departments may be referenced only if multiple feedback entries consistently highlight positive performance in those areas, but strengths should be interpreted as broader organizational patterns where applicable.
+
+  Data Support: Refer to Figure 3 and related sentiment and distribution charts to validate recurring positive feedback trends.` : `• [No Clear Recurring Strengths Identified - Overall]
+  Performance Summary: The available feedback does not provide sufficient evidence of consistent, recurring strengths across the full dataset. While isolated positive remarks may be present, they do not establish a strong organization-wide pattern.`}
+  
 V. STRATEGIC RECOMMENDATIONS
 • [Re-generate Report] - Priority: HIGH
   Action Required: Attempt to regenerate this report when the AI service is restored for comprehensive strategic analysis.
